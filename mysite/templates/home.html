@@ -1,0 +1,166 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
+</head> 
+<body>
+    <header>
+             <!-- Fixed Navigation Bar -->
+             <nav>
+                <div class="logo-sec"><img src="{% static "images/logo.png" %}" alt="" class="logo"></div>
+                <div class="nav-con">
+                    <div class="home nav-con-el"><a href="#home">Home</a></div>
+                    <div class="work nav-con-el"><a href="#workflow">Workflow</a></div>
+                    <div class="startIn nav-con-el"><a href="#venture">Venture & Capital</a></div>
+                </div>
+                <div class="log-in-sec margin">
+                    <a href="{% url 'login' %}">
+
+                        <button class="log-in">  
+                            <p>LogIn</p> 
+                        </button>
+                    </a>
+                </div>
+                <div class="sign-in-sec margin">
+                    <a href="{% url 'signup' %}">
+
+                        <button class="sign-in"><i class="fa-solid fa-user"></i>SignUp</button>
+                    </a>
+                </div>
+            </nav>
+        <main id="home">
+            <div class="main-sec">
+                <div class="con">
+                    <div class="con-1">
+                            Your trusted platform for startup-investor matchmaking
+                    </div>
+                    <div class="sub-con-1">
+                        We connect visionary startups with forward-thinking investors, fostering innovation and long-term success. Our platform provides the right funding, mentorship, and support to help entrepreneurs scale their ideas into thriving businesses. Whether you're a startup seeking seed funding or an investor looking for the next big opportunity, we facilitate meaningful connections that turn visions into reality.
+                    </div>
+                    <div class="get-start-sec">
+                        <button class="start-but">
+                            Get Started Now
+                        </button>
+                    </div>
+                    <div class="app-data">
+                        <div class="data">
+                            <div class="sub-data">
+                                <div class="number">1K+</div>
+                                <div class="cat">Succesfull Macthes</div>
+                            </div>
+                        </div>
+                        <div class="data">
+                            <div class="sub-data">
+                                <div class="number">2K+</div>
+                                <div class="cat">Active investor</div>
+                            </div>
+                        </div>
+                        <div class="data">
+                            <div class="sub-data">
+                                <div class="number">5K+</div>
+                                <div class="cat cat3">Startups</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-sec-img">
+                    <div class="img1">
+                        <img src="image/in-all.png" alt="">
+                    </div>
+                    
+                </div>
+            </div>
+        </main>
+        <main id="workflow">
+            <div class="workflow-sec">
+                <h1>Our Workflow</h1>
+                <p class="workflow-description">Discover how we connect startups with investors seamlessly.</p>
+    
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h2>Idea Submission</h2>
+                        <p>Startups submit their innovative ideas and business plans through our platform.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-search"></i></div>
+                        <h2>Investor Matching</h2>
+                        <p>Our algorithm matches startups with suitable investors based on industry, funding needs, and more.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-handshake"></i></div>
+                        <h2>Initial Meeting</h2>
+                        <p>Startups and investors have an initial meeting to discuss the potential collaboration.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon"><i class="fas fa-file-contract"></i></div>
+                        <h2>Deal Finalization</h2>
+                        <p>Once both parties agree, the deal is finalized, and funding is provided to the startup.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <main id="venture">
+            <div class="venture-sec">
+                <h1>Venture & Capital</h1>
+                <p class="venture-description">Empowering startups and investors to create impactful connections.</p>
+    
+                <div class="venture-content">
+                    <div class="for-startups">
+                        <h2>For Startups</h2>
+                        <div class="startup-benefits">
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-coins"></i></div>
+                                <h3>Funding Opportunities</h3>
+                                <p>Access to a wide range of funding options tailored to your startup's needs.</p>
+                            </div>
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-users"></i></div>
+                                <h3>Mentorship & Support</h3>
+                                <p>Guidance from industry experts and a supportive community to help you grow.</p>
+                            </div>
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-chart-line"></i></div>
+                                <h3>Success Stories</h3>
+                                <p>Learn from startups that have successfully scaled with our platform.</p>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="for-investors">
+                        <h2>For Investors</h2>
+                        <div class="investor-benefits">
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-search-dollar"></i></div>
+                                <h3>Investment Opportunities</h3>
+                                <p>Discover high-potential startups across various industries.</p>
+                            </div>
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-clipboard-check"></i></div>
+                                <h3>Due Diligence Support</h3>
+                                <p>Comprehensive tools and insights to evaluate potential investments.</p>
+                            </div>
+                            <div class="benefit">
+                                <div class="benefit-icon"><i class="fas fa-briefcase"></i></div>
+                                <h3>Portfolio Management</h3>
+                                <p>Efficiently manage and track your investments with our platform.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                
+            </div>
+        </main>
+    </header>
+    <script src="home.js"></script>
+</body>
+</html>

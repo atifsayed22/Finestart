@@ -1,0 +1,13 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+
+def home(req):
+    # return HttpResponse("Hello this home page , first response using  in django")
+    return render(req,'home.html')
+
+def login(req):
+    # return HttpResponse("Hello this about page , first response using  in django")
+    return render(req,'login.html')
+
+def signup(req):
+    return render(req,'signup.html')
