@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 def home(req):
     # return HttpResponse("Hello this home page , first response using  in django")
@@ -7,7 +7,9 @@ def home(req):
 
 def login(req):
     # return HttpResponse("Hello this about page , first response using  in django")
-    return render(req,'login.html')
+    return redirect('login')
 
 def signup(req):
-    return render(req,'signup.html')
+    return redirect('signup')
+def base(req):
+    return render(req,'base.html')

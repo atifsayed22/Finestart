@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,118 +16,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
     {% block extra_css %}{% endblock %}
     
-    <style>
-        :root {
-            --primary-color: #18cb96;
-            --secondary-color: #0056b3;
-            --dark-color: #343a40;
-            --light-color: #f8f9fa;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-        }
-        
-        body {
-            font-family: 'Montserrat', sans-serif;
-            padding-top: 80px;
-        }
-        
-        .navbar {
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand img {
-            height: 50px;
-        }
-        
-        .nav-link {
-            position: relative;
-            font-weight: 600;
-            transition: all 0.3s ease-in-out;
-        }
-        
-        .nav-link::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease-in-out;
-            transform: translateX(-50%);
-        }
-        
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-        
-        .nav-link:hover::after {
-            width: 70%;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-primary:hover {
-            background-color: #15a77c;
-            border-color: #15a77c;
-        }
-        
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 3rem 0;
-        }
-        
-        .footer-heading {
-            font-weight: 600;
-            margin-bottom: 1.2rem;
-            color: var(--primary-color);
-        }
-        
-        .footer-link {
-            color: #adb5bd;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-link:hover {
-            color: var(--primary-color);
-        }
-        
-        .social-icon {
-            font-size: 1.5rem;
-            margin-right: 1rem;
-            color: #adb5bd;
-            transition: color 0.3s;
-        }
-        
-        .social-icon:hover {
-            color: var(--primary-color);
-        }
-        
-        .copyright {
-            border-top: 1px solid #495057;
-            padding-top: 1.5rem;
-            margin-top: 2rem;
-        }
-    </style>
+  
 </head>
 <body>
     <!-- Navigation -->

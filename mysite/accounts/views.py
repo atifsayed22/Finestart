@@ -15,7 +15,7 @@ def signup(request):
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             messages.success(request, "Signup successful! Welcome to FineStart.")
-            return redirect("home")  # Redirect to homepage after successful signup
+            return redirect("login")  # Redirect to homepage after successful signup
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -34,7 +34,7 @@ def user_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect("home")
+            return redirect("login")
         else:
             messages.error(request, "Invalid username or password.")
     

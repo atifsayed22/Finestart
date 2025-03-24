@@ -17,6 +17,17 @@
             <p>Connect with the right investors or startups to grow your business.</p>
         </div>
 
+        <!-- Display any messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="user-type-selection">
             <button class="user-type-btn active" id="startupBtn">Startup</button>
             <button class="user-type-btn" id="investorBtn">Investor</button>
@@ -24,66 +35,73 @@
 
         <form id="signupForm" method="POST" action="{% url 'signup' %}">
             {% csrf_token %}
-        
-            <input type="hidden" id="userType" name="userType" value="startup">  <!-- Default is startup -->
-        
-            <!-- Common Fields -->
+            
+            <input type="hidden" id="userType" name="user_type" value="startup">
+            
+            <!-- Username and email fields -->
             <div class="form-group">
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" name="fullName" required>
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="error-message">{{ form.username.errors }}</div>
+                {% endif %}
             </div>
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
+                <label for="id_email">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="error-message">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Password fields -->
+            <div class="form-group">
+                <label for="id_password1">Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <div class="error-message">{{ form.password1.errors }}</div>
+                {% endif %}
+                <div class="help-text">{{ form.password1.help_text }}</div>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <label for="id_password2">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <div class="error-message">{{ form.password2.errors }}</div>
+                {% endif %}
             </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
-            </div>
-        
+            
             <!-- Startup Fields -->
             <div id="startupFields" class="user-fields">
                 <div class="form-group">
-                    <label for="startupName">Startup Name</label>
-                    <input type="text" id="startupName" name="startupName">
+                    <label for="id_startup_name">Startup Name</label>
+                    {{ form.startup_name }}
                 </div>
                 <div class="form-group">
-                    <label for="industry">Industry</label>
-                    <select id="industry" name="industry">
-                        <option value="tech">Technology</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="fintech">Fintech</option>
-                    </select>
+                    <label for="id_industry">Industry</label>
+                    {{ form.industry }}
                 </div>
             </div>
-        
+            
             <!-- Investor Fields -->
             <div id="investorFields" class="user-fields" style="display: none;">
                 <div class="form-group">
-                    <label for="investorType">Investor Type</label>
-                    <select id="investorType" name="investorType">
-                        <option value="angel">Angel Investor</option>
-                        <option value="vc">Venture Capitalist</option>
-                    </select>
+                    <label for="id_investor_type">Investor Type</label>
+                    {{ form.investor_type }}
                 </div>
                 <div class="form-group">
-                    <label for="investmentRange">Investment Range</label>
-                    <input type="text" id="investmentRange" name="investmentRange">
+                    <label for="id_investment_range">Investment Range</label>
+                    {{ form.investment_range }}
                 </div>
             </div>
-        
+            
             <div class="form-group">
                 <input type="checkbox" id="terms" name="terms" required>
                 <label for="terms">I agree to the <a href="#">Terms and Conditions</a></label>
             </div>
-        
+            
             <button type="submit" class="signup-btn">Sign Up</button>
         </form>
-        
 
         <div class="login-link">
             Already have an account? <a href="{% url 'login' %}">Log In</a>
@@ -114,8 +132,14 @@
                 }
             }
 
-            startupBtn.addEventListener('click', () => toggleUserType("startup"));
-            investorBtn.addEventListener('click', () => toggleUserType("investor"));
+            startupBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleUserType("startup");
+            });
+            investorBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleUserType("investor");
+            });
         });
     </script>
 </body>
