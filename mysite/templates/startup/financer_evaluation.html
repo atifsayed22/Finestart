@@ -1,0 +1,269 @@
+{% extends 'startup/base.html' %}
+
+{% block title %}Evaluate Startup - FineStart{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Startup Details -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Startup Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if startup.logo %}
+                        <img src="{{ startup.logo.url }}" alt="{{ startup.company_name }}" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-light me-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="fas fa-rocket fa-2x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h5 class="mb-1">{{ startup.company_name }}</h5>
+                        <p class="text-muted mb-0">{{ startup.industry.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Company Overview</h6>
+                    <p class="mb-0">{{ startup.description }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Stage</h6>
+                    <p class="mb-0">{{ startup.get_stage_display }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Location</h6>
+                    <p class="mb-0">{{ startup.location }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Team Size</h6>
+                    <p class="mb-0">{{ startup.team_size }} employees</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Founded</h6>
+                    <p class="mb-0">{{ startup.founded_date|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Funding Request Details -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Funding Request</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Requested Amount</h6>
+                    <h4 class="mb-0">${{ funding_request.amount|floatformat:0 }}k</h4>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Equity Offered</h6>
+                    <h4 class="mb-0">{{ funding_request.equity_offered }}%</h4>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Purpose</h6>
+                    <p class="mb-0">{{ funding_request.purpose }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Timeline</h6>
+                    <p class="mb-0">{{ funding_request.timeline }}</p>
+                </div>
+                
+                {% if funding_request.additional_documents %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Additional Documents</h6>
+                        <div class="list-group">
+                            {% for doc in funding_request.additional_documents.all %}
+                                <a href="{{ doc.file.url }}" class="list-group-item list-group-item-action" target="_blank">
+                                    <i class="fas fa-file-alt me-2"></i>{{ doc.title }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Evaluation Form -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Evaluation Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6>Please correct the errors below:</h6>
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Market Analysis -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Market Analysis</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.market_size.id_for_label }}" class="form-label">Market Size</label>
+                            {{ form.market_size }}
+                            {% if form.market_size.help_text %}
+                                <div class="form-text">{{ form.market_size.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.market_growth.id_for_label }}" class="form-label">Market Growth Potential</label>
+                            {{ form.market_growth }}
+                            {% if form.market_growth.help_text %}
+                                <div class="form-text">{{ form.market_growth.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.competition.id_for_label }}" class="form-label">Competition Level</label>
+                            {{ form.competition }}
+                            {% if form.competition.help_text %}
+                                <div class="form-text">{{ form.competition.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Team Assessment -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Team Assessment</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.team_experience.id_for_label }}" class="form-label">Team Experience</label>
+                            {{ form.team_experience }}
+                            {% if form.team_experience.help_text %}
+                                <div class="form-text">{{ form.team_experience.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.team_skills.id_for_label }}" class="form-label">Team Skills</label>
+                            {{ form.team_skills }}
+                            {% if form.team_skills.help_text %}
+                                <div class="form-text">{{ form.team_skills.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Product/Service -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Product/Service</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.product_quality.id_for_label }}" class="form-label">Product/Service Quality</label>
+                            {{ form.product_quality }}
+                            {% if form.product_quality.help_text %}
+                                <div class="form-text">{{ form.product_quality.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.innovation.id_for_label }}" class="form-label">Innovation Level</label>
+                            {{ form.innovation }}
+                            {% if form.innovation.help_text %}
+                                <div class="form-text">{{ form.innovation.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.scalability.id_for_label }}" class="form-label">Scalability</label>
+                            {{ form.scalability }}
+                            {% if form.scalability.help_text %}
+                                <div class="form-text">{{ form.scalability.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Assessment -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Financial Assessment</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.financial_health.id_for_label }}" class="form-label">Financial Health</label>
+                            {{ form.financial_health }}
+                            {% if form.financial_health.help_text %}
+                                <div class="form-text">{{ form.financial_health.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.growth_potential.id_for_label }}" class="form-label">Growth Potential</label>
+                            {{ form.growth_potential }}
+                            {% if form.growth_potential.help_text %}
+                                <div class="form-text">{{ form.growth_potential.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.risk_level.id_for_label }}" class="form-label">Risk Level</label>
+                            {{ form.risk_level }}
+                            {% if form.risk_level.help_text %}
+                                <div class="form-text">{{ form.risk_level.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Overall Assessment -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Overall Assessment</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.overall_score.id_for_label }}" class="form-label">Overall Score</label>
+                            {{ form.overall_score }}
+                            {% if form.overall_score.help_text %}
+                                <div class="form-text">{{ form.overall_score.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.comments.id_for_label }}" class="form-label">Comments</label>
+                            {{ form.comments }}
+                            {% if form.comments.help_text %}
+                                <div class="form-text">{{ form.comments.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Decision -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Decision</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.decision.id_for_label }}" class="form-label">Investment Decision</label>
+                            {{ form.decision }}
+                            {% if form.decision.help_text %}
+                                <div class="form-text">{{ form.decision.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Submit Evaluation
+                        </button>
+                        <a href="{% url 'startup:financer_requests' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,230 @@
+{% extends 'startup/base.html' %}
+
+{% block title %}Investment Details - FineStart{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Investment Overview -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Investment Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if investment.startup.logo %}
+                        <img src="{{ investment.startup.logo.url }}" alt="{{ investment.startup.company_name }}" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-light me-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                            <i class="fas fa-rocket fa-2x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h5 class="mb-1">{{ investment.startup.company_name }}</h5>
+                        <p class="text-muted mb-0">{{ investment.startup.industry.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Investment Details</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Amount</small>
+                            <span class="fw-bold">${{ investment.amount|floatformat:0 }}k</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Equity</small>
+                            <span class="fw-bold">{{ investment.equity }}%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Investment Date</h6>
+                    <p class="mb-0">{{ investment.investment_date|date:"F d, Y" }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Current Status</h6>
+                    <span class="badge {% if investment.status == 'active' %}bg-success{% elif investment.status == 'exited' %}bg-secondary{% else %}bg-warning{% endif %}">
+                        {{ investment.get_status_display }}
+                    </span>
+                </div>
+                
+                {% if investment.status == 'exited' %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Exit Details</h6>
+                        <p class="mb-1">Exit Date: {{ investment.exit_date|date:"F d, Y" }}</p>
+                        <p class="mb-0">Exit Value: ${{ investment.exit_value|floatformat:0 }}k</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Performance Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Return on Investment</h6>
+                    <h4 class="mb-0 {% if investment.return_on_investment > 0 %}text-success{% elif investment.return_on_investment < 0 %}text-danger{% else %}text-muted{% endif %}">
+                        {{ investment.return_on_investment }}%
+                    </h4>
+                    <small class="text-muted">Current value: ${{ investment.current_value|floatformat:0 }}k</small>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Investment Period</h6>
+                    <p class="mb-0">{{ investment.investment_period }} months</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Annual Return</h6>
+                    <h4 class="mb-0 {% if investment.annual_return > 0 %}text-success{% elif investment.annual_return < 0 %}text-danger{% else %}text-muted{% endif %}">
+                        {{ investment.annual_return }}%
+                    </h4>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Risk Level</h6>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-{{ investment.risk_level_color }}" role="progressbar" style="width: {{ investment.risk_level_percentage }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ investment.get_risk_level_display }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="col-md-8">
+        <!-- Value Growth Chart -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Value Growth</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="valueChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- Investment Timeline -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Investment Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for event in investment.timeline_events.all %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if event.type == 'investment' %}bg-success{% elif event.type == 'milestone' %}bg-primary{% elif event.type == 'exit' %}bg-secondary{% else %}bg-info{% endif %}"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <p class="text-muted mb-0">{{ event.description }}</p>
+                                <small class="text-muted">{{ event.date|date:"F d, Y" }}</small>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted text-center mb-0">No timeline events yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Documents -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for doc in investment.documents.all %}
+                        <a href="{{ doc.file.url }}" class="list-group-item list-group-item-action" target="_blank">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-alt me-3 text-muted"></i>
+                                <div>
+                                    <h6 class="mb-1">{{ doc.title }}</h6>
+                                    <small class="text-muted">{{ doc.upload_date|date:"F d, Y" }}</small>
+                                </div>
+                            </div>
+                        </a>
+                    {% empty %}
+                        <p class="text-muted text-center mb-0">No documents available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    padding-left: 15px;
+    border-left: 2px solid #e9ecef;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('valueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ value_chart_labels|safe }},
+            datasets: [{
+                label: 'Investment Value',
+                data: {{ value_chart_data|safe }},
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value + 'k';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

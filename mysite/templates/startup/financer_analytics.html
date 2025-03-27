@@ -1,0 +1,335 @@
+<!-- startup/templates/startup/financer_analytics.html -->
+{% extends 'startup/financer_base.html' %}
+{% load static %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<section id="financer-analytics" class="dashboard-section">
+    <h2>Portfolio Analytics</h2>
+    
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-sack-dollar metric-icon"></i>
+            <div class="metric-value">{{ portfolio_value }}</div>
+            <div class="metric-label">Portfolio Value</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-chart-line metric-icon"></i>
+            <div class="metric-value">{{ roi }}</div>
+            <div class="metric-label">Return on Investment</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-rocket metric-icon"></i>
+            <div class="metric-value">{{ total_investments }}</div>
+            <div class="metric-label">Total Investments</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-calendar-check metric-icon"></i>
+            <div class="metric-value">3</div>
+            <div class="metric-label">Successful Exits</div>
+        </div>
+    </div>
+    
+    <!-- Performance Over Time -->
+    <div class="chart-container full-width">
+        <h3>Portfolio Performance</h3>
+        <div class="chart-filters">
+            <button class="chart-filter active" data-period="1m">1 Month</button>
+            <button class="chart-filter" data-period="6m">6 Months</button>
+            <button class="chart-filter" data-period="1y">1 Year</button>
+            <button class="chart-filter" data-period="5y">5 Years</button>
+            <button class="chart-filter" data-period="all">All Time</button>
+        </div>
+        <canvas id="performanceChart"></canvas>
+    </div>
+    
+    <!-- Investment Breakdown Charts -->
+    <div class="charts-grid">
+        <div class="chart-container">
+            <h3>Industry Allocation</h3>
+            <canvas id="industryAllocationChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Stage Distribution</h3>
+            <canvas id="stageDistributionChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Returns by Industry</h3>
+            <canvas id="returnsByIndustryChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Returns by Year</h3>
+            <canvas id="returnsByYearChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Top Performers -->
+    <div class="top-performers">
+        <h3>Top Performing Investments</h3>
+        <div class="performer-cards">
+            <div class="performer-card">
+                <div class="performer-header">
+                    <img src="https://via.placeholder.com/50" alt="AIPlatform Logo">
+                    <div class="performer-info">
+                        <h4>AI Platform Inc.</h4>
+                        <div class="tag">AI/ML</div>
+                    </div>
+                    <div class="performer-roi">+85%</div>
+                </div>
+                <div class="performer-metrics">
+                    <div class="performer-metric">
+                        <div class="metric-label">Invested</div>
+                        <div class="metric-value">$200K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Current Value</div>
+                        <div class="metric-value">$370K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Period</div>
+                        <div class="metric-value">1.5 years</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="performer-card">
+                <div class="performer-header">
+                    <img src="https://via.placeholder.com/50" alt="HealthTech Logo">
+                    <div class="performer-info">
+                        <h4>HealthTech Solutions</h4>
+                        <div class="tag">Healthcare</div>
+                    </div>
+                    <div class="performer-roi">+62%</div>
+                </div>
+                <div class="performer-metrics">
+                    <div class="performer-metric">
+                        <div class="metric-label">Invested</div>
+                        <div class="metric-value">$350K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Current Value</div>
+                        <div class="metric-value">$567K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Period</div>
+                        <div class="metric-value">2.2 years</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="performer-card">
+                <div class="performer-header">
+                    <img src="https://via.placeholder.com/50" alt="EcoTech Logo">
+                    <div class="performer-info">
+                        <h4>EcoTech Green</h4>
+                        <div class="tag">Sustainability</div>
+                    </div>
+                    <div class="performer-roi">+58%</div>
+                </div>
+                <div class="performer-metrics">
+                    <div class="performer-metric">
+                        <div class="metric-label">Invested</div>
+                        <div class="metric-value">$180K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Current Value</div>
+                        <div class="metric-value">$284K</div>
+                    </div>
+                    <div class="performer-metric">
+                        <div class="metric-label">Period</div>
+                        <div class="metric-value">1.8 years</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts if Chart.js is loaded
+        if (typeof Chart !== 'undefined') {
+            // Portfolio Performance Chart
+            const performanceCtx = document.getElementById('performanceChart');
+            if (performanceCtx) {
+                new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Portfolio Value',
+                            data: [2100000, 2150000, 2240000, 2180000, 2250000, 2400000, 2380000, 2450000, 2520000, 2480000, 2550000, 2650000],
+                            borderColor: '#18cb96',
+                            backgroundColor: 'rgba(24, 203, 150, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Benchmark Index',
+                            data: [2100000, 2120000, 2160000, 2180000, 2210000, 2260000, 2300000, 2340000, 2390000, 2430000, 2480000, 2540000],
+                            borderColor: '#aaa',
+                            borderDash: [5, 5],
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Industry Allocation Chart
+            const industryAllocationCtx = document.getElementById('industryAllocationChart');
+            if (industryAllocationCtx) {
+                new Chart(industryAllocationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['AI/ML', 'Fintech', 'Healthcare', 'Sustainability', 'SaaS'],
+                        datasets: [{
+                            data: [35, 20, 15, 20, 10],
+                            backgroundColor: [
+                                '#4a6bff',
+                                '#18cb96',
+                                '#ff9f40',
+                                '#36a2eb',
+                                '#ffcc56'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'start'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Stage Distribution Chart
+            const stageDistributionCtx = document.getElementById('stageDistributionChart');
+            if (stageDistributionCtx) {
+                new Chart(stageDistributionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Seed', 'Series A', 'Series B', 'Series C', 'Growth'],
+                        datasets: [{
+                            data: [25, 35, 20, 15, 5],
+                            backgroundColor: [
+                                '#18cb96',
+                                '#4a6bff',
+                                '#ffbb00',
+                                '#ff5757',
+                                '#9966ff'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                align: 'start'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Returns by Industry Chart
+            const returnsByIndustryCtx = document.getElementById('returnsByIndustryChart');
+            if (returnsByIndustryCtx) {
+                new Chart(returnsByIndustryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['AI/ML', 'Fintech', 'Healthcare', 'Sustainability', 'SaaS'],
+                        datasets: [{
+                            label: 'ROI %',
+                            data: [28, 22, 18, 24, 15],
+                            backgroundColor: [
+                                '#4a6bff',
+                                '#18cb96',
+                                '#ff9f40',
+                                '#36a2eb',
+                                '#ffcc56'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Returns by Year Chart
+            const returnsByYearCtx = document.getElementById('returnsByYearChart');
+            if (returnsByYearCtx) {
+                new Chart(returnsByYearCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['2019', '2020', '2021', '2022', '2023'],
+                        datasets: [{
+                            label: 'ROI %',
+                            data: [12, 18, 24, 16, 22],
+                            backgroundColor: '#18cb96'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Chart period filters
+        const chartFilters = document.querySelectorAll('.chart-filter');
+        if (chartFilters.length > 0) {
+            chartFilters.forEach(filter => {
+                filter.addEventListener('click', function() {
+                    // Remove active class from all filters
+                    chartFilters.forEach(f => f.classList.remove('active'));
+                    
+                    // Add active class to clicked filter
+                    this.classList.add('active');
+                    
+                    // Here you would update the chart data based on selected period
+                    const period = this.dataset.period;
+                    console.log(`Selected period: ${period}`);
+                    
+                    // In a real app, you would fetch data for the selected period
+                    // and update the performance chart
+                });
+            });
+        }
+    });
+</script>
+{% endblock %} 

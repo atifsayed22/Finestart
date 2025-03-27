@@ -1,0 +1,158 @@
+<!-- startup/templates/startup/financer_investments.html -->
+{% extends 'startup/financer_base.html' %}
+{% load static %}
+
+{% block title %}Investments{% endblock %}
+
+{% block content %}
+<section id="investments" class="dashboard-section">
+    <h2>Your Investment Portfolio</h2>
+    
+    <!-- Portfolio Summary Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-money-bill-wave metric-icon"></i>
+            <div class="metric-value">$2.5M</div>
+            <div class="metric-label">Total Invested</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-chart-line metric-icon"></i>
+            <div class="metric-value">22%</div>
+            <div class="metric-label">Average ROI</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-rocket metric-icon"></i>
+            <div class="metric-value">12</div>
+            <div class="metric-label">Companies</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-calendar-alt metric-icon"></i>
+            <div class="metric-value">3.2 yrs</div>
+            <div class="metric-label">Avg Holding Period</div>
+        </div>
+    </div>
+    
+    <!-- Investment Timeline Chart -->
+    <div class="chart-container full-width">
+        <h3>Investment Timeline</h3>
+        <canvas id="investmentTimelineChart"></canvas>
+    </div>
+    
+    <!-- Investments Table -->
+    <div class="table-container">
+        <div class="table-actions">
+            <h3>All Investments</h3>
+            <div class="table-filters">
+                <select name="year">
+                    <option value="">All Years</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+                <select name="industry">
+                    <option value="">All Industries</option>
+                    <option value="ai">AI/ML</option>
+                    <option value="fintech">Fintech</option>
+                    <option value="healthcare">Healthcare</option>
+                </select>
+                <button class="export-btn"><i class="fas fa-download"></i> Export</button>
+            </div>
+        </div>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Startup</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Equity</th>
+                    <th>Stage</th>
+                    <th>Status</th>
+                    <th>Documents</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for investment in investments %}
+                <tr>
+                    <td class="startup-cell">
+                        <img src="https://via.placeholder.com/30" alt="Logo" class="small-logo">
+                        <span>{{ investment.startup }}</span>
+                    </td>
+                    <td>{{ investment.date }}</td>
+                    <td>{{ investment.amount }}</td>
+                    <td>{% if forloop.first %}8%{% else %}12%{% endif %}</td>
+                    <td>{% if forloop.first %}Seed{% else %}Series A{% endif %}</td>
+                    <td>
+                        <span class="status-badge {% if forloop.first %}status-active{% else %}status-exited{% endif %}">
+                            {% if forloop.first %}Active{% else %}Exited{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="icon-btn"><i class="fas fa-file-pdf"></i></button>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="icon-btn"><i class="fas fa-eye"></i></button>
+                            <button class="icon-btn"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="icon-btn"><i class="fas fa-chart-bar"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-table">No investments found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize investment timeline chart
+        const timelineCtx = document.getElementById('investmentTimelineChart');
+        if (timelineCtx && typeof Chart !== 'undefined') {
+            new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: '2023 Investments',
+                        data: [0, 250000, 0, 150000, 0, 500000, 0, 0, 100000, 0, 300000, 0],
+                        borderColor: '#18cb96',
+                        backgroundColor: 'rgba(24, 203, 150, 0.1)',
+                        fill: true,
+                        stepped: true
+                    }, {
+                        label: '2022 Investments',
+                        data: [0, 100000, 200000, 0, 150000, 0, 300000, 0, 250000, 0, 0, 400000],
+                        borderColor: '#4a6bff',
+                        backgroundColor: 'rgba(74, 107, 255, 0.1)',
+                        fill: true,
+                        stepped: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Investment Distribution Over Time'
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,75 @@
+<!-- startup/templates/startup/analytics.html -->
+{% extends 'startup/base.html' %}
+{% load static %}
+
+{% block title %}Analytics - Startup Dashboard{% endblock %}
+
+{% block content %}
+<section id="analytics" class="dashboard-section">
+    <h2>Analytics & Insights</h2>
+    
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-eye metric-icon"></i>
+            <div class="metric-value">{{ profile_views }}</div>
+            <div class="metric-label">Profile Views</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-handshake metric-icon"></i>
+            <div class="metric-value">8</div>
+            <div class="metric-label">Funding Requests</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-check-circle metric-icon"></i>
+            <div class="metric-value">3</div>
+            <div class="metric-label">Approved Requests</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-chart-line metric-icon"></i>
+            <div class="metric-value">$50k</div>
+            <div class="metric-label">Funding Raised</div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="analytics-content">
+        <div class="chart-container">
+            <h3>Profile Views Over Time</h3>
+            <canvas id="profileViewsChart"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <h3>Funding Requests Status</h3>
+            <canvas id="fundingRequestsChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Funding Trends Section -->
+    <div class="trends-section">
+        <h3>Industry Funding Trends</h3>
+        <div class="trends-card">
+            <div class="trend-item">
+                <div class="trend-title">{{ funding_trends }}</div>
+                <div class="trend-details">
+                    <p>Average Seed Round: $2.5M</p>
+                    <p>Top Sectors: AI, Fintech, Sustainability</p>
+                </div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">Investor Activity Up 15%</div>
+                <div class="trend-details">
+                    <p>Most Active VCs: Green Ventures, Future Capital</p>
+                    <p>Average Time to Funding: 3.5 months</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

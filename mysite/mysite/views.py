@@ -12,4 +12,6 @@ def login(req):
 def signup(req):
     return redirect('signup')
 def base(req):
-    return render(req,'base.html')
+    return render(req,'startup/base.html')
+def start(req):
+    return render(req,'startup/base.html')

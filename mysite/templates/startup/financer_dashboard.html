@@ -1,0 +1,254 @@
+<!-- startup/templates/startup/financer_dashboard.html -->
+{% extends 'startup/financer_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section id="financer-overview" class="dashboard-section">
+    <h2>Financer Dashboard</h2>
+    
+    <!-- Summary Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-paper-plane metric-icon"></i>
+            <div class="metric-value">12</div>
+            <div class="metric-label">New Requests</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-rocket metric-icon"></i>
+            <div class="metric-value">85</div>
+            <div class="metric-label">Active Startups</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-money-bill-wave metric-icon"></i>
+            <div class="metric-value">$1.2M</div>
+            <div class="metric-label">Total Invested</div>
+        </div>
+        
+        <div class="metric-card">
+            <i class="fas fa-chart-line metric-icon"></i>
+            <div class="metric-value">18%</div>
+            <div class="metric-label">Avg. ROI</div>
+        </div>
+    </div>
+    
+    <!-- Recent Funding Requests -->
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h3>Recent Funding Requests</h3>
+            <a href="{% url 'startup:financer_dashboard' %}" class="view-all">View All</a>
+        </div>
+        
+        <div class="funding-requests">
+            <div class="request-card">
+                <div class="request-status">
+                    <span class="request-badge badge-new">New</span>
+                </div>
+                <div class="request-header">
+                    <div class="request-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Tech Innovators Inc.</h3>
+                </div>
+                <p>AI-powered customer service platform seeking seed funding</p>
+                <div class="request-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value">$150,000</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Equity:</span>
+                        <span class="detail-value">8%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">June 5, 2023</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="view-details-btn">View Details</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                </div>
+            </div>
+            
+            <div class="request-card">
+                <div class="request-status">
+                    <span class="request-badge badge-new">New</span>
+                </div>
+                <div class="request-header">
+                    <div class="request-icon"><i class="fas fa-leaf"></i></div>
+                    <h3>Green Earth Solutions</h3>
+                </div>
+                <p>Sustainable packaging startup looking for Series A funding</p>
+                <div class="request-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Amount:</span>
+                        <span class="detail-value">$500,000</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Equity:</span>
+                        <span class="detail-value">12%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value">June 2, 2023</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="view-details-btn">View Details</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Portfolio Performance -->
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h3>Portfolio Performance</h3>
+            <div class="date-filter">
+                <select>
+                    <option>Last 30 Days</option>
+                    <option>Last 90 Days</option>
+                    <option>Last 12 Months</option>
+                    <option>All Time</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="portfolioPerformanceChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Investment Distribution -->
+    <div class="dashboard-grid">
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h3>Investment by Industry</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="industryDistributionChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h3>Investment by Stage</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="stageDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts if Chart.js is loaded
+        if (typeof Chart !== 'undefined') {
+            // Portfolio Performance Chart
+            const portfolioCtx = document.getElementById('portfolioPerformanceChart');
+            if (portfolioCtx) {
+                new Chart(portfolioCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Portfolio Value',
+                            data: [1000000, 1050000, 1120000, 1080000, 1150000, 1250000],
+                            borderColor: '#4a6bff',
+                            backgroundColor: 'rgba(74, 107, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Benchmark Index',
+                            data: [1000000, 1020000, 1040000, 1060000, 1080000, 1100000],
+                            borderColor: '#aaa',
+                            borderDash: [5, 5],
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Industry Distribution Chart
+            const industryCtx = document.getElementById('industryDistributionChart');
+            if (industryCtx) {
+                new Chart(industryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['AI/ML', 'Fintech', 'Healthcare', 'Sustainability', 'SaaS'],
+                        datasets: [{
+                            data: [35, 20, 15, 20, 10],
+                            backgroundColor: [
+                                '#4a6bff',
+                                '#18cb96',
+                                '#ff9f40',
+                                '#36a2eb',
+                                '#ffcc56'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Stage Distribution Chart
+            const stageCtx = document.getElementById('stageDistributionChart');
+            if (stageCtx) {
+                new Chart(stageCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Seed', 'Series A', 'Series B', 'Series C', 'Growth'],
+                        datasets: [{
+                            data: [25, 35, 20, 15, 5],
+                            backgroundColor: [
+                                '#18cb96',
+                                '#4a6bff',
+                                '#ffbb00',
+                                '#ff5757',
+                                '#9966ff'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %} 

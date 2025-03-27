@@ -1,0 +1,41 @@
+<!-- startup/templates/startup/financer_base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financer Dashboard - {% block title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'startup/styles.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="financer-theme">
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'startup/images/logo.png' %}" alt="Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="dashboard nav-con-el"><a href="{% url 'startup:financer_dashboard' %}">Dashboard</a></div>
+                <div class="startups nav-con-el"><a href="{% url 'startup:financer_startups' %}">Startups</a></div>
+                <div class="investments nav-con-el"><a href="{% url 'startup:financer_investments' %}">Investments</a></div>
+                <div class="analytics nav-con-el"><a href="{% url 'startup:financer_analytics' %}">Analytics</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <button class="log-in"><i class="fa-solid fa-user"></i>Log Out</button>
+            </div>
+        </nav>
+    </header>
+
+    <main id="financer-dashboard">
+        <div class="dashboard-container">
+            {% block content %}
+            <!-- Content will be injected here -->
+            {% endblock %}
+        </div>
+    </main>
+
+    <script src="{% static 'startup/home.js' %}"></script>
+</body>
+</html> 

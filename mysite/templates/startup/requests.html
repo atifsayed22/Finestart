@@ -1,0 +1,166 @@
+<!-- startup/templates/startup/requests.html -->
+{% extends 'startup/base.html' %}
+{% load static %}
+
+{% block title %}Requests - Startup Dashboard{% endblock %}
+
+{% block content %}
+<section id="requests" class="dashboard-section">
+    <h2>Funding Requests & Messages</h2>
+    
+    <!-- Quick Action Buttons -->
+    <div class="action-buttons">
+        <button id="compose-request-btn" class="primary-btn"><i class="fas fa-plus"></i> New Funding Request</button>
+        <button class="secondary-btn"><i class="fas fa-filter"></i> Filter</button>
+        <button class="secondary-btn"><i class="fas fa-sort"></i> Sort</button>
+    </div>
+    
+    <!-- Request Compose Form (hidden by default) -->
+    <div id="compose-form" class="compose-form" style="display: none;">
+        <h3>Create New Funding Request</h3>
+        <form action="#" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="investor">Select Investor</label>
+                <select id="investor" name="investor" required>
+                    <option value="">-- Select Investor --</option>
+                    <option value="1">Green Ventures</option>
+                    <option value="2">Future Capital</option>
+                    <option value="3">Tech Innovate Fund</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Funding Amount</label>
+                <input type="text" id="amount" name="amount" placeholder="e.g. $100,000" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="equity">Equity Offered (%)</label>
+                <input type="number" id="equity" name="equity" min="0" max="100" step="0.1" placeholder="e.g. 5%" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pitch">Pitch (Brief Overview)</label>
+                <textarea id="pitch" name="pitch" rows="4" placeholder="Briefly describe your startup and how you'll use the funds..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="documents">Attach Documents</label>
+                <input type="file" id="documents" name="documents" multiple>
+                <small>Attach pitch deck, financial projections, etc.</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">Send Request</button>
+                <button type="button" id="cancel-request" class="secondary-btn">Cancel</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Requests List -->
+    <div class="requests-tabs">
+        <div class="tab active" data-tab="all">All</div>
+        <div class="tab" data-tab="pending">Pending</div>
+        <div class="tab" data-tab="approved">Approved</div>
+        <div class="tab" data-tab="rejected">Rejected</div>
+    </div>
+    
+    <div class="requests-grid">
+        {% for request in requests %}
+        <div class="request-card">
+            <div class="request-status">
+                <span class="request-badge {% if forloop.first %}badge-pending{% else %}badge-new{% endif %}">
+                    {% if forloop.first %}Pending{% else %}New{% endif %}
+                </span>
+            </div>
+            
+            <div class="request-header">
+                <div class="request-icon"><i class="{% if forloop.first %}fas fa-paper-plane{% else %}fas fa-envelope{% endif %}"></i></div>
+                <h3>{{ request.title }}</h3>
+            </div>
+            
+            <p>{{ request.description }}</p>
+            
+            <div class="request-details">
+                <div class="detail-item">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value">{% if forloop.first %}May 15, 2023{% else %}June 2, 2023{% endif %}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value">{% if forloop.first %}$150,000{% else %}$75,000{% endif %}</span>
+                </div>
+            </div>
+            
+            <div class="request-timeline">
+                <div class="timeline-item {% if forloop.first %}active{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Sent</div>
+                </div>
+                <div class="timeline-item {% if forloop.first %}active{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Received</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Under Review</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">Decision</div>
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="view-status"><i class="fas fa-eye"></i> View Details</button>
+                <button class="view-message"><i class="fas fa-reply"></i> Send Message</button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-requests">
+            <i class="fas fa-inbox"></i>
+            <h3>No funding requests</h3>
+            <p>Click "New Funding Request" to get started</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Compose form show/hide
+        const composeBtn = document.getElementById('compose-request-btn');
+        const composeForm = document.getElementById('compose-form');
+        const cancelBtn = document.getElementById('cancel-request');
+        
+        if (composeBtn && composeForm) {
+            composeBtn.addEventListener('click', function() {
+                composeForm.style.display = 'block';
+                // Smooth scroll to form
+                composeForm.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                composeForm.style.display = 'none';
+            });
+        }
+        
+        // Tabs functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Here you would filter requests based on tab
+                const tabType = this.dataset.tab;
+                console.log(`Filter by: ${tabType}`);
+            });
+        });
+    });
+</script>
+{% endblock %}

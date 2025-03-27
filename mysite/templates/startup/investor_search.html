@@ -1,0 +1,95 @@
+<!-- startup/templates/startup/investor_search.html -->
+{% extends 'startup/base.html' %}
+{% load static %}
+
+{% block title %}Find Investors - FineStart{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Search Filters -->
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" novalidate>
+                    {{ filter_form.as_p }}
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Results -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Available Investors</h5>
+                    <span class="text-muted">{{ financers|length }} results</span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if financers %}
+                    <div class="row">
+                        {% for financer in financers %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            {% if financer.logo %}
+                                                <img src="{{ financer.logo.url }}" alt="{{ financer.organization_name }}" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-light me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-building fa-2x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h5 class="card-title mb-1">{{ financer.organization_name }}</h5>
+                                                <p class="text-muted mb-0">{{ financer.location }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <p class="card-text">{{ financer.description|truncatewords:30 }}</p>
+                                        
+                                        <div class="mb-3">
+                                            <h6 class="mb-2">Investment Focus:</h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for industry in financer.industries_focus.all %}
+                                                    <span class="badge bg-light text-dark">{{ industry.name }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-hand-holding-usd"></i> Investment Range: ${{ financer.min_investment|floatformat:0 }}k - ${{ financer.max_investment|floatformat:0 }}k
+                                                </small>
+                                            </div>
+                                            <a href="{% url 'startup:create_funding_request' financer.id %}" class="btn btn-primary">
+                                                <i class="fas fa-paper-plane"></i> Send Request
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No investors found</h5>
+                        <p class="text-muted">Try adjusting your filters to find more results.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

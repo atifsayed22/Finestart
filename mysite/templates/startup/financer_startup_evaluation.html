@@ -1,0 +1,292 @@
+<!-- startup/templates/startup/financer_startup_evaluation.html -->
+{% extends 'startup/financer_base.html' %}
+{% load static %}
+
+{% block title %}Startup Evaluation{% endblock %}
+
+{% block content %}
+<section id="startup-evaluation" class="dashboard-section">
+    <div class="breadcrumb">
+        <a href="{% url 'startup:financer_dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'startup:financer_dashboard' %}">Funding Requests</a> / 
+        <span>Tech Innovators Inc.</span>
+    </div>
+    
+    <h2>Startup Evaluation</h2>
+    
+    <!-- Startup Profile Overview -->
+    <div class="evaluation-header">
+        <div class="startup-profile">
+            <div class="profile-image">
+                <img src="https://via.placeholder.com/150" alt="Tech Innovators Inc. Logo">
+            </div>
+            <div class="profile-info">
+                <h3>Tech Innovators Inc.</h3>
+                <div class="startup-tags">
+                    <span class="tag">AI/ML</span>
+                    <span class="tag">SaaS</span>
+                    <span class="tag">B2B</span>
+                </div>
+                <div class="startup-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i> San Francisco, CA
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i> Founded: 2021
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-users"></i> Team: 8 members
+                    </div>
+                </div>
+            </div>
+            <div class="funding-request-summary">
+                <div class="summary-item">
+                    <div class="item-label">Requesting</div>
+                    <div class="item-value">$150,000</div>
+                </div>
+                <div class="summary-item">
+                    <div class="item-label">Equity Offered</div>
+                    <div class="item-value">8%</div>
+                </div>
+                <div class="summary-item">
+                    <div class="item-label">Valuation</div>
+                    <div class="item-value">$1.875M</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="primary-btn"><i class="fas fa-check"></i> Approve</button>
+            <button class="secondary-btn"><i class="fas fa-times"></i> Reject</button>
+            <button class="secondary-btn"><i class="fas fa-comment"></i> Request More Info</button>
+        </div>
+    </div>
+    
+    <!-- Evaluation Tabs -->
+    <div class="evaluation-tabs">
+        <div class="tab active" data-tab="overview">Overview</div>
+        <div class="tab" data-tab="team">Team</div>
+        <div class="tab" data-tab="financials">Financials</div>
+        <div class="tab" data-tab="market">Market Analysis</div>
+        <div class="tab" data-tab="product">Product</div>
+        <div class="tab" data-tab="documents">Documents</div>
+    </div>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="overview-tab">
+        <div class="content-section">
+            <h3>Executive Summary</h3>
+            <p>Tech Innovators Inc. is developing an AI-powered customer service platform that automates routine customer inquiries while seamlessly escalating complex issues to human agents. Their proprietary natural language processing (NLP) technology achieves 35% higher accuracy rates compared to leading competitors.</p>
+            <p>The company has completed its MVP and secured 3 beta customers including a Fortune 500 company. They're seeking seed funding to expand their engineering team and accelerate go-to-market efforts.</p>
+        </div>
+        
+        <div class="evaluation-metrics">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <h4>Overall Score</h4>
+                    <div class="score-value">8.2/10</div>
+                </div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width: 82%"></div>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Team</h4>
+                        <div class="score-value">9/10</div>
+                    </div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 90%"></div>
+                    </div>
+                    <p>Strong technical founders with industry experience</p>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Market Opportunity</h4>
+                        <div class="score-value">8/10</div>
+                    </div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 80%"></div>
+                    </div>
+                    <p>Large addressable market with clear pain points</p>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Technology</h4>
+                        <div class="score-value">8.5/10</div>
+                    </div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 85%"></div>
+                    </div>
+                    <p>Innovative approach with demonstrated advantages</p>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h4>Business Model</h4>
+                        <div class="score-value">7.5/10</div>
+                    </div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 75%"></div>
+                    </div>
+                    <p>Clear revenue model with good unit economics</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Traction & Milestones -->
+        <div class="content-section">
+            <h3>Traction & Key Milestones</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Q1 2021</div>
+                    <div class="timeline-content">
+                        <h4>Company Founded</h4>
+                        <p>Founded by Jane Smith (CEO) and Michael Johnson (CTO)</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-date">Q3 2021</div>
+                    <div class="timeline-content">
+                        <h4>Alpha Product</h4>
+                        <p>Completed first version of NLP engine with 75% accuracy</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-date">Q1 2022</div>
+                    <div class="timeline-content">
+                        <h4>Beta Launch</h4>
+                        <p>Secured 3 beta customers including Enterprise Solutions Inc.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-date">Present</div>
+                    <div class="timeline-content">
+                        <h4>Seed Funding</h4>
+                        <p>Seeking $150K to expand engineering team and accelerate sales</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item future">
+                    <div class="timeline-date">Q4 2023</div>
+                    <div class="timeline-content">
+                        <h4>Commercial Launch</h4>
+                        <p>Target: 15 paying customers and $300K ARR</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Competitive Analysis -->
+        <div class="content-section">
+            <h3>Competitive Analysis</h3>
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Features</th>
+                            <th>Tech Innovators</th>
+                            <th>Competitor A</th>
+                            <th>Competitor B</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>NLP Accuracy</td>
+                            <td class="highlight">95%</td>
+                            <td>75%</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td>Integration Time</td>
+                            <td class="highlight">2 days</td>
+                            <td>2 weeks</td>
+                            <td>1 week</td>
+                        </tr>
+                        <tr>
+                            <td>Multilingual Support</td>
+                            <td class="highlight">12 languages</td>
+                            <td>5 languages</td>
+                            <td>3 languages</td>
+                        </tr>
+                        <tr>
+                            <td>Enterprise Features</td>
+                            <td>Basic</td>
+                            <td class="highlight">Advanced</td>
+                            <td>Standard</td>
+                        </tr>
+                        <tr>
+                            <td>Pricing (monthly)</td>
+                            <td class="highlight">$199</td>
+                            <td>$299</td>
+                            <td>$249</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Analyst Notes -->
+        <div class="content-section">
+            <h3>Analyst Notes</h3>
+            <div class="notes-section">
+                <div class="note">
+                    <div class="note-header">
+                        <div class="note-author">James Wilson, Technical Analyst</div>
+                        <div class="note-date">June 4, 2023</div>
+                    </div>
+                    <div class="note-content">
+                        <p>The team has impressive technical credentials and their NLP approach is genuinely innovative. The demo showed significantly better accuracy than competing solutions, particularly with industry-specific terminology. Their technology advantage is likely sustainable for 12-18 months based on current patents.</p>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    <div class="note-header">
+                        <div class="note-author">Sarah Chen, Market Analyst</div>
+                        <div class="note-date">June 5, 2023</div>
+                    </div>
+                    <div class="note-content">
+                        <p>The customer service automation market is growing at 25% CAGR, currently a $4.5B addressable market. Tech Innovators has identified a valuable niche focusing on mid-market enterprises that need better solutions than generic chatbots but can't afford enterprise-grade implementations. Their go-to-market strategy is sound, though they'll need to accelerate sales hiring sooner than their current plan indicates.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add a note form -->
+            <div class="add-note-form">
+                <h4>Add Note</h4>
+                <textarea placeholder="Enter your analysis or comments..."></textarea>
+                <button class="primary-btn">Save Note</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Here you would toggle visibility of tab content
+                const tabType = this.dataset.tab;
+                console.log(`Show tab: ${tabType}`);
+                
+                // In a real implementation, you would show/hide tab content sections
+            });
+        });
+    });
+</script>
+{% endblock %} 

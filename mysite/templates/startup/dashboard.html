@@ -1,0 +1,175 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Startup Dashboard - FineStart{% endblock %}
+
+{% block sidebar_menu %}
+<li>
+    <a href="{% url 'startup:search_investors' %}" class="{% if request.resolver_match.url_name == 'search_investors' %}active{% endif %}">
+        <i class="material-icons">search</i>
+        <span>Find Investors</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'startup:funding_requests' %}" class="{% if request.resolver_match.url_name == 'funding_requests' %}active{% endif %}">
+        <i class="material-icons">monetization_on</i>
+        <span>Funding Requests</span>
+    </a>
+</li>
+<li>
+    <a href="{% url 'startup:active_investments' %}" class="{% if request.resolver_match.url_name == 'active_investments' %}active{% endif %}">
+        <i class="material-icons">account_balance</i>
+        <span>Active Investments</span>
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Welcome, {{ user.username }}</h1>
+    <div class="performance-score">
+        <div class="score-circle">
+            <span class="score">85</span>
+            <span class="score-label">Performance Score</span>
+        </div>
+        <div class="risk-meter">
+            <div class="risk-indicator low"></div>
+            <span>Low Risk</span>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Quick Stats -->
+    <div class="dashboard-card stats-card">
+        <h3>Quick Stats</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <i class="material-icons">trending_up</i>
+                <div class="stat-info">
+                    <span class="stat-value">$2.5M</span>
+                    <span class="stat-label">Total Funding</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <i class="material-icons">people</i>
+                <div class="stat-info">
+                    <span class="stat-value">12</span>
+                    <span class="stat-label">Active Investors</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <i class="material-icons">assessment</i>
+                <div class="stat-info">
+                    <span class="stat-value">45%</span>
+                    <span class="stat-label">Growth Rate</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-card activity-card">
+        <h3>Recent Activity</h3>
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="material-icons">person_add</i>
+                </div>
+                <div class="activity-content">
+                    <p>New investor connection request from <strong>TechVentures</strong></p>
+                    <span class="activity-time">2 hours ago</span>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="material-icons">monetization_on</i>
+                </div>
+                <div class="activity-content">
+                    <p>Funding request approved by <strong>GrowthCapital</strong></p>
+                    <span class="activity-time">1 day ago</span>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="material-icons">assessment</i>
+                </div>
+                <div class="activity-content">
+                    <p>Performance report updated</p>
+                    <span class="activity-time">2 days ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Growth Metrics -->
+    <div class="dashboard-card metrics-card">
+        <h3>Growth Metrics</h3>
+        <div class="metrics-chart">
+            <!-- Chart will be rendered here -->
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="dashboard-card events-card">
+        <h3>Upcoming Events</h3>
+        <div class="events-list">
+            <div class="event-item">
+                <div class="event-date">
+                    <span class="day">15</span>
+                    <span class="month">Mar</span>
+                </div>
+                <div class="event-content">
+                    <h4>Pitch Meeting</h4>
+                    <p>Meeting with potential investors from <strong>InnovationFund</strong></p>
+                </div>
+            </div>
+            <div class="event-item">
+                <div class="event-date">
+                    <span class="day">20</span>
+                    <span class="month">Mar</span>
+                </div>
+                <div class="event-content">
+                    <h4>Quarterly Review</h4>
+                    <p>Performance review with current investors</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize Growth Metrics Chart
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Revenue Growth',
+                data: [65, 59, 80, 81, 56, 55],
+                borderColor: '#4CAF50',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{% static 'signup.css' %}">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
 </head>
+
 <body>
     <div class="signup-container">
         <div class="signup-header">
@@ -56,12 +58,16 @@
             
             <!-- Password fields -->
             <div class="form-group">
-                <label for="id_password1">Password</label>
+                <label for="id_password1" >Password</label>
                 {{ form.password1 }}
                 {% if form.password1.errors %}
                 <div class="error-message">{{ form.password1.errors }}</div>
                 {% endif %}
-                <div class="help-text">{{ form.password1.help_text }}</div>
+                <!-- password strength indicator -->
+                <div id="password-strength">
+                    <div id="strength-bar"></div>
+                    <div id="strength-text"></div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="id_password2">Confirm Password</label>
@@ -115,7 +121,7 @@
             const startupFields = document.getElementById('startupFields');
             const investorFields = document.getElementById('investorFields');
             const userTypeInput = document.getElementById('userType');
-
+            
             function toggleUserType(type) {
                 if (type === "startup") {
                     startupFields.style.display = 'block';
@@ -141,6 +147,46 @@
                 toggleUserType("investor");
             });
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            const passwordInput = document.querySelector("#id_password1");
+            const strengthBar = document.querySelector("#strength-bar");
+            const strengthText = document.querySelector("#strength-text");
+        
+            passwordInput.addEventListener("input", function () {
+                const password = passwordInput.value;
+                let strength = 0;
+        
+                // Check character variety
+                if (password.length >= 8) strength++;  // Length check
+                if (/[a-z]/.test(password)) strength++; // Lowercase check
+                if (/[A-Z]/.test(password)) strength++; // Uppercase check
+                if (/[0-9]/.test(password)) strength++; // Number check
+                if (/[^a-zA-Z0-9]/.test(password)) strength++; // Special character check
+        
+                // Reset classes
+                strengthBar.classList.remove("weak", "medium", "strong");
+        
+                // Set strength level
+                let strengthClass = "";
+                let strengthLabel = "";
+        
+                if (strength <= 2) {
+                    strengthClass = "weak";
+                    strengthLabel = "Weak 😢";
+                } else if (strength === 3 || strength === 4) {
+                    strengthClass = "medium";
+                    strengthLabel = "Medium 🙂";
+                } else if (strength >= 5) {
+                    strengthClass = "strong";
+                    strengthLabel = "Strong 💪";
+                }
+        
+                // Apply class and text
+                strengthBar.classList.add(strengthClass);
+                strengthText.textContent = strengthLabel;
+            });
+        });
+        
     </script>
 </body>
 </html>

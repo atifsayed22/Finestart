@@ -1,0 +1,99 @@
+{% extends 'startup/base.html' %}
+
+{% block title %}Welcome to FineStart{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row align-items-center py-5">
+    <div class="col-md-6">
+        <h1 class="display-4 fw-bold mb-4">Connect with the Right Investors</h1>
+        <p class="lead mb-4">FineStart helps innovative startups find the perfect investors and enables investors to discover promising opportunities.</p>
+        {% if not user.is_authenticated %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{% url 'startup:signup' %}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                <a href="{% url 'startup:login' %}" class="btn btn-outline-primary btn-lg px-4">Login</a>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <img src="https://via.placeholder.com/600x400" alt="Hero Image" class="img-fluid rounded shadow">
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="row py-5 bg-light rounded">
+    <div class="col-md-4 text-center">
+        <div class="card border-0 bg-transparent">
+            <div class="card-body">
+                <i class="fas fa-rocket fa-3x text-primary mb-3"></i>
+                <h2 class="display-4 fw-bold">{{ startup_count }}</h2>
+                <p class="lead">Active Startups</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="card border-0 bg-transparent">
+            <div class="card-body">
+                <i class="fas fa-hand-holding-usd fa-3x text-primary mb-3"></i>
+                <h2 class="display-4 fw-bold">{{ financer_count }}</h2>
+                <p class="lead">Active Investors</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 text-center">
+        <div class="card border-0 bg-transparent">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                <h2 class="display-4 fw-bold">{{ total_funding }}</h2>
+                <p class="lead">Successful Fundings</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row py-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold">Why Choose FineStart?</h2>
+        <p class="lead">We provide the tools and connections you need to succeed</p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Smart Matching</h3>
+                <p class="card-text">Our algorithm matches startups with investors based on industry, stage, and investment criteria.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Secure Platform</h3>
+                <p class="card-text">Your data is protected with enterprise-grade security and privacy measures.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                <h3 class="card-title">Analytics Dashboard</h3>
+                <p class="card-text">Track your progress, monitor engagement, and make data-driven decisions.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+{% if not user.is_authenticated %}
+<div class="row py-5 bg-primary text-white rounded">
+    <div class="col-md-8 mx-auto text-center">
+        <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+        <p class="lead mb-4">Join our community of innovative startups and visionary investors today.</p>
+        <a href="{% url 'startup:signup' %}" class="btn btn-light btn-lg px-4">Create Your Account</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 
