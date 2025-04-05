@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Startups - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .discovery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1E3A8A;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            align-self: end;
+        }
+
+        .search-button:hover {
+            opacity: 0.9;
+        }
+
+        .startups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .startup-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .startup-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .startup-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .startup-content {
+            padding: 1.5rem;
+        }
+
+        .startup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .startup-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E3A8A;
+            margin: 0;
+        }
+
+        .startup-stage {
+            background: #e5e5e5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .startup-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .startup-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .startup-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: #f5f5f5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            text-align: center;
+        }
+
+        .view-button {
+            background: #4A90E2;
+            color: white;
+        }
+
+        .contact-button {
+            background: #00BFA6;
+            color: white;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .discovery-container {
+                padding: 1rem;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .startups-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'portfolio_tracker' %}">Portfolio</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a href="{% url 'logout' %}">
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="discovery-container">
+        <div class="search-section">
+            <h2>Find Your Next Investment</h2>
+            <form class="search-form" method="GET">
+                <div class="form-group">
+                    <label for="industry">Industry</label>
+                    <select id="industry" name="industry">
+                        <option value="">All Industries</option>
+                        <option value="tech">Technology</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="fintech">FinTech</option>
+                        <option value="ai">AI/ML</option>
+                        <option value="ecommerce">E-commerce</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stage">Stage</label>
+                    <select id="stage" name="stage">
+                        <option value="">All Stages</option>
+                        <option value="seed">Seed</option>
+                        <option value="early">Early Stage</option>
+                        <option value="growth">Growth</option>
+                        <option value="late">Late Stage</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="region">Region</label>
+                    <select id="region" name="region">
+                        <option value="">All Regions</option>
+                        <option value="north-america">North America</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia">Asia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="investment">Investment Range</label>
+                    <select id="investment" name="investment">
+                        <option value="">Any Range</option>
+                        <option value="0-100k">$0 - $100K</option>
+                        <option value="100k-500k">$100K - $500K</option>
+                        <option value="500k-1m">$500K - $1M</option>
+                        <option value="1m+">$1M+</option>
+                    </select>
+                </div>
+                <button type="submit" class="search-button">Search Startups</button>
+            </form>
+        </div>
+
+        <div class="startups-grid">
+            <!-- Startup Card 1 -->
+            <div class="startup-card">
+                <img src="{% static 'images/startup1.jpg' %}" alt="TechStart AI" class="startup-image">
+                <div class="startup-content">
+                    <div class="startup-header">
+                        <h3 class="startup-name">TechStart AI</h3>
+                        <span class="startup-stage">Seed</span>
+                    </div>
+                    <p class="startup-description">
+                        AI-powered analytics platform helping businesses make data-driven decisions.
+                    </p>
+                    <div class="startup-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value">$500K</div>
+                            <div class="metric-label">Funding Raised</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">15</div>
+                            <div class="metric-label">Team Size</div>
+                        </div>
+                    </div>
+                    <div class="startup-tags">
+                        <span class="tag">AI/ML</span>
+                        <span class="tag">Analytics</span>
+                        <span class="tag">B2B</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button view-button">View Profile</button>
+                        <button class="action-button contact-button">Contact</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Startup Card 2 -->
+            <div class="startup-card">
+                <img src="{% static 'images/startup2.jpg' %}" alt="HealthTech Solutions" class="startup-image">
+                <div class="startup-content">
+                    <div class="startup-header">
+                        <h3 class="startup-name">HealthTech Solutions</h3>
+                        <span class="startup-stage">Early Stage</span>
+                    </div>
+                    <p class="startup-description">
+                        Revolutionary healthcare platform connecting patients with providers.
+                    </p>
+                    <div class="startup-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value">$1.2M</div>
+                            <div class="metric-label">Funding Raised</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">25</div>
+                            <div class="metric-label">Team Size</div>
+                        </div>
+                    </div>
+                    <div class="startup-tags">
+                        <span class="tag">Healthcare</span>
+                        <span class="tag">Digital Health</span>
+                        <span class="tag">B2C</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button view-button">View Profile</button>
+                        <button class="action-button contact-button">Contact</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Startup Card 3 -->
+            <div class="startup-card">
+                <img src="{% static 'images/startup3.jpg' %}" alt="FinTech App" class="startup-image">
+                <div class="startup-content">
+                    <div class="startup-header">
+                        <h3 class="startup-name">FinTech App</h3>
+                        <span class="startup-stage">Growth</span>
+                    </div>
+                    <p class="startup-description">
+                        Innovative financial technology platform for seamless payments.
+                    </p>
+                    <div class="startup-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value">$5M</div>
+                            <div class="metric-label">Funding Raised</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">50</div>
+                            <div class="metric-label">Team Size</div>
+                        </div>
+                    </div>
+                    <div class="startup-tags">
+                        <span class="tag">FinTech</span>
+                        <span class="tag">Payments</span>
+                        <span class="tag">B2B2C</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button view-button">View Profile</button>
+                        <button class="action-button contact-button">Contact</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 

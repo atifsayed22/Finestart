@@ -1,0 +1,532 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Ubuntu+Condensed&display=swap");
+
+html{
+  scroll-behavior: smooth;
+}
+/* Prevent content from getting hidden under the fixed navbar */
+body {
+  padding-top: 80px; /* Adjust according to nav height */
+}
+.box{
+  border: 1px solid black;
+  color: blue;
+  background-color:black;
+  height: 500px;
+  width: 800px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Montserrat", serif;
+}
+header nav {
+  display: flex;
+  /* background-color: blue; */
+  height: 110px;
+  width: 100vw;
+  /* position: fixed; */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white; /* Or any color */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+ 
+}
+a{
+  text-decoration: none;
+  color: black;
+}
+nav img {
+  height: 100px;
+  width: 300px;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+.nav-con {
+  display: flex;
+  padding: 40px;
+  margin-left: 115px;
+}
+
+.nav-con .nav-con-el {
+  position: relative;
+  padding: 0 22px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: black;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+/* Animated underline effect */
+.nav-con-el::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px; /* Places the underline below the text */
+  width: 0;
+  height: 3px;
+  background-color: black;
+  transition: width 0.3s ease-in-out;
+  transform: translateX(-50%);
+}
+
+.nav-con-el:hover {
+  color: #18cb96;
+  transform: scale(1.05); /* Slight zoom effect */
+}
+
+.nav-con-el:hover::after {
+  width: 80%; /* Underline appears smoothly */
+}
+
+/* Active state */
+.nav-con-el.active,
+.nav-con-el a.active {
+  color: #18cb96;
+  font-weight: bold;
+}
+
+.nav-con-el.active::after {
+  width: 100%; /* Full underline for active state */
+}
+
+.margin{
+    margin-top: 30px;
+}
+.log-in p{
+  margin-left: 0px;
+}
+.log-in-sec .log-in{
+    padding-left: 20px;
+    height: 45px;
+    font-size: 1.5rem;
+    width: 125px;
+    border: none;
+    padding: 5px;
+    border-top-right-radius:25px ;
+    border-bottom-right-radius: 25px;
+    background-color: transparent;
+    border-right: 2px solid #18cb96;
+    border-bottom:2px solid #18cb96;
+    border-top:2px solid #18cb96;
+    border-left: none;
+    font-weight: 600;
+    margin-left: 55px;
+    position: relative;
+  display: flex;
+    color: white;
+    background-color: #18cb96;
+    /* background-color: blue; */
+    
+}
+.log-in::before{
+  content: "\f007"; /* FontAwesome User Icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  background-color: white; /* White circle background */
+  color: #18cb96; /* Green icon color */
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Makes it circular */
+  position: absolute;
+  left: -30px;
+  top: -3px;
+  border: 2px solid #18cb96;
+}
+.log-in:hover {
+  background-color: white;
+  color: #18cb96;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  border-top: 2px solid white;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 0px 10px rgba(24, 203, 150, 0.6);
+}
+
+.log-in::before {
+  transition: all 0.3s ease-in-out;
+}
+
+.log-in:hover::before {
+  background-color: #18cb96;
+  color: white;
+  border: 2px solid white;
+  transform: scale(1.1);
+}
+
+
+.sign-in {
+  height: 45px;
+  font-size: 1.25rem;
+  width: 140px;
+  border: 2px solid #333; /* Darker border for better contrast */
+  border-radius: 25px;
+  background-color: transparent;
+  font-weight: 600;
+  margin-left: 25px;
+  color: #333;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.sign-in:hover {
+  background-color: #333;
+  color: white;
+}
+
+/* Icon Styling */
+.sign-in i {
+  font-size: 1.2rem;
+}
+
+main .con{
+  margin-top: 40px;
+  height: 60vh;
+  width: 50vw;
+  /* background-color:antiquewhite */
+}
+.con-1{
+  padding:  20px 20px;
+  font-size: 2rem;
+  font-weight: 500;
+}
+.sub-con-1{
+  padding: 10px 20px;
+  font-size: 1.25rem;
+  color: rgb(76, 75, 75);
+  font-weight: 400;
+}
+.start-but {
+  border: none;
+  font-size: 1.5rem;
+  height: 50px;
+  width: 240px;
+  background-color: #18cb96;
+  margin: 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 4px 4px 0px #4c4b4b, 4px 4px 10px rgba(0, 0, 0, 0.2);
+  border: 2px solid #4c4b4b;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Smooth hover effect */
+.start-but:hover {
+  background-color: #14a97b;
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px #4c4b4b, 6px 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Click effect */
+.start-but:active {
+  transform: translateY(2px);
+  box-shadow: 2px 2px 0px #4c4b4b, 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.app-data {
+  height: 100px;
+  width: 650px;
+  background-color: #272727;
+  margin-left: 20px;
+  margin-top: 20px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-around; /* Distributes elements evenly */
+  align-items: center; /* Centers items vertically */
+  padding: 10px; /* Adds some space inside */
+}
+
+.data {
+  color: white;
+  font-size: 1.25rem;
+  flex: 1; /* Makes each item take equal width */
+  text-align: center; /* Centers text */
+}
+
+.sub-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers text inside */
+  justify-content: center; /* Centers vertically */
+}
+
+.number {
+  color: #18cb96;
+  font-size: 1.4rem;
+}
+
+.cat {
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+
+.main-sec{
+  display: flex;
+  margin-top: 10px;
+}
+.img1 img{
+  height: 400px;
+
+  position: relative;
+  top: 100px;
+  left: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.img2 img{
+  width: 850px;
+  height: 500px;
+
+  position: relative;
+  top: 100px;
+
+}
+.about-sec{
+  height: 100vh;
+  width: 100vw;
+  background-color: aquamarine;
+}
+#home{
+  margin-top: 20px;
+  /* background-color: black; */
+  height: 80vh;
+}
+.workflow-sec {
+  padding: 50px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.workflow-sec h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.workflow-description {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.step {
+  width: 22%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.step:hover {
+  transform: translateY(-10px);
+}
+
+.step-icon {
+  font-size: 2rem;
+  color: #18cb96;
+  margin-bottom: 15px;
+}
+
+.step h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.step p {
+  font-size: 1rem;
+  color: #666;
+}
+.venture-sec {
+  padding: 50px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.venture-sec h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.venture-description {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.venture-content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.for-startups, .for-investors {
+  width: 45%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.for-startups h2, .for-investors h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.benefit {
+  margin-bottom: 20px;
+}
+
+.benefit-icon {
+  font-size: 2rem;
+  color: #18cb96;
+  margin-bottom: 15px;
+}
+
+.benefit h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.benefit p {
+  font-size: 1rem;
+  color: #666;
+}
+:root {
+    --primary-color: #18cb96;
+    --secondary-color: #0056b3;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    padding-top: 80px;
+}
+
+.navbar {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    height: 50px;
+}
+
+.nav-link {
+    position: relative;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease-in-out;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.nav-link:hover::after {
+    width: 70%;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #15a77c;
+    border-color: #15a77c;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 3rem 0;
+}
+
+.footer-heading {
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    color: var(--primary-color);
+}
+
+.footer-link {
+    color: #adb5bd;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+}
+
+.social-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #adb5bd;
+    transition: color 0.3s;
+}
+
+.social-icon:hover {
+    color: var(--primary-color);
+}
+
+.copyright {
+    border-top: 1px solid #495057;
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+} 

@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Dashboard - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .greeting-section {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .profile-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: #1E3A8A;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .nav-item:hover {
+            background: #4A90E2;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .profile-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a >
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="greeting-section">
+            <h1>Welcome back, {{ user.first_name }}!</h1>
+            <p>Here's what's happening with your startup today.</p>
+        </div>
+
+        <div class="nav-menu">
+            <a  class="nav-item">Dashboard</a>
+            <a  class="nav-item">Profile</a>
+            <a  class="nav-item">Upload Pitch</a>
+            <a  class="nav-item">Find Investors</a>
+            <a class="nav-item">Insights</a>
+        </div>
+
+        <div class="profile-summary">
+            <div class="summary-card">
+                <h3><i class="fas fa-chart-line"></i> Startup Stage</h3>
+                <p>Seed Stage</p>
+            </div>
+            <div class="summary-card">
+                <h3><i class="fas fa-dollar-sign"></i> Current Valuation</h3>
+                <p>$500,000</p>
+            </div>
+            <div class="summary-card">
+                <h3><i class="fas fa-coins"></i> Current Funding</h3>
+                <p>$100,000</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2>Profit/Loss Overview</h2>
+            <canvas id="profitLossChart"></canvas>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Placeholder for profit/loss chart
+        const ctx = document.getElementById('profitLossChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Profit/Loss',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                    borderColor: '#4A90E2',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

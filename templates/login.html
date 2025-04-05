@@ -1,0 +1,68 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - FineStart</title>
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Header Section -->
+        <div class="login-header">
+            <img src="{% static "images/logo.png" %}" alt="FineStart Logo" class="logo">
+            <h1>Welcome Back</h1>
+            <p>Log in to continue your journey with FineStart.</p>
+        </div>
+
+        <!-- Display messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">Log In</button>
+        </form>
+
+        <!-- Social Login Options -->
+        <div class="social-login">
+            <p>Or log in with:</p>
+            <div class="social-buttons">
+                <button class="social-btn google">
+                    <i class="fab fa-google"></i> Google
+                </button>
+                <button class="social-btn linkedin">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </button>
+                <button class="social-btn facebook">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+            </div>
+        </div>
+
+        <!-- Sign Up Link -->
+        <div class="signup-link">
+            Don't have an account? <a href="{% url 'signup'%}">Sign Up</a>
+        </div>
+    </div>
+</body>
+</html>

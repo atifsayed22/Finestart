@@ -1,0 +1,247 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Pitch - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .upload-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #4A90E2;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover {
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #4A90E2;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1E3A8A;
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            width: 100%;
+        }
+
+        .submit-button:hover {
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background: #f5f5f5;
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .upload-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a href="{% url 'logout' %}">
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="upload-container">
+        <div class="upload-section">
+            <h1>Upload Your Pitch</h1>
+            <p>Share your pitch deck or video to attract potential investors</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="upload-area" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag and drop your pitch deck or video here</p>
+                    <p>or</p>
+                    <input type="file" id="file-input" name="pitch_file" accept=".pdf,.ppt,.pptx,.mp4,.mov" style="display: none;">
+                    <button type="button" class="submit-button" onclick="document.getElementById('file-input').click()">
+                        Choose File
+                    </button>
+                </div>
+
+                <div class="file-info" id="file-info">
+                    <p>Selected file: <span id="file-name"></span></p>
+                    <p>Size: <span id="file-size"></span></p>
+                </div>
+
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pitch-description">Pitch Description</label>
+                    <textarea id="pitch-description" name="pitch_description" placeholder="Describe your pitch, key points, and what makes your startup unique..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-button">Upload Pitch</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const fileInfo = document.getElementById('file-info');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const progressBar = document.getElementById('progress-bar');
+        const progress = document.getElementById('progress');
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#00BFA6';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#4A90E2';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4A90E2';
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFile(file);
+        });
+
+        function handleFile(file) {
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.classList.add('show');
+                progressBar.classList.add('show');
+                
+                // Simulate upload progress
+                let width = 0;
+                const interval = setInterval(() => {
+                    if (width >= 100) {
+                        clearInterval(interval);
+                    } else {
+                        width++;
+                    }
+                    progress.style.width = width + '%';
+                }, 20);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html> 

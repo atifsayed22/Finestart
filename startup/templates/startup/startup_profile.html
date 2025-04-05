@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Profile - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo-upload {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .logo-upload img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-upload input[type="file"] {
+            display: none;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1E3A8A;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .save-button {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .save-button:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a >
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <div class="logo-upload">
+                <img src="{% static 'images/default-logo.png' %}" alt="Startup Logo" id="logo-preview">
+                <input type="file" id="logo-input" accept="image/*">
+            </div>
+            <div class="profile-info">
+                <h1>Startup Profile</h1>
+                <p>Update your startup information to attract potential investors</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-section">
+                <h2>Basic Information</h2>
+                <div class="form-group">
+                    <label for="team-size">Team Size</label>
+                    <input type="number" id="team-size" name="team_size" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="ceo-name">CEO Name</label>
+                    <input type="text" id="ceo-name" name="ceo_name" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Business Details</h2>
+                <div class="form-group">
+                    <label for="startup-stage">Startup Stage</label>
+                    <select id="startup-stage" name="startup_stage" required>
+                        <option value="">Select Stage</option>
+                        <option value="idea">Idea Stage</option>
+                        <option value="pre-seed">Pre-Seed</option>
+                        <option value="seed">Seed</option>
+                        <option value="series-a">Series A</option>
+                        <option value="series-b">Series B</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="equity-structure">Equity Structure</label>
+                    <textarea id="equity-structure" name="equity_structure" placeholder="Describe your current equity structure..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Business Model</h2>
+                <div class="form-group">
+                    <label for="business-model">Business Model Description</label>
+                    <textarea id="business-model" name="business_model" placeholder="Describe your business model, revenue streams, and target market..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="save-button">Save Changes</button>
+        </form>
+    </main>
+
+    <script>
+        // Logo upload preview
+        document.getElementById('logo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('logo-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html> 

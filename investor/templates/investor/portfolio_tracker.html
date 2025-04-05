@@ -1,0 +1,335 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Tracker - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .portfolio-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .portfolio-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1E3A8A;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .summary-trend {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .trend-up {
+            color: #00BFA6;
+        }
+
+        .trend-down {
+            color: #FF4B4B;
+        }
+
+        .portfolio-chart {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-top: 1rem;
+        }
+
+        .investments-list {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .investment-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .investment-item:last-child {
+            border-bottom: none;
+        }
+
+        .investment-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .investment-info h3 {
+            margin: 0;
+            color: #1E3A8A;
+            font-size: 1.1rem;
+        }
+
+        .investment-info p {
+            margin: 0.25rem 0 0;
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .investment-metrics {
+            text-align: right;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .investment-status {
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(0, 191, 166, 0.1);
+            color: #00BFA6;
+        }
+
+        .status-exited {
+            background: rgba(74, 144, 226, 0.1);
+            color: #4A90E2;
+        }
+
+        .status-pending {
+            background: rgba(255, 75, 75, 0.1);
+            color: #FF4B4B;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-container {
+                padding: 1rem;
+            }
+            
+            .investment-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .investment-logo {
+                margin: 0 auto;
+            }
+
+            .investment-metrics {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'portfolio_tracker' %}">Portfolio</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a href="{% url 'logout' %}">
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="portfolio-container">
+        <div class="portfolio-summary">
+            <h2>Portfolio Overview</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-value">$2.5M</div>
+                    <div class="summary-label">Total Portfolio Value</div>
+                    <div class="summary-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> 12.5% YTD
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">8</div>
+                    <div class="summary-label">Active Investments</div>
+                    <div class="summary-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> 2 new this year
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">18.5%</div>
+                    <div class="summary-label">Average ROI</div>
+                    <div class="summary-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> 3.2% this month
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">3</div>
+                    <div class="summary-label">Exited Investments</div>
+                    <div class="summary-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> 1 this quarter
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="portfolio-chart">
+            <h2>Portfolio Performance</h2>
+            <div class="chart-container">
+                <canvas id="portfolioChart"></canvas>
+            </div>
+        </div>
+
+        <div class="investments-list">
+            <h2>Active Investments</h2>
+            <div class="investment-item">
+                <img src="{% static 'images/startup1.jpg' %}" alt="TechStart AI" class="investment-logo">
+                <div class="investment-info">
+                    <h3>TechStart AI</h3>
+                    <p>AI-powered analytics platform</p>
+                </div>
+                <div class="investment-metrics">
+                    <div class="metric-value">$500K</div>
+                    <div class="metric-label">Investment</div>
+                    <div class="metric-value">$750K</div>
+                    <div class="metric-label">Current Value</div>
+                </div>
+                <div class="investment-status">
+                    <span class="status-badge status-active">Active</span>
+                </div>
+            </div>
+
+            <div class="investment-item">
+                <img src="{% static 'images/startup2.jpg' %}" alt="HealthTech Solutions" class="investment-logo">
+                <div class="investment-info">
+                    <h3>HealthTech Solutions</h3>
+                    <p>Healthcare platform</p>
+                </div>
+                <div class="investment-metrics">
+                    <div class="metric-value">$1.2M</div>
+                    <div class="metric-label">Investment</div>
+                    <div class="metric-value">$1.8M</div>
+                    <div class="metric-label">Current Value</div>
+                </div>
+                <div class="investment-status">
+                    <span class="status-badge status-active">Active</span>
+                </div>
+            </div>
+
+            <div class="investment-item">
+                <img src="{% static 'images/startup3.jpg' %}" alt="FinTech App" class="investment-logo">
+                <div class="investment-info">
+                    <h3>FinTech App</h3>
+                    <p>Financial technology platform</p>
+                </div>
+                <div class="investment-metrics">
+                    <div class="metric-value">$2M</div>
+                    <div class="metric-label">Investment</div>
+                    <div class="metric-value">$3.5M</div>
+                    <div class="metric-label">Current Value</div>
+                </div>
+                <div class="investment-status">
+                    <span class="status-badge status-active">Active</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Portfolio Performance Chart
+        const ctx = document.getElementById('portfolioChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Portfolio Value',
+                    data: [2000000, 2150000, 2250000, 2300000, 2400000, 2500000],
+                    borderColor: '#4A90E2',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

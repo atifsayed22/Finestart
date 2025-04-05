@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Registration | FineStart</title>
+    <link rel="stylesheet" href="{% static 'forms.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+   
+</head>
+<body>
+    <div class="registration-container">
+        <div class="form-header">
+            <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            <h1>Startup Registration</h1>
+        </div>
+
+        <div class="progress-bar">
+            <div class="step active" data-step="1">
+                <span>1</span>
+                <p>Basic Details</p>
+            </div>
+            <div class="step" data-step="2">
+                <span>2</span>
+                <p>Financial Info</p>
+            </div>
+            <div class="step" data-step="3">
+                <span>3</span>
+                <p>Market Insights</p>
+            </div>
+            <div class="step" data-step="4">
+                <span>4</span>
+                <p>Supporting Docs</p>
+            </div>
+        </div>
+
+        <form id="startup-registration-form"  method="POST" action="{% url 'startup_registration' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- Step 1: Basic Details -->
+            <div class="form-step active" data-step="1">
+                <div class="form-section">
+                    <h2>Basic Company Details</h2>
+                    <div class="input-group">
+                        <label for="startup-name">Startup Name</label>
+                        <input type="text" id="startup-name" name="startup-name" required>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="industry-type">Industry Type</label>
+                        <select id="industry-type" name="industry-type" required>
+                            <option value="">Select Industry</option>
+                            <option value="tech">Technology</option>
+                            <option value="fintech">Fintech</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="years-in-business">Years in Business</label>
+                        <input type="number" id="years-in-business" name="years-in-business" min="0" max="50" required>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="company-logo">Company Logo</label>
+                        <input type="file" id="company-logo" name="company-logo" accept=".png,.jpg,.jpeg">
+                        <div class="file-preview"></div>
+                    </div>
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="btn btn-next">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 2: Financial Information -->
+            <div class="form-step" data-step="2">
+                <div class="form-section">
+                    <h2>Financial Information</h2>
+                    <div class="input-group">
+                        <label for="revenue">Annual Revenue ($)</label>
+                        <input type="number" id="revenue" name="revenue" min="0" required>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="profit-margin">Profit Margin (%)</label>
+                        <input type="number" id="profit-margin" name="profit-margin" min="0" max="100" step="0.1" required>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="investment-required">Investment Required ($)</label>
+                        <input type="number" id="investment-required" name="investment-required" min="0" required>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="funding-purpose">Funding Purpose</label>
+                        <textarea id="funding-purpose" name="funding-purpose" rows="4" required></textarea>
+                        <span class="validation-icon"></span>
+                    </div>
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="btn btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button type="button" class="btn btn-next">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 3: Market & Business Insights -->
+            <div class="form-step" data-step="3">
+                <div class="form-section">
+                    <h2>Market & Business Insights</h2>
+                    <div class="input-group">
+                        <label for="target-market">Target Market Description</label>
+                        <textarea id="target-market" name="target-market" rows="4" required></textarea>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="growth-trend">Business Growth Trend</label>
+                        <select id="growth-trend" name="growth-trend" required>
+                            <option value="">Select Trend</option>
+                            <option value="growing">Growing</option>
+                            <option value="stable">Stable</option>
+                            <option value="declining">Declining</option>
+                        </select>
+                        <span class="validation-icon"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="pitch-video">Pitch Video</label>
+                        <input type="file" id="pitch-video" name="pitch-video" accept=".mp4,.mov">
+                        <div class="file-preview"></div>
+                    </div>
+                </div>
+                <div class="form-navigation">
+                    <button type="button" class="btn btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button type="button" class="btn btn-next">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 4: Supporting Documents -->
+            <div class="form-step" data-step="4">
+                <div class="form-section">
+                    <h2>Supporting Documents</h2>
+                    <div class="input-group">
+                        <label for="business-proposal">Business Proposal</label>
+                        <input type="file" id="business-proposal" name="business-proposal" accept=".pdf" required>
+                        <div class="file-preview"></div>
+                    </div>
+                    <div class="input-group">
+                        <label for="legal-documents">Legal Documents</label>
+                        <input type="file" id="legal-documents" name="legal-documents" accept=".pdf,.png,.jpg,.jpeg" multiple>
+                        <div class="file-preview"></div>
+                    </div>
+                </div>
+                <div class="form-navigation final-step">
+                    <button type="button" class="btn btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button type="submit" class="btn btn-submit">Submit Application <i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'forms.js' %}">
+       
+    </script>
+</body>
+</html>

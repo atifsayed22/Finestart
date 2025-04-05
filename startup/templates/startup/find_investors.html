@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Investors - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .investors-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            color: #1E3A8A;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            width: 100%;
+        }
+
+        .search-button:hover {
+            opacity: 0.9;
+        }
+
+        .investors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .investor-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .investor-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .investor-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+        }
+
+        .investor-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .investor-header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+
+        .investor-body {
+            padding: 1.5rem;
+        }
+
+        .investor-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .investor-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: #f5f5f5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .connect-button {
+            background: #1E3A8A;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .connect-button:hover {
+            background: #4A90E2;
+        }
+
+        @media (max-width: 768px) {
+            .investors-container {
+                padding: 1rem;
+            }
+            
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a >Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <a href="{% url 'logout' %}">
+                    <button class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="investors-container">
+        <div class="search-section">
+            <h1>Find Investors</h1>
+            <p>Search and filter investors based on your startup's needs</p>
+
+            <form method="GET" class="search-filters">
+                <div class="filter-group">
+                    <label for="industry">Industry</label>
+                    <select id="industry" name="industry">
+                        <option value="">All Industries</option>
+                        <option value="tech">Technology</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="fintech">FinTech</option>
+                        <option value="ai">AI/ML</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="region">Region</label>
+                    <select id="region" name="region">
+                        <option value="">All Regions</option>
+                        <option value="north-america">North America</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia">Asia</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="funding-stage">Funding Stage</label>
+                    <select id="funding-stage" name="funding_stage">
+                        <option value="">All Stages</option>
+                        <option value="seed">Seed</option>
+                        <option value="series-a">Series A</option>
+                        <option value="series-b">Series B</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="investment-range">Investment Range</label>
+                    <select id="investment-range" name="investment_range">
+                        <option value="">All Ranges</option>
+                        <option value="0-100k">$0 - $100K</option>
+                        <option value="100k-500k">$100K - $500K</option>
+                        <option value="500k-1m">$500K - $1M</option>
+                        <option value="1m+">$1M+</option>
+                    </select>
+                </div>
+            </form>
+
+            <button type="submit" class="search-button">Search Investors</button>
+        </div>
+
+        <div class="investors-grid">
+            <!-- Sample Investor Card -->
+            <div class="investor-card">
+                <div class="investor-header">
+                    <h3>TechVentures Capital</h3>
+                    <p>San Francisco, CA</p>
+                </div>
+                <div class="investor-body">
+                    <div class="investor-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">$50M</div>
+                            <div class="stat-label">Portfolio Value</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">25</div>
+                            <div class="stat-label">Active Deals</div>
+                        </div>
+                    </div>
+                    <div class="investor-tags">
+                        <span class="tag">Technology</span>
+                        <span class="tag">AI/ML</span>
+                        <span class="tag">Series A</span>
+                    </div>
+                    <button class="connect-button">Connect</button>
+                </div>
+            </div>
+
+            <!-- More investor cards will be dynamically added here -->
+        </div>
+    </main>
+
+    <script>
+        // Add more investor cards dynamically
+        const investors = [
+            {
+                name: "Innovation Fund",
+                location: "New York, NY",
+                portfolioValue: "$75M",
+                activeDeals: 30,
+                tags: ["Healthcare", "Biotech", "Series B"]
+            },
+            {
+                name: "Growth Capital Partners",
+                location: "London, UK",
+                portfolioValue: "$100M",
+                activeDeals: 40,
+                tags: ["FinTech", "E-commerce", "Series A"]
+            }
+        ];
+
+        const investorsGrid = document.querySelector('.investors-grid');
+        investors.forEach(investor => {
+            const card = createInvestorCard(investor);
+            investorsGrid.appendChild(card);
+        });
+
+        function createInvestorCard(investor) {
+            const card = document.createElement('div');
+            card.className = 'investor-card';
+            card.innerHTML = `
+                <div class="investor-header">
+                    <h3>${investor.name}</h3>
+                    <p>${investor.location}</p>
+                </div>
+                <div class="investor-body">
+                    <div class="investor-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${investor.portfolioValue}</div>
+                            <div class="stat-label">Portfolio Value</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${investor.activeDeals}</div>
+                            <div class="stat-label">Active Deals</div>
+                        </div>
+                    </div>
+                    <div class="investor-tags">
+                        ${investor.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <button class="connect-button">Connect</button>
+                </div>
+            `;
+            return card;
+        }
+    </script>
+</body>
+</html> 

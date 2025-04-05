@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - FineStart</title>
+    <link rel="stylesheet" href="{% static 'signup.css' %}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            <h1>Join FineStart</h1>
+            <p>Connect with the right investors or startups to grow your business.</p>
+        </div>
+
+        <!-- Display any messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="user-type-selection">
+            <button class="user-type-btn active" id="startupBtn">Startup</button>
+            <button class="user-type-btn" id="investorBtn">Investor</button>
+        </div>
+
+        <form id="signupForm" method="POST" action="{% url 'signup' %}">
+            {% csrf_token %}
+            
+            <input type="hidden" id="userType" name="user_type" value="startup">
+            
+            <!-- Username and email fields -->
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="error-message">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_email">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="error-message">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Password fields -->
+            <div class="form-group">
+                <label for="id_password1" >Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <div class="error-message">{{ form.password1.errors }}</div>
+                {% endif %}
+                <!-- password strength indicator -->
+                <div id="password-strength">
+                    <div id="strength-bar"></div>
+                    <div id="strength-text"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_password2">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <div class="error-message">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Startup Fields -->
+            <div id="startupFields" class="user-fields">
+                <div class="form-group">
+                    <label for="id_startup_name">Startup Name</label>
+                    {{ form.startup_name }}
+                </div>
+                <div class="form-group">
+                    <label for="id_industry">Industry</label>
+                    {{ form.industry }}
+                </div>
+            </div>
+            
+            <!-- Investor Fields -->
+            <div id="investorFields" class="user-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="id_investor_type">Investor Type</label>
+                    {{ form.investor_type }}
+                </div>
+                <div class="form-group">
+                    <label for="id_investment_range">Investment Range</label>
+                    {{ form.investment_range }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">I agree to the <a href="#">Terms and Conditions</a></label>
+            </div>
+            
+            <button type="submit" class="signup-btn">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const startupBtn = document.getElementById('startupBtn');
+            const investorBtn = document.getElementById('investorBtn');
+            const startupFields = document.getElementById('startupFields');
+            const investorFields = document.getElementById('investorFields');
+            const userTypeInput = document.getElementById('userType');
+            
+            function toggleUserType(type) {
+                if (type === "startup") {
+                    startupFields.style.display = 'block';
+                    investorFields.style.display = 'none';
+                    startupBtn.classList.add('active');
+                    investorBtn.classList.remove('active');
+                    userTypeInput.value = 'startup';
+                } else {
+                    startupFields.style.display = 'none';
+                    investorFields.style.display = 'block';
+                    investorBtn.classList.add('active');
+                    startupBtn.classList.remove('active');
+                    userTypeInput.value = 'investor';
+                }
+            }
+
+            startupBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleUserType("startup");
+            });
+            investorBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleUserType("investor");
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const passwordInput = document.querySelector("#id_password1");
+            const strengthBar = document.querySelector("#strength-bar");
+            const strengthText = document.querySelector("#strength-text");
+        
+            passwordInput.addEventListener("input", function () {
+                const password = passwordInput.value;
+                let strength = 0;
+        
+                // Check character variety
+                if (password.length >= 8) strength++;  // Length check
+                if (/[a-z]/.test(password)) strength++; // Lowercase check
+                if (/[A-Z]/.test(password)) strength++; // Uppercase check
+                if (/[0-9]/.test(password)) strength++; // Number check
+                if (/[^a-zA-Z0-9]/.test(password)) strength++; // Special character check
+        
+                // Reset classes
+                strengthBar.classList.remove("weak", "medium", "strong");
+        
+                // Set strength level
+                let strengthClass = "";
+                let strengthLabel = "";
+        
+                if (strength <= 2) {
+                    strengthClass = "weak";
+                    strengthLabel = "Weak 😢";
+                } else if (strength === 3 || strength === 4) {
+                    strengthClass = "medium";
+                    strengthLabel = "Medium 🙂";
+                } else if (strength >= 5) {
+                    strengthClass = "strong";
+                    strengthLabel = "Strong 💪";
+                }
+        
+                // Apply class and text
+                strengthBar.classList.add(strengthClass);
+                strengthText.textContent = strengthLabel;
+            });
+        });
+        
+    </script>
+</body>
+</html>
