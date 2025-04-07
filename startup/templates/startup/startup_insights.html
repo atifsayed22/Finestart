@@ -148,15 +148,16 @@
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Find Investors</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
-                <a >
-                    <button class="log-in">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">
                         <p>Logout</p>
                     </button>
-                </a>
+                </form>
             </div>
         </nav>
     </header>

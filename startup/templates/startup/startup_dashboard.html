@@ -88,11 +88,10 @@
                 <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
-                <a >
-                    <button class="log-in">
-                        <p>Logout</p>
-                    </button>
-                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
             </div>
         </nav>
     </header>

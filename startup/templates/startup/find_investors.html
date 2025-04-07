@@ -176,15 +176,14 @@
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a >Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
-                <a href="{% url 'logout' %}">
-                    <button class="log-in">
-                        <p>Logout</p>
-                    </button>
-                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
             </div>
         </nav>
     </header>
@@ -199,10 +198,10 @@
                     <label for="industry">Industry</label>
                     <select id="industry" name="industry">
                         <option value="">All Industries</option>
-                        <option value="tech">Technology</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="fintech">FinTech</option>
-                        <option value="ai">AI/ML</option>
+                        <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
+                        <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                        <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>FinTech</option>
+                        <option value="ai" {% if current_filters.industry == 'ai' %}selected{% endif %}>AI/ML</option>
                     </select>
                 </div>
 
@@ -210,9 +209,9 @@
                     <label for="region">Region</label>
                     <select id="region" name="region">
                         <option value="">All Regions</option>
-                        <option value="north-america">North America</option>
-                        <option value="europe">Europe</option>
-                        <option value="asia">Asia</option>
+                        <option value="north-america" {% if current_filters.region == 'north-america' %}selected{% endif %}>North America</option>
+                        <option value="europe" {% if current_filters.region == 'europe' %}selected{% endif %}>Europe</option>
+                        <option value="asia" {% if current_filters.region == 'asia' %}selected{% endif %}>Asia</option>
                     </select>
                 </div>
 
@@ -220,9 +219,9 @@
                     <label for="funding-stage">Funding Stage</label>
                     <select id="funding-stage" name="funding_stage">
                         <option value="">All Stages</option>
-                        <option value="seed">Seed</option>
-                        <option value="series-a">Series A</option>
-                        <option value="series-b">Series B</option>
+                        <option value="seed" {% if current_filters.funding_stage == 'seed' %}selected{% endif %}>Seed</option>
+                        <option value="series-a" {% if current_filters.funding_stage == 'series-a' %}selected{% endif %}>Series A</option>
+                        <option value="series-b" {% if current_filters.funding_stage == 'series-b' %}selected{% endif %}>Series B</option>
                     </select>
                 </div>
 
@@ -230,45 +229,54 @@
                     <label for="investment-range">Investment Range</label>
                     <select id="investment-range" name="investment_range">
                         <option value="">All Ranges</option>
-                        <option value="0-100k">$0 - $100K</option>
-                        <option value="100k-500k">$100K - $500K</option>
-                        <option value="500k-1m">$500K - $1M</option>
-                        <option value="1m+">$1M+</option>
+                        <option value="0-100k" {% if current_filters.investment_range == '0-100k' %}selected{% endif %}>$0 - $100K</option>
+                        <option value="100k-500k" {% if current_filters.investment_range == '100k-500k' %}selected{% endif %}>$100K - $500K</option>
+                        <option value="500k-1m" {% if current_filters.investment_range == '500k-1m' %}selected{% endif %}>$500K - $1M</option>
+                        <option value="1m+" {% if current_filters.investment_range == '1m+' %}selected{% endif %}>$1M+</option>
                     </select>
                 </div>
-            </form>
 
-            <button type="submit" class="search-button">Search Investors</button>
+                <button type="submit" class="search-button">Search Investors</button>
+            </form>
         </div>
 
         <div class="investors-grid">
-            <!-- Sample Investor Card -->
-            <div class="investor-card">
-                <div class="investor-header">
-                    <h3>TechVentures Capital</h3>
-                    <p>San Francisco, CA</p>
-                </div>
-                <div class="investor-body">
-                    <div class="investor-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">$50M</div>
-                            <div class="stat-label">Portfolio Value</div>
+            {% if investors %}
+                {% for investor in investors %}
+                    <div class="investor-card">
+                        <div class="investor-header">
+                            <h3>{{ investor.user.get_full_name }}</h3>
+                            <p>{{ investor.investor_type }}</p>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value">25</div>
-                            <div class="stat-label">Active Deals</div>
+                        <div class="investor-body">
+                            <div class="investor-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ investor.investment_range }}</div>
+                                    <div class="stat-label">Investment Range</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ investor.user.email }}</div>
+                                    <div class="stat-label">Contact</div>
+                                </div>
+                            </div>
+                            <div class="investor-tags">
+                                <span class="tag">{{ investor.investor_type }}</span>
+                                {% if investor.investment_range %}
+                                    <span class="tag">{{ investor.investment_range }}</span>
+                                {% endif %}
+                            </div>
+                            <form method="post" action="{% url 'connect_with_investor' investor.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="connect-button">Connect</button>
+                            </form>
                         </div>
                     </div>
-                    <div class="investor-tags">
-                        <span class="tag">Technology</span>
-                        <span class="tag">AI/ML</span>
-                        <span class="tag">Series A</span>
-                    </div>
-                    <button class="connect-button">Connect</button>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">
+                    <p>No investors found matching your criteria. Try adjusting your filters.</p>
                 </div>
-            </div>
-
-            <!-- More investor cards will be dynamically added here -->
+            {% endif %}
         </div>
     </main>
 

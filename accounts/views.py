@@ -36,18 +36,16 @@ def user_login(request):
             login(request, user)
             messages.success(request, "Login successful!")
             
-            #check if the user is starup or notd
+            # Check user type and redirect accordingly
             user_profile = CustomUser.objects.get(username=username)
-            if user_profile.user_type == "Startup":
-                return redirect("startup_profile")
+            if user_profile.user_type.lower() == "startup":
+                return redirect("startup_dashboard")
             else:
-                return redirect("startup_profile")
+                return redirect("investor_dashboard")
         else:
             messages.error(request, "Invalid username or password.")
     
     return render(request, "login.html")
 
-
-def startup_profile (request):
-  
+def startup_profile(request):
     return redirect(reverse('startup_registration'))

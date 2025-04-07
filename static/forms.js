@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         messageBox.style.display = 'block';
         
-        // Hide after 5 seconds
+        // Hide after 3 seconds for success, 5 seconds for error
         setTimeout(() => {
             messageBox.style.display = 'none';
-        }, 50000);
+        }, type === 'success' ? 3000 : 5000);
     }
     
     // Next button click handler
@@ -117,13 +117,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     console.log('Form submitted successfully:', data);
                     showMessage('success', data.message || 'Submission successful!');
-                    form.reset();
-                    showStep(0);
                     
                     if (data.redirect_url) {
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 3000);
+                        }, 2000); // Reduced to 2 seconds
                     }
                 } else {
                     showMessage('error', data.message || 'Submission failed. Please try again.');

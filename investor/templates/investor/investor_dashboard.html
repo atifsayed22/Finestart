@@ -71,7 +71,6 @@
         .activity-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
             padding: 1rem;
             border-bottom: 1px solid #eee;
         }
@@ -88,6 +87,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 1rem;
             color: #4A90E2;
         }
 
@@ -102,13 +102,13 @@
 
         .activity-content p {
             margin: 0.25rem 0 0;
-            font-size: 0.875rem;
             color: #666;
+            font-size: 0.875rem;
         }
 
         .activity-time {
-            font-size: 0.875rem;
             color: #999;
+            font-size: 0.875rem;
         }
 
         .portfolio-overview {
@@ -123,6 +123,25 @@
             margin-top: 1rem;
         }
 
+        .nav-menu {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: #1E3A8A;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .nav-item:hover {
+            background: #4A90E2;
+        }
+
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 1rem;
@@ -130,6 +149,19 @@
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .activity-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .activity-icon {
+                margin: 0 auto 1rem;
+            }
+
+            .activity-time {
+                margin-top: 0.5rem;
             }
         }
     </style>
@@ -159,6 +191,14 @@
         <div class="greeting-section">
             <h1>Welcome back, {{ user.first_name }}!</h1>
             <p>Here's an overview of your investment portfolio and recent activities</p>
+        </div>
+
+        <div class="nav-menu">
+            <a href="{% url 'investor_dashboard' %}" class="nav-item">Dashboard</a>
+            <a href="{% url 'startup_discovery' %}" class="nav-item">Discover Startups</a>
+            <a href="{% url 'portfolio_tracker' %}" class="nav-item">Portfolio</a>
+            <a href="#" class="nav-item">Investment Preferences</a>
+            <a href="#" class="nav-item">Deal Flow</a>
         </div>
 
         <div class="stats-grid">
@@ -239,18 +279,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Portfolio Chart
-        const ctx = document.getElementById('portfolioChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
+        const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+        new Chart(portfolioCtx, {
+            type: 'doughnut',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: ['Technology', 'Healthcare', 'FinTech', 'AI/ML', 'E-commerce'],
                 datasets: [{
-                    label: 'Portfolio Value',
-                    data: [2000000, 2150000, 2250000, 2300000, 2400000, 2500000],
-                    borderColor: '#4A90E2',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)'
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: [
+                        '#4A90E2',
+                        '#00BFA6',
+                        '#FF6B6B',
+                        '#FFD166',
+                        '#06D6A0'
+                    ]
                 }]
             },
             options: {
@@ -258,17 +300,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + (value / 1000000).toFixed(1) + 'M';
-                            }
-                        }
+                        position: 'right',
                     }
                 }
             }

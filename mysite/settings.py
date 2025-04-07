@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Finestart',
         'USER': 'root',   
-        'PASSWORD': 'sayedatif@22',
+        'PASSWORD': 'umair',
         'HOST': 'localhost',  
         'PORT': '3306',  
     }
@@ -137,6 +137,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # default user model
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Authentication settings
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Media files (Images, Videos)
 MEDIA_URL = '/media/'
