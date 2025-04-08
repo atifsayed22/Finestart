@@ -82,10 +82,10 @@
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
                 <form method="post" action="{% url 'logout' %}">
@@ -98,7 +98,7 @@
 
     <main class="dashboard-container">
         <div class="greeting-section">
-            <h1>Welcome back, {{ user.first_name }}!</h1>
+            <h1>Welcome back, {{ welcome_name }}!</h1>
             <p>Here's what's happening with your startup today.</p>
         </div>
 

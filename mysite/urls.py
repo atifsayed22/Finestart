@@ -11,7 +11,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('base/', views.base),
     path('demo/', views.demo),
-    path('startup/', include('startup.urls')),
+    path('startup/', include('startup.urls', namespace='startup')),
     path('accounts/', include('accounts.urls')),
     path('investor/', include('investor.urls')),
 ]

@@ -121,10 +121,10 @@
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
                 <form method="post" action="{% url 'logout' %}">
@@ -138,14 +138,28 @@
     </header>
 
     <main class="profile-container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
         <div class="profile-header">
             <div class="logo-upload">
-                <img src="{% static 'images/default-logo.png' %}" alt="Startup Logo" id="logo-preview">
-                <input type="file" id="logo-input" accept="image/*">
+                {% if profile and profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Startup Logo" id="logo-preview">
+                {% else %}
+                    <img src="{% static 'images/default-logo.png' %}" alt="Startup Logo" id="logo-preview">
+                {% endif %}
+                <input type="file" id="logo-input" name="profile_picture" accept="image/*">
             </div>
             <div class="profile-info">
-                <h1>Startup Profile</h1>
-                <p>Update your startup information to attract potential investors</p>
+                <h1>{% if profile %}Update{% else %}Create{% endif %} Startup Profile</h1>
+                <p>{% if profile %}Update{% else %}Complete{% endif %} your startup information to attract potential investors</p>
             </div>
         </div>
 
@@ -154,43 +168,59 @@
             <div class="form-section">
                 <h2>Basic Information</h2>
                 <div class="form-group">
-                    <label for="team-size">Team Size</label>
-                    <input type="number" id="team-size" name="team_size" min="1" required>
+                    <label for="startup-name">Startup Name</label>
+                    <input type="text" id="startup-name" name="startup-name" value="{% if profile %}{{ profile.startup_name }}{% endif %}" required>
                 </div>
                 <div class="form-group">
-                    <label for="ceo-name">CEO Name</label>
-                    <input type="text" id="ceo-name" name="ceo_name" required>
+                    <label for="industry">Industry</label>
+                    <input type="text" id="industry" name="industry" value="{% if profile %}{{ profile.industry }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="company_description">Company Description</label>
+                    <textarea id="company_description" name="company_description">{% if profile %}{{ profile.company_description }}{% endif %}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="team_size">Team Size</label>
+                    <input type="number" id="team_size" name="team_size" min="1" value="{% if profile %}{{ profile.team_size }}{% else %}1{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="ceo_name">CEO Name</label>
+                    <input type="text" id="ceo_name" name="ceo_name" value="{% if profile %}{{ profile.ceo_name }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="monthly_profit">Monthly Profit ($)</label>
+                    <input type="number" id="monthly_profit" name="monthly_profit" step="0.01" value="{% if profile %}{{ profile.monthly_profit }}{% else %}0{% endif %}" required>
                 </div>
             </div>
 
             <div class="form-section">
                 <h2>Business Details</h2>
                 <div class="form-group">
-                    <label for="startup-stage">Startup Stage</label>
-                    <select id="startup-stage" name="startup_stage" required>
-                        <option value="">Select Stage</option>
-                        <option value="idea">Idea Stage</option>
-                        <option value="pre-seed">Pre-Seed</option>
-                        <option value="seed">Seed</option>
-                        <option value="series-a">Series A</option>
-                        <option value="series-b">Series B</option>
+                    <label for="startup_stage">Startup Stage</label>
+                    <select id="startup_stage" name="startup_stage" required>
+                        <option value="" {% if not profile or not profile.startup_stage %}selected{% endif %}>Select Stage</option>
+                        <option value="idea" {% if profile and profile.startup_stage == 'idea' %}selected{% endif %}>Idea Stage</option>
+                        <option value="pre-seed" {% if profile and profile.startup_stage == 'pre-seed' %}selected{% endif %}>Pre-Seed</option>
+                        <option value="seed" {% if profile and profile.startup_stage == 'seed' %}selected{% endif %}>Seed</option>
+                        <option value="series-a" {% if profile and profile.startup_stage == 'series-a' %}selected{% endif %}>Series A</option>
+                        <option value="series-b" {% if profile and profile.startup_stage == 'series-b' %}selected{% endif %}>Series B</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="equity-structure">Equity Structure</label>
-                    <textarea id="equity-structure" name="equity_structure" placeholder="Describe your current equity structure..."></textarea>
+                    <label for="equity_structure">Equity Structure</label>
+                    <textarea id="equity_structure" name="equity_structure" placeholder="Describe your current equity structure...">{% if profile %}{{ profile.equity_structure }}{% endif %}</textarea>
                 </div>
             </div>
 
             <div class="form-section">
                 <h2>Business Model</h2>
                 <div class="form-group">
-                    <label for="business-model">Business Model Description</label>
-                    <textarea id="business-model" name="business_model" placeholder="Describe your business model, revenue streams, and target market..."></textarea>
+                    <label for="business_model">Business Model Description</label>
+                    <textarea id="business_model" name="business_model" placeholder="Describe your business model, revenue streams, and target market...">{% if profile %}{{ profile.business_model }}{% endif %}</textarea>
                 </div>
             </div>
 
-            <button type="submit" class="save-button">Save Changes</button>
+            <button type="submit" class="save-button">{% if profile %}Update{% else %}Create{% endif %} Profile</button>
         </form>
     </main>
 
@@ -205,6 +235,11 @@
                 }
                 reader.readAsDataURL(file);
             }
+        });
+
+        // Make the logo image clickable to trigger file input
+        document.querySelector('.logo-upload').addEventListener('click', function() {
+            document.getElementById('logo-input').click();
         });
     </script>
 </body>

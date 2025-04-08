@@ -64,13 +64,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Form submission handler (updated version)
+    // Form submission handler
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
         // Validate all steps first
         let allValid = true;
         let errorMessage = '';
+        
+        // Clear any previous error messages
+        messageBox.style.display = 'none';
         
         steps.forEach((step, index) => {
             const inputs = step.querySelectorAll('input[required], select[required], textarea[required]');
@@ -105,31 +108,86 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
             }
             
-            fetch(form.action, {
+            // Add a timestamp to avoid caching issues
+            const timestamp = new Date().getTime();
+            const url = form.action + (form.action.includes('?') ? '&' : '?') + '_=' + timestamp;
+            
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Form submitted successfully:', data);
-                    showMessage('success', data.message || 'Submission successful!');
-                    
-                    if (data.redirect_url) {
+            .then(response => {
+                // Get the content type
+                const contentType = response.headers.get('content-type');
+                
+                // First check if it's a JSON response
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        // Return object with both response status and data
+                        return {
+                            ok: response.ok,
+                            status: response.status,
+                            data: data
+                        };
+                    });
+                } else {
+                    // If not JSON, get text
+                    return response.text().then(text => {
+                        // Try to parse as JSON anyway (sometimes content-type is wrong)
+                        try {
+                            const data = JSON.parse(text);
+                            return {
+                                ok: response.ok,
+                                status: response.status,
+                                data: data
+                            };
+                        } catch (e) {
+                            // If not JSON, return as text with status
+                            return {
+                                ok: response.ok,
+                                status: response.status,
+                                text: text
+                            };
+                        }
+                    });
+                }
+            })
+            .then(result => {
+                if (result.ok) {
+                    // Request was successful
+                    if (result.data && result.data.success) {
+                        console.log('Form submitted successfully:', result.data);
+                        showMessage('success', result.data.message || 'Submission successful!');
+                        
+                        if (result.data.redirect_url) {
+                            setTimeout(() => {
+                                window.location.href = result.data.redirect_url;
+                            }, 2000);
+                        }
+                    } else {
+                        // Even with 200 OK, success might be false
+                        showMessage('success', 'Form submitted successfully!');
                         setTimeout(() => {
-                            window.location.href = data.redirect_url;
-                        }, 2000); // Reduced to 2 seconds
+                            window.location.href = '/startup/dashboard/';
+                        }, 2000);
                     }
                 } else {
-                    showMessage('error', data.message || 'Submission failed. Please try again.');
+                    // Request failed
+                    const errorMsg = (result.data && result.data.message) 
+                        ? result.data.message 
+                        : `Server error: ${result.status}`;
+                    
+                    console.error('Error:', errorMsg);
+                    showMessage('error', errorMsg);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showMessage('error', 'An error occurred. Please try again.');
+                console.error('Fetch error:', error);
+                showMessage('error', 'Connection error. Please try again.');
             })
             .finally(() => {
                 if (submitBtn) {

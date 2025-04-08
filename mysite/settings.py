@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.user_name_processor',
             ],
         },
     },
@@ -83,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Finestart',
         'USER': 'root',   
-        'PASSWORD': 'umair',
+        'PASSWORD': 'sayedatif@22',
         'HOST': 'localhost',  
         'PORT': '3306',  
     }

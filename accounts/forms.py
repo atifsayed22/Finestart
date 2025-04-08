@@ -26,18 +26,22 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
             
-            # Create profile based on user type
-            if user.user_type == 'startup':
-                StartupProfile.objects.create(
-                    user=user,
-                    startup_name=self.cleaned_data.get('startup_name', ''),
-                    industry=self.cleaned_data.get('industry', '')
-                )
-            elif user.user_type == 'investor':
-                InvestorProfile.objects.create(
-                    user=user,
-                    investor_type=self.cleaned_data.get('investor_type', ''),
-                    investment_range=self.cleaned_data.get('investment_range', '')
-                )
+            # Create profile based on user type with error handling
+            try:
+                if user.user_type == 'startup':
+                    StartupProfile.objects.create(
+                        user=user,
+                        startup_name=self.cleaned_data.get('startup_name', ''),
+                        industry=self.cleaned_data.get('industry', '')
+                    )
+                elif user.user_type == 'investor':
+                    InvestorProfile.objects.create(
+                        user=user,
+                        investor_type=self.cleaned_data.get('investor_type', ''),
+                        investment_range=self.cleaned_data.get('investment_range', '')
+                    )
+            except Exception as e:
+                # Log error but don't raise it - user is still created
+                print(f"Error creating profile during signup: {e}")
                 
         return user

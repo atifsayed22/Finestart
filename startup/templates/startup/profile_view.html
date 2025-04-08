@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Profile - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 1rem;
+        }
+
+        .info-label {
+            width: 200px;
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .info-value {
+            flex: 1;
+        }
+
+        .edit-button {
+            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .edit-button:hover {
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .info-row {
+                flex-direction: column;
+            }
+
+            .info-label {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">
+                        <p>Logout</p>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <div class="profile-picture">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ profile.startup_name }} Logo">
+                {% else %}
+                    <img src="{% static 'images/default-logo.png' %}" alt="Default Logo">
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h1>{{ profile.startup_name }}</h1>
+                <p>{{ profile.industry }}</p>
+                <a href="{% url 'startup:edit_profile' %}" class="edit-button">Edit Profile</a>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2>Company Information</h2>
+            
+            <div class="info-row">
+                <div class="info-label">Description</div>
+                <div class="info-value">{{ profile.company_description }}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Team Size</div>
+                <div class="info-value">{{ profile.team_size }}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">CEO</div>
+                <div class="info-value">{{ profile.ceo_name }}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Stage</div>
+                <div class="info-value">{{ profile.startup_stage }}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Monthly Profit</div>
+                <div class="info-value">${{ profile.monthly_profit }}</div>
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <h2>Business Model</h2>
+            <p>{{ profile.business_model }}</p>
+        </div>
+        
+        <div class="profile-section">
+            <h2>Equity Structure</h2>
+            <p>{{ profile.equity_structure }}</p>
+        </div>
+        
+        <!-- Monthly Profit Chart -->
+        <div class="chart-container">
+            <h2>Monthly Profit Trend</h2>
+            <canvas id="profitChart"></canvas>
+        </div>
+    </main>
+
+    <script>
+        // Get the profit data from the backend
+        const profitData = {
+            labels: {{ profit_data.labels|safe }},
+            datasets: [{
+                label: 'Monthly Profit ($)',
+                data: {{ profit_data.values|safe }},
+                backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                borderColor: 'rgba(74, 144, 226, 1)',
+                borderWidth: 2,
+                tension: 0.4
+            }]
+        };
+
+        // Render the chart
+        const ctx = document.getElementById('profitChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: profitData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

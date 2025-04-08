@@ -7,20 +7,32 @@ from .models import StartupProfile, InvestorProfile, CustomUser
 
 def signup(request):
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            # Log the user in after signup
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            messages.success(request, "Signup successful! Welcome to FineStart.")
-            return redirect("login")  # Redirect to homepage after successful signup
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
+        try:
+            form = CustomUserCreationForm(request.POST)
+            if form.is_valid():
+                try:
+                    user = form.save()
+                    # Log the user in after signup
+                    username = form.cleaned_data.get('username')
+                    raw_password = form.cleaned_data.get('password1')
+                    user = authenticate(username=username, password=raw_password)
+                    if user is not None:
+                        login(request, user)
+                        messages.success(request, "Signup successful! Welcome to FineStart.")
+                        return redirect("login")
+                    else:
+                        messages.warning(request, "Account created but auto-login failed. Please log in manually.")
+                        return redirect("login")
+                except Exception as e:
+                    print(f"Error during signup process: {e}")
+                    messages.error(request, f"Error during signup: {str(e)}")
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+        except Exception as outer_e:
+            print(f"Unexpected error in signup view: {outer_e}")
+            messages.error(request, "An unexpected error occurred. Please try again.")
     else:
         form = CustomUserCreationForm()
     
@@ -34,18 +46,34 @@ def user_login(request):
         
         if user is not None:
             login(request, user)
-            messages.success(request, "Login successful!")
+            # Include the username in the welcome message
+            welcome_name = user.first_name if user.first_name else user.username
+            messages.success(request, f"Login successful! Welcome, {welcome_name}!")
             
             # Check user type and redirect accordingly
-            user_profile = CustomUser.objects.get(username=username)
-            if user_profile.user_type.lower() == "startup":
-                return redirect("startup_dashboard")
-            else:
-                return redirect("investor_dashboard")
+            try:
+                if user.user_type.lower() == "startup":
+                    # Check if user has a startup profile
+                    if StartupProfile.objects.filter(user=user).exists():
+                        return redirect("startup:startup_dashboard")
+                    else:
+                        return redirect("startup:startup_profile")
+                else:
+                    # For investor users
+                    if InvestorProfile.objects.filter(user=user).exists():
+                        return redirect("investor_dashboard")
+                    else:
+                        # You might want to create an investor_profile route
+                        return redirect("investor_dashboard")
+            except Exception as e:
+                # If any error occurs, default to startup dashboard
+                print(f"Error checking user profile: {e}")
+                return redirect("startup:startup_dashboard")
         else:
             messages.error(request, "Invalid username or password.")
     
     return render(request, "login.html")
 
 def startup_profile(request):
-    return redirect(reverse('startup_registration'))
+    # Redirect to the startup app's profile view with the namespace to avoid ambiguity
+    return redirect('startup:startup_profile')

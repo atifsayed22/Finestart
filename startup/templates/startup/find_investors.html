@@ -174,10 +174,10 @@
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_insights' %}">Insights</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>
             <div class="log-in-sec margin">
                 <form method="post" action="{% url 'logout' %}">
@@ -189,6 +189,23 @@
     </header>
 
     <main class="investors-container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if error %}
+            <div class="alert alert-error">
+                <p>There was an error loading investors: {{ error }}</p>
+                <p>Please try again later or contact support.</p>
+            </div>
+        {% endif %}
+        
         <div class="search-section">
             <h1>Find Investors</h1>
             <p>Search and filter investors based on your startup's needs</p>
@@ -264,8 +281,11 @@
                                 {% if investor.investment_range %}
                                     <span class="tag">{{ investor.investment_range }}</span>
                                 {% endif %}
+                                {% if investor.location %}
+                                    <span class="tag">{{ investor.location }}</span>
+                                {% endif %}
                             </div>
-                            <form method="post" action="{% url 'connect_with_investor' investor.id %}">
+                            <form method="post" action="{% url 'startup:connect_with_investor' investor.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="connect-button">Connect</button>
                             </form>
@@ -273,65 +293,12 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="no-results">
-                    <p>No investors found matching your criteria. Try adjusting your filters.</p>
+                <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3>No Investors Found</h3>
+                    <p>No investors found matching your criteria. Try adjusting your filters or check back later as more investors join our platform.</p>
                 </div>
             {% endif %}
         </div>
     </main>
-
-    <script>
-        // Add more investor cards dynamically
-        const investors = [
-            {
-                name: "Innovation Fund",
-                location: "New York, NY",
-                portfolioValue: "$75M",
-                activeDeals: 30,
-                tags: ["Healthcare", "Biotech", "Series B"]
-            },
-            {
-                name: "Growth Capital Partners",
-                location: "London, UK",
-                portfolioValue: "$100M",
-                activeDeals: 40,
-                tags: ["FinTech", "E-commerce", "Series A"]
-            }
-        ];
-
-        const investorsGrid = document.querySelector('.investors-grid');
-        investors.forEach(investor => {
-            const card = createInvestorCard(investor);
-            investorsGrid.appendChild(card);
-        });
-
-        function createInvestorCard(investor) {
-            const card = document.createElement('div');
-            card.className = 'investor-card';
-            card.innerHTML = `
-                <div class="investor-header">
-                    <h3>${investor.name}</h3>
-                    <p>${investor.location}</p>
-                </div>
-                <div class="investor-body">
-                    <div class="investor-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${investor.portfolioValue}</div>
-                            <div class="stat-label">Portfolio Value</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${investor.activeDeals}</div>
-                            <div class="stat-label">Active Deals</div>
-                        </div>
-                    </div>
-                    <div class="investor-tags">
-                        ${investor.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                    <button class="connect-button">Connect</button>
-                </div>
-            `;
-            return card;
-        }
-    </script>
 </body>
 </html> 
