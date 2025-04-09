@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Profile - FineStart</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'portfolio_tracker' %}">Portfolio</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor_profile' %}">Profile</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <h1>Investor Profile</h1>
+        </div>
+
+        {% if investor %}
+        <div class="profile-content">
+            <div class="profile-section">
+                <h2>Personal Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Name:</label>
+                        <p>{{ investor.user.get_full_name }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Email:</label>
+                        <p>{{ investor.user.email }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Investment Focus:</label>
+                        <p>{{ investor.investment_focus }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Investment Stage Preference:</label>
+                        <p>{{ investor.investment_stage_preference }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Typical Investment Range:</label>
+                        <p>${{ investor.min_investment_amount }} - ${{ investor.max_investment_amount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h2>Investment Preferences</h2>
+                <div class="preferences-grid">
+                    <div class="preference-item">
+                        <label>Preferred Industries:</label>
+                        <p>{{ investor.preferred_industries }}</p>
+                    </div>
+                    <div class="preference-item">
+                        <label>Geographic Focus:</label>
+                        <p>{{ investor.geographic_focus }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="profile-content">
+            <p>No investor profile found. Please complete your profile setup.</p>
+        </div>
+        {% endif %}
+    </main>
+</body>
+</html> 

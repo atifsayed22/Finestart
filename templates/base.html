@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FineStart{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    {# Add other common CSS/JS links if needed #}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {# Optional: Add a common header/navbar here #}
+    {% block header %}
+        {# Default header content or include snippet #}
+    {% endblock %}
+
+    <main class="container mt-4"> {# Basic container, adjust as needed #}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> {# Requires Bootstrap JS #}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {# Content from inheriting templates will go here #}
+        {% endblock %}
+    </main>
+
+    {# Optional: Add a common footer here #}
+    {% block footer %}
+        {# Default footer content or include snippet #}
+    {% endblock %}
+
+    {# Common JS files #}
+    {# <script src="{% static 'js/main.js' %}"></script> #}
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html> 

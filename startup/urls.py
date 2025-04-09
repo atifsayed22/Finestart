@@ -12,4 +12,7 @@ urlpatterns = [
     path('find_investors/', views.find_investors, name='find_investors'),
     path('connect_with_investor/<int:investor_id>/', views.connect_with_investor, name='connect_with_investor'),
     path('upload_pitch/', views.startup_upload_pitch, name='startup_upload_pitch'),
+    path('manage_offers/', views.manage_offers, name='manage_offers'),
+    path('create_offer/<int:startup_id>/', views.create_offer, name='create_offer'),
+    path('respond_to_offer/<int:offer_id>/<str:response>/', views.respond_to_offer, name='respond_to_offer'),
 ]

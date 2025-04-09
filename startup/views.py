@@ -2,16 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Startup
+from .models import Startup, Offer
 from accounts.models import InvestorProfile, CustomUser, StartupProfile
 import json
 
 @login_required
 def startup_registration(request):
-    # First check if the user already has a profile
     try:
         if StartupProfile.objects.filter(user=request.user).exists():
-            # If profile exists, redirect to the profile view
             return redirect('startup:startup_profile')
     except Exception as e:
         print(f"Error checking for existing profile: {e}")
@@ -19,11 +17,9 @@ def startup_registration(request):
     if request.method == 'POST':
         try:
             print("Registration submission received")
-            # Print request data for debugging
             print(f"POST data: {request.POST}")
             print(f"FILES data: {request.FILES}")
             
-            # Basic input validation to prevent errors
             name = request.POST.get('startup-name', '')
             industry_type = request.POST.get('industry-type', '')
             years_in_business = request.POST.get('years-in-business', 0)
@@ -34,7 +30,6 @@ def startup_registration(request):
             if not industry_type:
                 raise ValueError("Industry type is required")
             
-            # Financial validation with defaults to prevent type errors
             try:
                 annual_revenue = float(request.POST.get('revenue', 0))
             except (ValueError, TypeError):
@@ -50,43 +45,32 @@ def startup_registration(request):
             except (ValueError, TypeError):
                 investment_required = 0
             
-            # Other fields with defaults
             funding_purpose = request.POST.get('funding-purpose', '')
             target_market = request.POST.get('target-market', '')
             growth_trend = request.POST.get('growth-trend', '')
             
-            # Handle file uploads safely
             company_logo = request.FILES.get('company-logo') if 'company-logo' in request.FILES else None
             pitch_video = request.FILES.get('pitch-video') if 'pitch-video' in request.FILES else None
             business_proposal = request.FILES.get('business-proposal') if 'business-proposal' in request.FILES else None
             legal_documents = request.FILES.get('legal-documents') if 'legal-documents' in request.FILES else None
             
-            # Create new startup record with validated data
             startup = Startup(
-                # Basic Details
                 name=name,
                 industry_type=industry_type,
                 years_in_business=years_in_business,
                 company_logo=company_logo,
-                
-                # Financial Info
                 annual_revenue=annual_revenue,
                 profit_margin=profit_margin,
                 investment_required=investment_required,
                 funding_purpose=funding_purpose,
-                
-                # Market Insights
                 target_market=target_market,
                 growth_trend=growth_trend,
                 pitch_video=pitch_video,
-                
-                # Supporting Docs
                 business_proposal=business_proposal,
                 legal_documents=legal_documents
             )
             startup.save()
             
-            # Make sure we have a startup profile
             try:
                 startup_profile, created = StartupProfile.objects.get_or_create(
                     user=request.user,
@@ -98,9 +82,7 @@ def startup_registration(request):
                 )
             except Exception as profile_error:
                 print(f"Could not create startup profile: {profile_error}")
-                # Continue even if profile creation fails
             
-            # Check if this is an AJAX request
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             
             if is_ajax:
@@ -117,7 +99,6 @@ def startup_registration(request):
             error_message = str(e)
             print(f"Error in startup registration: {error_message}")
             
-            # Check if this is an AJAX request
             is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             
             if is_ajax:
@@ -129,7 +110,6 @@ def startup_registration(request):
                 messages.error(request, error_message)
                 return redirect('startup:startup_registration')
     
-    # GET request - show the form
     return render(request, 'forms.html')
 
 
@@ -376,3 +356,83 @@ def connect_with_investor(request, investor_id):
         except InvestorProfile.DoesNotExist:
             messages.error(request, 'Investor not found.')
     return redirect('startup:find_investors')
+
+@login_required
+def create_offer(request, startup_id):
+    startup = get_object_or_404(Startup, id=startup_id)
+    if request.method == 'POST':
+        try:
+            investor_profile = request.user.investorprofile
+            equity_percentage = request.POST.get('equity_percentage')
+            royalty_percentage = request.POST.get('royalty_percentage')
+
+            # Validate percentages
+            if not (0 <= float(equity_percentage) <= 100):
+                messages.error(request, 'Equity percentage must be between 0 and 100.')
+                return redirect('create_offer', startup_id=startup.id)
+            if not (0 <= float(royalty_percentage) <= 100):
+                messages.error(request, 'Royalty percentage must be between 0 and 100.')
+                return redirect('create_offer', startup_id=startup.id)
+
+            offer = Offer.objects.create(
+                investor=investor_profile,
+                startup=startup,
+                equity_percentage=equity_percentage,
+                royalty_percentage=royalty_percentage,
+            )
+
+            messages.success(request, 'Offer sent successfully!')
+            # Redirect to a relevant page, e.g., the startup discovery page or investor dashboard
+            return redirect('investor_dashboard') 
+        except AttributeError:
+            messages.error(request, 'You must be logged in as an investor to make an offer.')
+            return redirect('login')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
+            return redirect('create_offer', startup_id=startup.id)
+
+    # GET request - Render the form
+    return render(request, 'create_offer.html', {'startup': startup})
+
+@login_required
+def respond_to_offer(request, offer_id, response):
+    offer = get_object_or_404(Offer, id=offer_id, startup__user=request.user)
+
+    if offer.status != 'pending':
+        messages.warning(request, "This offer has already been responded to.")
+        return redirect('startup:manage_offers')
+
+    if response == 'accept':
+        offer.status = 'accepted'
+        messages.success(request, f'Offer from {offer.investor.user.get_full_name()} accepted!')
+    elif response == 'reject':
+        offer.status = 'rejected'
+        messages.info(request, f'Offer from {offer.investor.user.get_full_name()} rejected.')
+    else:
+        messages.error(request, "Invalid response.")
+        return redirect('startup:manage_offers')
+
+    offer.save()
+    # Redirect back to the manage offers page
+    return redirect('startup:manage_offers')
+
+@login_required
+def manage_offers(request):
+    try:
+        # Assuming a startup user is linked to one Startup instance
+        # Adjust this logic if a user can manage multiple startups
+        startup = request.user.startups.first() 
+        if not startup:
+            messages.warning(request, "You need to register your startup profile first.")
+            return redirect('startup_registration') # Or wherever startup registration happens
+        
+        offers = Offer.objects.filter(startup=startup).order_by('-created_at')
+        context = {
+            'offers': offers
+        }
+        return render(request, 'startup/manage_offers.html', context)
+    except AttributeError:
+        # Handle cases where the user might not have the 'startups' related manager
+        # This might happen if the user is not a startup user or profile isn't set up
+        messages.error(request, "Could not retrieve startup profile. Please ensure you are logged in as a startup.")
+        return redirect('home') # Redirect to home or login

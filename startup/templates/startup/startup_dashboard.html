@@ -84,6 +84,7 @@
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>
@@ -128,6 +129,24 @@
         <div class="chart-container">
             <h2>Profit/Loss Overview</h2>
             <canvas id="profitLossChart"></canvas>
+        </div>
+
+        <div class="offers-section">
+            <h2>Pending Offers</h2>
+            {% for offer in offers %}
+            <div class="offer-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                <p><strong>Investor:</strong> {{ offer.investor.user.get_full_name }}</p>
+                <p><strong>Equity Offered:</strong> {{ offer.equity_percentage }}%</p>
+                <p><strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%</p>
+                <p><strong>Status:</strong> <span class="badge bg-warning text-dark">{{ offer.get_status_display }}</span></p>
+                <div class="offer-actions mt-3">
+                    <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success me-2">Accept</a>
+                    <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger">Reject</a>
+                </div>
+            </div>
+            {% empty %}
+            <p>No pending offers at the moment.</p>
+            {% endfor %}
         </div>
     </main>
 

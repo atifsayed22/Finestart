@@ -1,7 +1,12 @@
 from django.db import models
-from accounts.models import CustomUser
+from accounts.models import CustomUser, InvestorProfile
+from django.conf import settings
 
 # Create your models here.
+def get_default_user():
+    # Return the first user as the default, or None if no users exist
+    return CustomUser.objects.first() if CustomUser.objects.exists() else None
+
 class Company(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -40,6 +45,13 @@ class Startup(models.Model):
         ('declining', 'Declining'),
     ]
 
+    user = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.CASCADE, 
+        related_name='startups',
+        default=get_default_user
+    )
+
     name = models.CharField(max_length=255)
     industry_type = models.CharField(max_length=50, choices=INDUSTRY_CHOICES)
     years_in_business = models.PositiveIntegerField()
@@ -59,3 +71,21 @@ class Startup(models.Model):
 
     def __str__(self):
         return self.name
+
+class Offer(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    investor = models.ForeignKey(InvestorProfile, on_delete=models.CASCADE, related_name='offers')
+    startup = models.ForeignKey(Startup, on_delete=models.CASCADE, related_name='offers')
+    equity_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of equity offered")
+    royalty_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of royalty offered")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Offer from {self.investor.user.get_full_name()} to {self.startup.name}"

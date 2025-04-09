@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Make an Offer to {{ startup.name }}{% endblock %}
+
+{% block content %}
+<div class="registration-container" style="max-width: 600px; margin: 2rem auto;"> {# Adjust styling as needed #}
+    <div class="form-header">
+        <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo" style="max-width: 150px;">
+        <h1>Make an Offer to {{ startup.name }}</h1>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {# Using form-message style defined in forms.js for consistency? #}
+            <div id="form-message" style="display: block;">
+                <div class="message-content {{ message.tags }}">
+                    {# Correct conditional for icon class #}
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form id="offer-form" method="post" action="{% url 'startup:create_offer' startup.id %}">
+        {% csrf_token %}
+        <div class="form-section" style="border: none; padding: 0;"> {# Simplified structure #}
+            <div class="input-group mb-3">
+                <label for="equity_percentage">Equity Percentage (%):</label>
+                <input type="number" name="equity_percentage" id="equity_percentage" class="form-control" step="0.01" min="0" max="100" required>
+                <span class="validation-icon"></span>
+            </div>
+            <div class="input-group mb-3">
+                <label for="royalty_percentage">Royalty Percentage (%):</label>
+                <input type="number" name="royalty_percentage" id="royalty_percentage" class="form-control" step="0.01" min="0" max="100" required>
+                <span class="validation-icon"></span>
+            </div>
+        </div>
+        <div class="form-navigation final-step">
+            <button type="submit" class="btn btn-submit" style="background: linear-gradient(135deg, #4A90E2, #00BFA6); color: white;">Send Offer <i class="fas fa-paper-plane"></i></button>
+            <a href="{% url 'investor_dashboard' %}" class="btn btn-secondary" style="background: #6c757d;">Cancel</a> {# Basic cancel button #}
+        </div>
+    </form>
+</div>
+
+{# Add specific JS if needed, e.g., for custom validation #}
+{% block extra_scripts %}
+<script>
+    // Optional: Add any specific JS for this form
+</script>
+{% endblock %}
+
+{% endblock %} 

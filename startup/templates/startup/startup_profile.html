@@ -116,13 +116,14 @@
 </head>
 <body>
     <header>
-        <nav>
+        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 0 1rem;">
             <div class="logo-sec">
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>

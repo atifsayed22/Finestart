@@ -233,9 +233,9 @@
                     <label for="industry">Industry</label>
                     <select id="industry" name="industry">
                         <option value="">All Industries</option>
-                        <option value="tech">Technology</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="fintech">FinTech</option>
+                        <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
+                        <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                        <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>FinTech</option>
                         <option value="ai">AI/ML</option>
                         <option value="ecommerce">E-commerce</option>
                     </select>
@@ -269,109 +269,48 @@
                         <option value="1m+">$1M+</option>
                     </select>
                 </div>
-                <button type="submit" class="search-button">Search Startups</button>
+                <button type="submit" class="search-button">Search</button>
             </form>
         </div>
 
         <div class="startups-grid">
-            <!-- Startup Card 1 -->
+            {% for startup in startups %}
             <div class="startup-card">
-                <img src="{% static 'images/startup1.jpg' %}" alt="TechStart AI" class="startup-image">
+                {% if startup.company_logo %}
+                    <img src="{{ startup.company_logo.url }}" alt="{{ startup.name }} Logo" class="startup-image">
+                {% else %}
+                    <img src="{% static 'images/default_logo.png' %}" alt="Default Logo" class="startup-image">
+                {% endif %}
                 <div class="startup-content">
                     <div class="startup-header">
-                        <h3 class="startup-name">TechStart AI</h3>
-                        <span class="startup-stage">Seed</span>
+                        <h3 class="startup-name">{{ startup.name }}</h3>
                     </div>
                     <p class="startup-description">
-                        AI-powered analytics platform helping businesses make data-driven decisions.
+                        {{ startup.funding_purpose|truncatewords:20 }}
                     </p>
                     <div class="startup-metrics">
                         <div class="metric-item">
-                            <div class="metric-value">$500K</div>
-                            <div class="metric-label">Funding Raised</div>
+                            <div class="metric-value">${{ startup.investment_required|floatformat:0 }}</div>
+                            <div class="metric-label">Investment Req.</div>
                         </div>
                         <div class="metric-item">
-                            <div class="metric-value">15</div>
-                            <div class="metric-label">Team Size</div>
+                            <div class="metric-value">{{ startup.years_in_business }}</div>
+                            <div class="metric-label">Years Active</div>
                         </div>
                     </div>
                     <div class="startup-tags">
-                        <span class="tag">AI/ML</span>
-                        <span class="tag">Analytics</span>
-                        <span class="tag">B2B</span>
+                        <span class="tag">{{ startup.get_industry_type_display }}</span>
                     </div>
                     <div class="action-buttons">
-                        <button class="action-button view-button">View Profile</button>
-                        <button class="action-button contact-button">Contact</button>
+                        <a href="#" class="action-button view-button">View Details</a>
+                        {# DEBUG: {{ startup.id }} #}
+                        <a href="{% url 'startup:create_offer' startup.id %}" class="action-button contact-button">Make Offer</a>
                     </div>
                 </div>
             </div>
-
-            <!-- Startup Card 2 -->
-            <div class="startup-card">
-                <img src="{% static 'images/startup2.jpg' %}" alt="HealthTech Solutions" class="startup-image">
-                <div class="startup-content">
-                    <div class="startup-header">
-                        <h3 class="startup-name">HealthTech Solutions</h3>
-                        <span class="startup-stage">Early Stage</span>
-                    </div>
-                    <p class="startup-description">
-                        Revolutionary healthcare platform connecting patients with providers.
-                    </p>
-                    <div class="startup-metrics">
-                        <div class="metric-item">
-                            <div class="metric-value">$1.2M</div>
-                            <div class="metric-label">Funding Raised</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">25</div>
-                            <div class="metric-label">Team Size</div>
-                        </div>
-                    </div>
-                    <div class="startup-tags">
-                        <span class="tag">Healthcare</span>
-                        <span class="tag">Digital Health</span>
-                        <span class="tag">B2C</span>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="action-button view-button">View Profile</button>
-                        <button class="action-button contact-button">Contact</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Startup Card 3 -->
-            <div class="startup-card">
-                <img src="{% static 'images/startup3.jpg' %}" alt="FinTech App" class="startup-image">
-                <div class="startup-content">
-                    <div class="startup-header">
-                        <h3 class="startup-name">FinTech App</h3>
-                        <span class="startup-stage">Growth</span>
-                    </div>
-                    <p class="startup-description">
-                        Innovative financial technology platform for seamless payments.
-                    </p>
-                    <div class="startup-metrics">
-                        <div class="metric-item">
-                            <div class="metric-value">$5M</div>
-                            <div class="metric-label">Funding Raised</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">50</div>
-                            <div class="metric-label">Team Size</div>
-                        </div>
-                    </div>
-                    <div class="startup-tags">
-                        <span class="tag">FinTech</span>
-                        <span class="tag">Payments</span>
-                        <span class="tag">B2B2C</span>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="action-button view-button">View Profile</button>
-                        <button class="action-button contact-button">Contact</button>
-                    </div>
-                </div>
-            </div>
+            {% empty %}
+            <p>No startups found matching your criteria.</p>
+            {% endfor %}
         </div>
     </main>
 </body>

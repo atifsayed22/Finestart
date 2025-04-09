@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Received Offers{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div> 
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Received Offers</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if offers %}
+        <div class="list-group">
+            {% for offer in offers %}
+                <div class="list-group-item list-group-item-action flex-column align-items-start mb-3 shadow-sm" style="border-radius: 8px;">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Offer from: {{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</h5>
+                        <small class="text-muted">{{ offer.created_at|timesince }} ago</small>
+                    </div>
+                    <p class="mb-1">
+                        <strong>Equity Offered:</strong> {{ offer.equity_percentage }}% <br>
+                        <strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%
+                    </p>
+                    <div class="d-flex w-100 justify-content-between align-items-center mt-2">
+                        <div>
+                            <strong>Status:</strong> 
+                            {% if offer.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">{{ offer.get_status_display }}</span>
+                            {% elif offer.status == 'accepted' %}
+                                <span class="badge bg-success">{{ offer.get_status_display }}</span>
+                            {% elif offer.status == 'rejected' %}
+                                <span class="badge bg-danger">{{ offer.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                        {% if offer.status == 'pending' %}
+                            <div>
+                                <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success btn-sm me-2">Accept</a>
+                                <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger btn-sm">Reject</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You have not received any offers yet.</p>
+    {% endif %}
+</div>
+{% endblock %} 
