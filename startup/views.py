@@ -75,6 +75,7 @@ def startup_registration(request):
             startup.save()
             
             try:
+                # Get or create the startup profile
                 startup_profile, created = StartupProfile.objects.get_or_create(
                     user=request.user,
                     defaults={
@@ -83,6 +84,12 @@ def startup_registration(request):
                         'monthly_profit': profit_margin
                     }
                 )
+                
+                # Set the profile picture to be the same as the company logo if it exists
+                if company_logo and not startup_profile.profile_picture:
+                    startup_profile.profile_picture = company_logo
+                    startup_profile.save()
+                    
             except Exception as profile_error:
                 print(f"Could not create startup profile: {profile_error}")
             
@@ -279,10 +286,18 @@ def edit_profile(request):
                 profile.company_description = request.POST.get('company_description', profile.company_description)
                 profile.monthly_profit = float(request.POST.get('monthly_profit', profile.monthly_profit))
                 
-                # Handle profile picture upload
-                if 'profile_picture' in request.FILES:
+                # Handle profile picture upload only if a new one is provided
+                if 'profile_picture' in request.FILES and request.FILES['profile_picture']:
                     profile.profile_picture = request.FILES['profile_picture']
                     
+                    # Also update the startup company_logo to match if it exists
+                    try:
+                        startup = Startup.objects.get(user=request.user)
+                        startup.company_logo = request.FILES['profile_picture']
+                        startup.save()
+                    except Startup.DoesNotExist:
+                        pass  # No startup entity to update
+                
                 profile.save()
                 
                 # Update monthly profit record if profit changed
@@ -337,6 +352,25 @@ def startup_upload_pitch(request):
                 pitch_video = request.FILES['pitch_video']
                 startup.pitch_video = pitch_video
                 startup.save()
+                
+                # Ensure the startup profile exists
+                try:
+                    profile, created = StartupProfile.objects.get_or_create(
+                        user=request.user,
+                        defaults={
+                            'startup_name': startup.name,
+                            'industry': startup.industry_type,
+                            'monthly_profit': startup.profit_margin
+                        }
+                    )
+                    
+                    # If the profile doesn't have a picture but the startup has a logo, use that
+                    if created and not profile.profile_picture and startup.company_logo:
+                        profile.profile_picture = startup.company_logo
+                        profile.save()
+                except Exception as e:
+                    print(f"Error updating startup profile: {e}")
+                
                 messages.success(request, "Pitch video uploaded successfully!")
                 return redirect('startup:startup_dashboard')
             else:
@@ -577,65 +611,5 @@ def find_startups(request):
         messages.warning(request, "This page is only for investors.")
         return redirect('home')
 
-    try:
-        # Get all startups
-        startups = Startup.objects.all()
-        
-        # Get filter parameters
-        industry = request.GET.get('industry')
-        years_in_business = request.GET.get('years_in_business')
-        growth_trend = request.GET.get('growth_trend')
-        
-        # Apply filters if they are provided
-        if industry:
-            startups = startups.filter(industry_type=industry)
-        if years_in_business:
-            try:
-                years_val = int(years_in_business)
-                startups = startups.filter(years_in_business__gte=years_val)
-            except (ValueError, TypeError):
-                # Invalid value, ignore this filter
-                pass
-        if growth_trend:
-            startups = startups.filter(growth_trend=growth_trend)
-        
-        # Get the investor profile for context
-        try:
-            investor_profile = InvestorProfile.objects.get(user=request.user)
-            context = {
-                'startups': startups,
-                'investor': investor_profile,
-                'current_filters': {
-                    'industry': industry,
-                    'years_in_business': years_in_business,
-                    'growth_trend': growth_trend,
-                }
-            }
-        except InvestorProfile.DoesNotExist:
-            # Investor doesn't have a profile yet
-            context = {
-                'startups': startups,
-                'profile_missing': True,
-                'current_filters': {
-                    'industry': industry,
-                    'years_in_business': years_in_business,
-                    'growth_trend': growth_trend,
-                }
-            }
-            
-        return render(request, 'investor/find_startups.html', context)
-    except Exception as e:
-        # Log the error
-        print(f"Error in find_startups: {e}")
-        # Create empty context with error message
-        context = {
-            'startups': [],
-            'error_message': "Unable to retrieve startups. Please try again later.",
-            'current_filters': {
-                'industry': None,
-                'years_in_business': None,
-                'growth_trend': None,
-            }
-        }
-        messages.error(request, "There was an error retrieving startups. Please try again later.")
-        return render(request, 'investor/find_startups.html', context)
+    # Redirect to the consolidated view in the investor app
+    return redirect('investor:startup_discovery')

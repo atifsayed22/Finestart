@@ -8,4 +8,5 @@ urlpatterns = [
     path('discover/', views.startup_discovery, name='startup_discovery'),
     path('portfolio/', views.portfolio_tracker, name='portfolio_tracker'),
     path('profile/', views.investor_profile, name='investor_profile'),
+    path('find_startups/', views.find_startups, name='find_startups'),
 ] 

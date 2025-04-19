@@ -77,6 +77,30 @@ class Startup(models.Model):
     def __str__(self):
         return self.name
 
+    def get_logo_url(self):
+        """Return the URL of the company logo, if it exists."""
+        if self.company_logo and hasattr(self.company_logo, 'url'):
+            return self.company_logo.url
+        return ""
+        
+    def get_pitch_video_url(self):
+        """Return the URL of the pitch video, if it exists."""
+        if self.pitch_video and hasattr(self.pitch_video, 'url'):
+            return self.pitch_video.url
+        return ""
+        
+    def get_business_proposal_url(self):
+        """Return the URL of the business proposal, if it exists."""
+        if self.business_proposal and hasattr(self.business_proposal, 'url'):
+            return self.business_proposal.url
+        return ""
+        
+    def get_legal_documents_url(self):
+        """Return the URL of the legal documents, if it exists."""
+        if self.legal_documents and hasattr(self.legal_documents, 'url'):
+            return self.legal_documents.url
+        return ""
+
 class Offer(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),

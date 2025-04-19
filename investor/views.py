@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from startup.models import Startup, Offer  # Import the Startup and Offer models
 from accounts.models import InvestorProfile
+from django.contrib import messages
 
 # Create your views here.
 
@@ -53,13 +54,92 @@ def investor_dashboard(request):
 
 @login_required
 def startup_discovery(request):
-    startups = Startup.objects.all()  # Query all startups
-
-    # Add filtering logic here based on search criteria later if needed
-    context = {
-        'startups': startups
-    }
-    return render(request, 'investor/startup_discovery.html', context)
+    # Check if user is an investor
+    if request.user.user_type.lower() != 'investor':
+        from django.contrib import messages
+        messages.warning(request, "This page is only for investor users.")
+        return redirect('home')
+        
+    try:
+        # Get all startups with their documents
+        startups = Startup.objects.all()
+        
+        # Get filter parameters
+        industry = request.GET.get('industry')
+        years_in_business = request.GET.get('years_in_business')
+        growth_trend = request.GET.get('growth_trend')
+        
+        # Apply filters if they are provided
+        if industry:
+            startups = startups.filter(industry_type=industry)
+        if years_in_business:
+            try:
+                years_val = int(years_in_business)
+                startups = startups.filter(years_in_business__gte=years_val)
+            except (ValueError, TypeError):
+                # Invalid value, ignore this filter
+                pass
+        if growth_trend:
+            startups = startups.filter(growth_trend=growth_trend)
+        
+        # Prepare startup data with documents for display
+        startup_data = []
+        for startup in startups:
+            startup_info = {
+                'startup': startup,
+                'has_pitch': bool(startup.pitch_video),
+                'has_proposal': bool(startup.business_proposal),
+                'has_legal_docs': bool(startup.legal_documents),
+                'has_logo': bool(startup.company_logo)
+            }
+            startup_data.append(startup_info)
+        
+        # Get the investor profile for context
+        try:
+            investor_profile = InvestorProfile.objects.get(user=request.user)
+            context = {
+                'startups': startups,
+                'startup_data': startup_data,
+                'investor': investor_profile,
+                'current_filters': {
+                    'industry': industry,
+                    'years_in_business': years_in_business,
+                    'growth_trend': growth_trend,
+                }
+            }
+        except InvestorProfile.DoesNotExist:
+            # Investor doesn't have a profile yet
+            context = {
+                'startups': startups,
+                'startup_data': startup_data,
+                'profile_missing': True,
+                'current_filters': {
+                    'industry': industry,
+                    'years_in_business': years_in_business,
+                    'growth_trend': growth_trend,
+                }
+            }
+        
+        # Redirect to consolidated view if AJAX request or directly render
+        return render(request, 'investor/startup_discovery.html', context)
+        
+    except Exception as e:
+        # Log the error
+        print(f"Error in startup_discovery: {e}")
+        # Create empty context with error message
+        context = {
+            'startups': [],
+            'startup_data': [],
+            'error_message': "Unable to retrieve startups. Please try again later.",
+            'current_filters': {
+                'industry': None,
+                'years_in_business': None,
+                'growth_trend': None,
+            }
+        }
+        from django.contrib import messages
+        messages.error(request, "There was an error retrieving startups. Please try again later.")
+        return render(request, 'investor/startup_discovery.html', context)
 
 @login_required
 def portfolio_tracker(request):
@@ -137,3 +217,9 @@ def investor_profile(request):
         'investor': investor
     }
     return render(request, 'investor/investor_profile.html', context)
+
+# Redirect from older find_startups view to the consolidated startup_discovery view
+@login_required
+def find_startups(request):
+    messages.info(request, "You've been redirected to our enhanced startup discovery page.")
+    return redirect('investor:startup_discovery')
