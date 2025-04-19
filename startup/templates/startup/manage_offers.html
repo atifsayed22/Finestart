@@ -28,7 +28,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Received Offers</h2>
+    <h2>Manage Offers for {{ startup.name }}</h2>
 
     {% if messages %}
         {% for message in messages %}
@@ -39,6 +39,42 @@
     {% endif %}
 
     {% if offers %}
+        <!-- Offer statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ offer_stats.total }}</h5>
+                        <p class="card-text">Total Offers</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100 bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ offer_stats.pending }}</h5>
+                        <p class="card-text">Pending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100 bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ offer_stats.accepted }}</h5>
+                        <p class="card-text">Accepted</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100 bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ offer_stats.rejected }}</h5>
+                        <p class="card-text">Rejected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="list-group">
             {% for offer in offers %}
                 <div class="list-group-item list-group-item-action flex-column align-items-start mb-3 shadow-sm" style="border-radius: 8px;">
@@ -46,10 +82,21 @@
                         <h5 class="mb-1">Offer from: {{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</h5>
                         <small class="text-muted">{{ offer.created_at|timesince }} ago</small>
                     </div>
+                    <div class="mb-2">
+                        <span class="badge bg-info me-2">{{ offer.investor.investor_type }} Investor</span>
+                        {% if offer.investor.location %}
+                        <span class="badge bg-secondary me-2">{{ offer.investor.location }}</span>
+                        {% endif %}
+                    </div>
                     <p class="mb-1">
                         <strong>Equity Offered:</strong> {{ offer.equity_percentage }}% <br>
                         <strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%
                     </p>
+                    {% if offer.investor.investment_focus %}
+                    <p class="mb-1">
+                        <strong>Investment Focus:</strong> {{ offer.investor.investment_focus }}
+                    </p>
+                    {% endif %}
                     <div class="d-flex w-100 justify-content-between align-items-center mt-2">
                         <div>
                             <strong>Status:</strong> 
@@ -72,7 +119,11 @@
             {% endfor %}
         </div>
     {% else %}
-        <p>You have not received any offers yet.</p>
+        <div class="alert alert-info">
+            <p>You have not received any offers yet.</p>
+            <p>Find investors and connect with them to receive investment offers.</p>
+            <a href="{% url 'startup:find_investors' %}" class="btn btn-primary mt-2">Find Investors</a>
+        </div>
     {% endif %}
 </div>
 {% endblock %} 

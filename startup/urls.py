@@ -15,4 +15,5 @@ urlpatterns = [
     path('manage_offers/', views.manage_offers, name='manage_offers'),
     path('create_offer/<int:startup_id>/', views.create_offer, name='create_offer'),
     path('respond_to_offer/<int:offer_id>/<str:response>/', views.respond_to_offer, name='respond_to_offer'),
+    path('find_startups/', views.find_startups, name='find_startups'),
 ]

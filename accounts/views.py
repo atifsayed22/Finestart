@@ -61,14 +61,17 @@ def user_login(request):
                 else:
                     # For investor users
                     if InvestorProfile.objects.filter(user=user).exists():
-                        return redirect("investor_dashboard")
+                        return redirect("investor:investor_dashboard")
                     else:
-                        # You might want to create an investor_profile route
-                        return redirect("investor_dashboard")
+                        # Redirect to investor profile creation page
+                        return redirect("investor:investor_profile")
             except Exception as e:
-                # If any error occurs, default to startup dashboard
+                # If any error occurs, check user type for redirection
                 print(f"Error checking user profile: {e}")
-                return redirect("startup:startup_dashboard")
+                if user.user_type.lower() == "investor":
+                    return redirect("investor:investor_dashboard")
+                else:
+                    return redirect("startup:startup_dashboard")
         else:
             messages.error(request, "Invalid username or password.")
     

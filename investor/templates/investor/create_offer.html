@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Make an Offer to {{ startup.name }}{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
+                <div class="nav-con-el"><a href="#">Investments</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Make an Offer to {{ startup.name }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <h5>Startup Details</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Industry:</dt>
+                            <dd class="col-sm-8">{{ startup.get_industry_type_display }}</dd>
+                            
+                            <dt class="col-sm-4">Years in Business:</dt>
+                            <dd class="col-sm-8">{{ startup.years_in_business }}</dd>
+                            
+                            <dt class="col-sm-4">Investment Required:</dt>
+                            <dd class="col-sm-8">${{ startup.investment_required }}</dd>
+                            
+                            <dt class="col-sm-4">Funding Purpose:</dt>
+                            <dd class="col-sm-8">{{ startup.funding_purpose }}</dd>
+                        </dl>
+                    </div>
+                    
+                    <form method="post" action="{% url 'startup:create_offer' startup.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="equity_percentage" class="form-label">Equity Percentage (%)</label>
+                            <input type="number" class="form-control" id="equity_percentage" name="equity_percentage" 
+                                min="0" max="100" step="0.01" required>
+                            <div class="form-text">The percentage of ownership you want in the startup</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="royalty_percentage" class="form-label">Royalty Percentage (%)</label>
+                            <input type="number" class="form-control" id="royalty_percentage" name="royalty_percentage" 
+                                min="0" max="100" step="0.01" required>
+                            <div class="form-text">The percentage of revenue you want as royalty</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message (Optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                            <div class="form-text">Add any additional terms or information about your offer</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Submit Offer</button>
+                            <a href="{% url 'startup:find_startups' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -114,23 +114,44 @@ def startup_registration(request):
 
 
 def startup_dashboard(request):
-    # Pass user information to the dashboard
+    # Initialize context dictionary
     context = {}
+    
     try:
         # Check if the user has a startup profile
         profile = StartupProfile.objects.get(user=request.user)
         context['profile'] = profile
+        
+        try:
+            # Get the startup
+            startup = Startup.objects.get(user=request.user)
+            context['startup'] = startup
+            
+            # Get pending offers
+            pending_offers = Offer.objects.filter(startup=startup, status='pending').order_by('-created_at')
+            context['pending_offers'] = pending_offers
+            context['offer_count'] = pending_offers.count()
+        except Startup.DoesNotExist:
+            # No startup record yet
+            context['startup_missing'] = True
+            
+        # Get profit data for the chart
+        profit_data = profile.get_monthly_profits(months=6)
+        context['profit_labels'] = json.dumps(profit_data['labels'])
+        context['profit_values'] = json.dumps(profit_data['values'])
+        
     except StartupProfile.DoesNotExist:
         # Handle the case when no profile exists
-        pass
+        context['profile_missing'] = True
     except Exception as e:
         print(f"Error getting startup profile for dashboard: {e}")
+        context['error'] = str(e)
     
     # Pass the welcome message to the template
     if request.user.is_authenticated:
         welcome_name = request.user.first_name if request.user.first_name else request.user.username
         context['welcome_name'] = welcome_name
-        
+    
     return render(request, 'startup/startup_dashboard.html', context)
 
 def startup_insights(request):
@@ -297,34 +318,56 @@ def startup_pro(request):
 def startup_find_investors(request):
     return render(request, 'startup/find_investors.html')   
 
+@login_required
 def startup_upload_pitch(request):
-    return render(request, 'startup/upload_pitch.html')
+    try:
+        # Get the startup associated with this user
+        startup = Startup.objects.get(user=request.user)
+        
+        if request.method == 'POST':
+            # Handle pitch video upload
+            if 'pitch_video' in request.FILES:
+                pitch_video = request.FILES['pitch_video']
+                startup.pitch_video = pitch_video
+                startup.save()
+                messages.success(request, "Pitch video uploaded successfully!")
+                return redirect('startup:startup_dashboard')
+            else:
+                messages.error(request, "No video file was uploaded.")
+                
+        return render(request, 'startup/upload_pitch.html', {'startup': startup})
+    except Startup.DoesNotExist:
+        messages.warning(request, "You need to register your startup first.")
+        return redirect('startup:startup_registration')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('startup:startup_dashboard')
 
 @login_required
 def find_investors(request):
     try:
         # Get all users who are investors and have profiles
-        investors = InvestorProfile.objects.select_related('user').all()
+        investor_profiles = InvestorProfile.objects.select_related('user').all()
         
         # Get filter parameters
-        industry = request.GET.get('industry')
-        region = request.GET.get('region')
-        funding_stage = request.GET.get('funding_stage')
+        investor_type = request.GET.get('investor_type')
         investment_range = request.GET.get('investment_range')
+        location = request.GET.get('location')
         
         # Apply filters if they are provided
-        if industry:
-            investors = investors.filter(user__startupprofile__industry=industry)
+        if investor_type:
+            investor_profiles = investor_profiles.filter(investor_type=investor_type)
         if investment_range:
-            investors = investors.filter(investment_range=investment_range)
+            investor_profiles = investor_profiles.filter(investment_range=investment_range)
+        if location:
+            investor_profiles = investor_profiles.filter(location__icontains=location)
         
         context = {
-            'investors': investors,
+            'investors': investor_profiles,
             'current_filters': {
-                'industry': industry,
-                'region': region,
-                'funding_stage': funding_stage,
+                'investor_type': investor_type,
                 'investment_range': investment_range,
+                'location': location,
             }
         }
         return render(request, 'startup/find_investors.html', context)
@@ -335,12 +378,6 @@ def find_investors(request):
         context = {
             'investors': [],
             'error_message': "Unable to retrieve investors. Please try again later.",
-            'current_filters': {
-                'industry': None,
-                'region': None,
-                'funding_stage': None,
-                'investment_range': None,
-            }
         }
         messages.error(request, "There was an error retrieving investors. Please try again later.")
         return render(request, 'startup/find_investors.html', context)
@@ -349,30 +386,77 @@ def find_investors(request):
 def connect_with_investor(request, investor_id):
     if request.method == 'POST':
         try:
+            # Get the investor profile
             investor = InvestorProfile.objects.get(id=investor_id)
-            # Here you would typically create a connection/message record
-            # For now, we'll just show a success message
-            messages.success(request, f'Connection request sent to {investor.user.get_full_name()}')
+            
+            # Get the startup for the current user or redirect if none exists
+            startup = Startup.objects.filter(user=request.user).first()
+            if not startup:
+                messages.error(request, "You need to register your startup before connecting with investors.")
+                return redirect('startup:startup_registration')
+            
+            # In a real application, you would create a Connection object
+            # Here we'll just show a success message
+            investor_name = investor.user.get_full_name() or investor.user.username
+            messages.success(request, f'Connection request sent to {investor_name}')
+            
+            # If you want to implement actual connection functionality:
+            # 1. Create a Connection model with fields like startup, investor, status, etc.
+            # 2. Create the connection record:
+            # Connection.objects.create(
+            #     startup=startup,
+            #     investor=investor,
+            #     status='pending'
+            # )
+            
+            # 3. Optionally, send an email notification
+            # from django.core.mail import send_mail
+            # send_mail(
+            #     f'New Connection Request from {startup.name}',
+            #     f'A startup named {startup.name} wants to connect with you. Login to your dashboard to view details.',
+            #     'from@example.com',
+            #     [investor.user.email],
+            #     fail_silently=False,
+            # )
+            
         except InvestorProfile.DoesNotExist:
             messages.error(request, 'Investor not found.')
+        except Exception as e:
+            print(f"Error in connect_with_investor: {e}")
+            messages.error(request, f'An error occurred: {str(e)}')
+    
     return redirect('startup:find_investors')
 
 @login_required
 def create_offer(request, startup_id):
+    # Check if user is an investor
+    if request.user.user_type != 'investor':
+        messages.error(request, "Only investors can make offers.")
+        return redirect('home')
+    
     startup = get_object_or_404(Startup, id=startup_id)
+    
     if request.method == 'POST':
         try:
-            investor_profile = request.user.investorprofile
+            # Get or create investor profile for the user
+            investor_profile, created = InvestorProfile.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'investor_type': 'Individual',
+                    'investment_range': '0-50000',
+                }
+            )
+            
             equity_percentage = request.POST.get('equity_percentage')
             royalty_percentage = request.POST.get('royalty_percentage')
 
             # Validate percentages
             if not (0 <= float(equity_percentage) <= 100):
                 messages.error(request, 'Equity percentage must be between 0 and 100.')
-                return redirect('create_offer', startup_id=startup.id)
+                return redirect('startup:create_offer', startup_id=startup.id)
             if not (0 <= float(royalty_percentage) <= 100):
                 messages.error(request, 'Royalty percentage must be between 0 and 100.')
-                return redirect('create_offer', startup_id=startup.id)
+                return redirect('startup:create_offer', startup_id=startup.id)
 
             offer = Offer.objects.create(
                 investor=investor_profile,
@@ -383,16 +467,13 @@ def create_offer(request, startup_id):
 
             messages.success(request, 'Offer sent successfully!')
             # Redirect to a relevant page, e.g., the startup discovery page or investor dashboard
-            return redirect('investor_dashboard') 
-        except AttributeError:
-            messages.error(request, 'You must be logged in as an investor to make an offer.')
-            return redirect('login')
+            return redirect('investor:investor_dashboard') 
         except Exception as e:
             messages.error(request, f'An error occurred: {str(e)}')
-            return redirect('create_offer', startup_id=startup.id)
+            return redirect('startup:create_offer', startup_id=startup.id)
 
     # GET request - Render the form
-    return render(request, 'create_offer.html', {'startup': startup})
+    return render(request, 'investor/create_offer.html', {'startup': startup})
 
 @login_required
 def respond_to_offer(request, offer_id, response):
@@ -419,20 +500,134 @@ def respond_to_offer(request, offer_id, response):
 @login_required
 def manage_offers(request):
     try:
-        # Assuming a startup user is linked to one Startup instance
-        # Adjust this logic if a user can manage multiple startups
-        startup = request.user.startups.first() 
-        if not startup:
-            messages.warning(request, "You need to register your startup profile first.")
-            return redirect('startup_registration') # Or wherever startup registration happens
+        # First, check if the user is a startup user type
+        if request.user.user_type.lower() != 'startup':
+            messages.warning(request, "This page is only for startup users.")
+            return redirect('home')
+            
+        # Find existing startup profile
+        startup_profile = StartupProfile.objects.filter(user=request.user).first()
         
-        offers = Offer.objects.filter(startup=startup).order_by('-created_at')
+        if not startup_profile:
+            # If no startup profile exists, redirect to create one
+            messages.warning(request, "You need to create your startup profile first.")
+            return redirect('startup:startup_profile')
+        
+        # Find startups associated with this user - make a direct query by user
+        startup = Startup.objects.filter(user=request.user).first()
+        
+        # If no startup exists, create a basic one with information from the profile
+        if not startup:
+            try:
+                # Create a basic startup record using profile data
+                startup = Startup(
+                    user=request.user,
+                    name=startup_profile.startup_name,
+                    industry_type=startup_profile.industry or 'tech',  # Default to tech if empty
+                    years_in_business=1,  # Default value
+                    annual_revenue=0,     # Default value
+                    profit_margin=startup_profile.monthly_profit * 12,  # Estimate
+                    investment_required=50000,  # Default value
+                    funding_purpose="Funding details not specified",
+                    target_market="Target market not specified",
+                    growth_trend="stable"  # Default value
+                )
+                startup.save()
+                messages.info(request, "We've created a basic startup record for you. Please complete your registration when possible.")
+            except Exception as creation_error:
+                messages.warning(request, "You need to register your startup details first.")
+                return redirect('startup:startup_registration')
+        
+        # Verify that the startup has the correct user
+        if startup.user != request.user:
+            startup.user = request.user
+            startup.save()
+        
+        # Get all offers for this startup with related investor data
+        offers = Offer.objects.filter(startup=startup).select_related('investor', 'investor__user').order_by('-created_at')
+        
+        # Enhanced context with detailed information
         context = {
-            'offers': offers
+            'offers': offers,
+            'startup': startup,
+            'offer_stats': {
+                'total': offers.count(),
+                'pending': offers.filter(status='pending').count(),
+                'accepted': offers.filter(status='accepted').count(),
+                'rejected': offers.filter(status='rejected').count(),
+            }
         }
         return render(request, 'startup/manage_offers.html', context)
-    except AttributeError:
-        # Handle cases where the user might not have the 'startups' related manager
-        # This might happen if the user is not a startup user or profile isn't set up
-        messages.error(request, "Could not retrieve startup profile. Please ensure you are logged in as a startup.")
-        return redirect('home') # Redirect to home or login
+    except Exception as e:
+        messages.error(request, "There was an error retrieving your offers. Please try again later.")
+        return redirect('startup:startup_dashboard')
+
+@login_required
+def find_startups(request):
+    # Check if user is an investor
+    if request.user.user_type.lower() != 'investor':
+        messages.warning(request, "This page is only for investors.")
+        return redirect('home')
+
+    try:
+        # Get all startups
+        startups = Startup.objects.all()
+        
+        # Get filter parameters
+        industry = request.GET.get('industry')
+        years_in_business = request.GET.get('years_in_business')
+        growth_trend = request.GET.get('growth_trend')
+        
+        # Apply filters if they are provided
+        if industry:
+            startups = startups.filter(industry_type=industry)
+        if years_in_business:
+            try:
+                years_val = int(years_in_business)
+                startups = startups.filter(years_in_business__gte=years_val)
+            except (ValueError, TypeError):
+                # Invalid value, ignore this filter
+                pass
+        if growth_trend:
+            startups = startups.filter(growth_trend=growth_trend)
+        
+        # Get the investor profile for context
+        try:
+            investor_profile = InvestorProfile.objects.get(user=request.user)
+            context = {
+                'startups': startups,
+                'investor': investor_profile,
+                'current_filters': {
+                    'industry': industry,
+                    'years_in_business': years_in_business,
+                    'growth_trend': growth_trend,
+                }
+            }
+        except InvestorProfile.DoesNotExist:
+            # Investor doesn't have a profile yet
+            context = {
+                'startups': startups,
+                'profile_missing': True,
+                'current_filters': {
+                    'industry': industry,
+                    'years_in_business': years_in_business,
+                    'growth_trend': growth_trend,
+                }
+            }
+            
+        return render(request, 'investor/find_startups.html', context)
+    except Exception as e:
+        # Log the error
+        print(f"Error in find_startups: {e}")
+        # Create empty context with error message
+        context = {
+            'startups': [],
+            'error_message': "Unable to retrieve startups. Please try again later.",
+            'current_filters': {
+                'industry': None,
+                'years_in_business': None,
+                'growth_trend': None,
+            }
+        }
+        messages.error(request, "There was an error retrieving startups. Please try again later.")
+        return render(request, 'investor/find_startups.html', context)

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find Startups{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Find Startups</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5>Filter Startups</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="industry" class="form-label">Industry</label>
+                    <select name="industry" id="industry" class="form-select">
+                        <option value="">All Industries</option>
+                        <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
+                        <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>Fintech</option>
+                        <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                        <option value="education" {% if current_filters.industry == 'education' %}selected{% endif %}>Education</option>
+                        <option value="other" {% if current_filters.industry == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="years_in_business" class="form-label">Years in Business (min)</label>
+                    <input type="number" class="form-control" id="years_in_business" name="years_in_business" value="{{ current_filters.years_in_business }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="growth_trend" class="form-label">Growth Trend</label>
+                    <select name="growth_trend" id="growth_trend" class="form-select">
+                        <option value="">All Trends</option>
+                        <option value="growing" {% if current_filters.growth_trend == 'growing' %}selected{% endif %}>Growing</option>
+                        <option value="stable" {% if current_filters.growth_trend == 'stable' %}selected{% endif %}>Stable</option>
+                        <option value="declining" {% if current_filters.growth_trend == 'declining' %}selected{% endif %}>Declining</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'startup:find_startups' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Startups List -->
+    {% if startups %}
+        <div class="row">
+            {% for startup in startups %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>{{ startup.name }}</h5>
+                            {% if startup.company_logo %}
+                                <img src="{{ startup.company_logo.url }}" alt="{{ startup.name }} Logo" style="height: 40px;">
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Industry:</strong> {{ startup.get_industry_type_display }}</p>
+                            <p><strong>Years in Business:</strong> {{ startup.years_in_business }}</p>
+                            <p><strong>Growth Trend:</strong> {{ startup.get_growth_trend_display }}</p>
+                            <p><strong>Investment Required:</strong> ${{ startup.investment_required }}</p>
+                            <hr>
+                            <p><strong>Target Market:</strong> {{ startup.target_market|truncatechars:100 }}</p>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <a href="{% url 'startup:create_offer' startup.id %}" class="btn btn-primary">Make an Offer</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            {% if error_message %}
+                {{ error_message }}
+            {% else %}
+                No startups found matching your criteria.
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

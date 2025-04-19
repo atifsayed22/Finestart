@@ -60,6 +60,13 @@
             display: block;
         }
 
+        .current-video {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -118,6 +125,27 @@
             transition: width 0.3s;
         }
 
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
         @media (max-width: 768px) {
             .upload-container {
                 padding: 1rem;
@@ -134,6 +162,7 @@
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
             </div>
@@ -151,15 +180,31 @@
     <main class="upload-container">
         <div class="upload-section">
             <h1>Upload Your Pitch</h1>
-            <p>Share your pitch deck or video to attract potential investors</p>
+            <p>Share your pitch video to attract potential investors</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if startup.pitch_video %}
+            <div class="current-video">
+                <h3>Current Pitch Video</h3>
+                <p>You already have a pitch video uploaded. Uploading a new one will replace the current one.</p>
+                <p><a href="{{ startup.pitch_video.url }}" target="_blank">View current pitch video</a></p>
+            </div>
+            {% endif %}
 
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="upload-area" id="upload-area">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Drag and drop your pitch deck or video here</p>
+                    <p>Drag and drop your pitch video here</p>
                     <p>or</p>
-                    <input type="file" id="file-input" name="pitch_file" accept=".pdf,.ppt,.pptx,.mp4,.mov" style="display: none;">
+                    <input type="file" id="file-input" name="pitch_video" accept=".mp4,.mov" style="display: none;">
                     <button type="button" class="submit-button" onclick="document.getElementById('file-input').click()">
                         Choose File
                     </button>

@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <form id="startup-registration-form"  method="POST" action="{% url 'startup_registration' %}" enctype="multipart/form-data">
+        <form id="startup-registration-form"  method="POST" action="{% url 'startup:startup_registration' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <!-- Step 1: Basic Details -->
             <div class="form-step active" data-step="1">

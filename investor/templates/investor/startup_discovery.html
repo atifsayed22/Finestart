@@ -211,16 +211,17 @@
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'portfolio_tracker' %}">Portfolio</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
             </div>
             <div class="log-in-sec margin">
-                <a href="{% url 'logout' %}">
-                    <button class="log-in">
-                        <p>Logout</p>
-                    </button>
-                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
             </div>
         </nav>
     </header>

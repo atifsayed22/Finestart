@@ -123,23 +123,93 @@
             margin-top: 1rem;
         }
 
-        .nav-menu {
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .profile-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .profile-action-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            color: white;
+            background: #1E3A8A;
+        }
+
+        .offers-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
         }
 
-        .nav-item {
-            padding: 0.5rem 1rem;
+        .offer-card {
+            border: 1px solid #eee;
             border-radius: 8px;
-            background: #1E3A8A;
-            color: white;
-            text-decoration: none;
-            transition: background 0.3s;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .nav-item:hover {
-            background: #4A90E2;
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .offer-header h4 {
+            margin: 0;
+            color: #1E3A8A;
+        }
+
+        .offer-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-accepted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
         }
 
         @media (max-width: 768px) {
@@ -173,10 +243,11 @@
                 <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
             </div>
             <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
             </div>
             <div class="log-in-sec margin">
                 <form method="post" action="{% url 'logout' %}">
@@ -188,123 +259,93 @@
     </header>
 
     <main class="dashboard-container">
-        <div class="greeting-section">
-            <h1>Welcome back, {{ user.first_name }}!</h1>
-            <p>Here's an overview of your investment portfolio and recent activities</p>
-        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
-        <div class="nav-menu">
-            <a href="{% url 'investor_dashboard' %}" class="nav-item">Dashboard</a>
-            <a href="{% url 'startup_discovery' %}" class="nav-item">Discover Startups</a>
-            <a href="{% url 'portfolio_tracker' %}" class="nav-item">Portfolio</a>
-            <a href="#" class="nav-item">Investment Preferences</a>
-            <a href="#" class="nav-item">Deal Flow</a>
-        </div>
+        {% if profile_missing %}
+            <div class="alert alert-info">
+                <h2>Welcome to FineStart!</h2>
+                <p>You need to set up your investor profile to get started.</p>
+                <div class="profile-actions">
+                    <a href="{% url 'investor:investor_profile' %}" class="profile-action-btn">
+                        <i class="fas fa-user-plus"></i> Create Profile
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="greeting-section">
+                <h1>Welcome back, {{ welcome_name }}!</h1>
+                <p>Here's an overview of your investment portfolio and recent activities</p>
+            </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-handshake"></i>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="stat-value">{{ offer_counts.total|default:"0" }}</div>
+                    <div class="stat-label">Total Offers Made</div>
                 </div>
-                <div class="stat-value">12</div>
-                <div class="stat-label">Total Deals Done</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value">{{ offer_counts.pending|default:"0" }}</div>
+                    <div class="stat-label">Pending Offers</div>
                 </div>
-                <div class="stat-value">25</div>
-                <div class="stat-label">Startups Tracked</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-wallet"></i>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">{{ offer_counts.accepted|default:"0" }}</div>
+                    <div class="stat-label">Accepted Offers</div>
                 </div>
-                <div class="stat-value">$2.5M</div>
-                <div class="stat-label">Portfolio Size</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-percentage"></i>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-value">
+                        {% if offer_counts.total > 0 %}
+                            {% widthratio offer_counts.accepted offer_counts.total 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">Acceptance Rate</div>
                 </div>
-                <div class="stat-value">18.5%</div>
-                <div class="stat-label">Average ROI</div>
             </div>
-        </div>
 
-        <div class="recent-activity">
-            <h2>Recent Activity</h2>
-            <div class="activity-list">
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h4>Viewed Startup Profile</h4>
-                        <p>TechStart AI - AI-powered analytics platform</p>
-                    </div>
-                    <div class="activity-time">2 hours ago</div>
+            {% if offers %}
+                <div class="offers-section">
+                    <h2>Your Offers</h2>
+                    {% for offer in offers %}
+                        <div class="offer-card">
+                            <div class="offer-header">
+                                <h4>Offer to {{ offer.startup.name }}</h4>
+                                <span class="offer-status status-{{ offer.status }}">{{ offer.status }}</span>
+                            </div>
+                            <p><strong>Equity:</strong> {{ offer.equity_percentage }}% | <strong>Royalty:</strong> {{ offer.royalty_percentage }}%</p>
+                            <p><strong>Date:</strong> {{ offer.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    {% endfor %}
                 </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h4>Received Pitch Deck</h4>
-                        <p>HealthTech Solutions - Healthcare innovation</p>
-                    </div>
-                    <div class="activity-time">5 hours ago</div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h4>Portfolio Update</h4>
-                        <p>FinTech App - 15% growth in Q1</p>
-                    </div>
-                    <div class="activity-time">1 day ago</div>
-                </div>
-            </div>
-        </div>
+            {% endif %}
 
-        <div class="portfolio-overview">
-            <h2>Portfolio Overview</h2>
-            <div class="portfolio-chart">
-                <canvas id="portfolioChart"></canvas>
+            <div class="portfolio-overview">
+                <h2>Investment Opportunities</h2>
+                <p>Discover promising startups looking for investment.</p>
+                <div class="profile-actions">
+                    <a href="{% url 'startup:find_startups' %}" class="profile-action-btn">
+                        <i class="fas fa-search"></i> Find Startups
+                    </a>
+                </div>
             </div>
-        </div>
+        {% endif %}
     </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Portfolio Chart
-        const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
-        new Chart(portfolioCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Technology', 'Healthcare', 'FinTech', 'AI/ML', 'E-commerce'],
-                datasets: [{
-                    data: [30, 25, 20, 15, 10],
-                    backgroundColor: [
-                        '#4A90E2',
-                        '#00BFA6',
-                        '#FF6B6B',
-                        '#FFD166',
-                        '#06D6A0'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
-                }
-            }
-        });
-    </script>
 </body>
 </html> 

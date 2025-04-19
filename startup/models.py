@@ -5,7 +5,11 @@ from django.conf import settings
 # Create your models here.
 def get_default_user():
     # Return the first user as the default, or None if no users exist
-    return CustomUser.objects.first() if CustomUser.objects.exists() else None
+    try:
+        return CustomUser.objects.first().id if CustomUser.objects.exists() else None
+    except Exception as e:
+        print(f"Error getting default user: {e}")
+        return None
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -49,7 +53,8 @@ class Startup(models.Model):
         CustomUser, 
         on_delete=models.CASCADE, 
         related_name='startups',
-        default=get_default_user
+        null=True,
+        blank=True
     )
 
     name = models.CharField(max_length=255)

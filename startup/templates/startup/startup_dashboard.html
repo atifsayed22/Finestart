@@ -64,6 +64,90 @@
             background: #4A90E2;
         }
 
+        .offers-section {
+            margin-top: 2rem;
+        }
+
+        .offer-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .offer-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .bg-warning {
+            background-color: #ffc107;
+        }
+
+        .text-dark {
+            color: #343a40;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .profile-action-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            color: white;
+            background: #1E3A8A;
+        }
+
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 1rem;
@@ -98,71 +182,98 @@
     </header>
 
     <main class="dashboard-container">
-        <div class="greeting-section">
-            <h1>Welcome back, {{ welcome_name }}!</h1>
-            <p>Here's what's happening with your startup today.</p>
-        </div>
-
-        <div class="nav-menu">
-            <a  class="nav-item">Dashboard</a>
-            <a  class="nav-item">Profile</a>
-            <a  class="nav-item">Upload Pitch</a>
-            <a  class="nav-item">Find Investors</a>
-            <a class="nav-item">Insights</a>
-        </div>
-
-        <div class="profile-summary">
-            <div class="summary-card">
-                <h3><i class="fas fa-chart-line"></i> Startup Stage</h3>
-                <p>Seed Stage</p>
-            </div>
-            <div class="summary-card">
-                <h3><i class="fas fa-dollar-sign"></i> Current Valuation</h3>
-                <p>$500,000</p>
-            </div>
-            <div class="summary-card">
-                <h3><i class="fas fa-coins"></i> Current Funding</h3>
-                <p>$100,000</p>
-            </div>
-        </div>
-
-        <div class="chart-container">
-            <h2>Profit/Loss Overview</h2>
-            <canvas id="profitLossChart"></canvas>
-        </div>
-
-        <div class="offers-section">
-            <h2>Pending Offers</h2>
-            {% for offer in offers %}
-            <div class="offer-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
-                <p><strong>Investor:</strong> {{ offer.investor.user.get_full_name }}</p>
-                <p><strong>Equity Offered:</strong> {{ offer.equity_percentage }}%</p>
-                <p><strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%</p>
-                <p><strong>Status:</strong> <span class="badge bg-warning text-dark">{{ offer.get_status_display }}</span></p>
-                <div class="offer-actions mt-3">
-                    <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success me-2">Accept</a>
-                    <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger">Reject</a>
+        {% if profile_missing %}
+            <div class="alert alert-info">
+                <h2>Welcome to FineStart!</h2>
+                <p>You need to set up your startup profile to get started.</p>
+                <div class="profile-actions">
+                    <a href="{% url 'startup:startup_profile' %}" class="profile-action-btn">
+                        <i class="fas fa-user-plus"></i> Create Profile
+                    </a>
                 </div>
             </div>
-            {% empty %}
-            <p>No pending offers at the moment.</p>
-            {% endfor %}
-        </div>
+        {% elif startup_missing %}
+            <div class="alert alert-info">
+                <h2>Complete Your Registration</h2>
+                <p>You need to register your startup details to access all features.</p>
+                <div class="profile-actions">
+                    <a href="{% url 'startup:startup_registration' %}" class="profile-action-btn">
+                        <i class="fas fa-building"></i> Register Startup
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="greeting-section">
+                <h1>Welcome back, {{ welcome_name }}!</h1>
+                <p>Here's what's happening with your startup today.</p>
+            </div>
+
+            <div class="profile-summary">
+                <div class="summary-card">
+                    <h3><i class="fas fa-chart-line"></i> Startup Stage</h3>
+                    <p>{{ profile.startup_stage|default:"Not specified" }}</p>
+                </div>
+                <div class="summary-card">
+                    <h3><i class="fas fa-dollar-sign"></i> Monthly Profit</h3>
+                    <p>${{ profile.monthly_profit|floatformat:2 }}</p>
+                </div>
+                <div class="summary-card">
+                    <h3><i class="fas fa-users"></i> Team Size</h3>
+                    <p>{{ profile.team_size|default:"1" }} members</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2>Profit Overview</h2>
+                <canvas id="profitLossChart"></canvas>
+            </div>
+
+            <div class="offers-section">
+                <h2>Pending Offers {% if offer_count %}({{ offer_count }}){% endif %}</h2>
+                {% if pending_offers %}
+                    {% for offer in pending_offers %}
+                    <div class="offer-card">
+                        <p><strong>Investor:</strong> {{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</p>
+                        <p><strong>Equity Offered:</strong> {{ offer.equity_percentage }}%</p>
+                        <p><strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%</p>
+                        <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Pending</span></p>
+                        <div class="offer-actions">
+                            <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success">Accept</a>
+                            <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger">Reject</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No pending offers at the moment.</p>
+                    <p>
+                        <a href="{% url 'startup:find_investors' %}" class="profile-action-btn">
+                            <i class="fas fa-search"></i> Find Investors
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Placeholder for profit/loss chart
+        {% if profit_labels and profit_values %}
+        // Real profit/loss chart data
         const ctx = document.getElementById('profitLossChart').getContext('2d');
+        const labels = {{ profit_labels|safe }};
+        const values = {{ profit_values|safe }};
+        
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: labels,
                 datasets: [{
-                    label: 'Profit/Loss',
-                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                    label: 'Monthly Profit',
+                    data: values,
                     borderColor: '#4A90E2',
-                    tension: 0.4
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    tension: 0.4,
+                    fill: true
                 }]
             },
             options: {
@@ -174,6 +285,7 @@
                 }
             }
         });
+        {% endif %}
     </script>
 </body>
 </html> 
