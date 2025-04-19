@@ -1,13 +1,32 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Investors - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+{% block title %}Find Investors - FineStart{% endblock %}
+
+{% block header %}
+    <header>
+        <nav>
+            <div class="logo-sec">
+                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+            </div>
+            <div class="nav-con">
+                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
+                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
+            </div>
+            <div class="log-in-sec margin">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="log-in">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+{% endblock %}
+
+{% block extra_css %}
     <style>
         .investors-container {
             max-width: 1200px;
@@ -37,7 +56,7 @@
 
         .filter-group label {
             margin-bottom: 0.5rem;
-            color: #1E3A8A;
+            color: #18cb96;
             font-weight: 500;
         }
 
@@ -50,7 +69,7 @@
         }
 
         .search-button {
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            background: linear-gradient(135deg, #18cb96, #14a97b);
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -85,7 +104,7 @@
 
         .investor-header {
             padding: 1.5rem;
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            background: linear-gradient(135deg, #18cb96, #14a97b);
             color: white;
         }
 
@@ -117,7 +136,7 @@
         .stat-value {
             font-size: 1.25rem;
             font-weight: 600;
-            color: #1E3A8A;
+            color: #18cb96;
         }
 
         .stat-label {
@@ -141,7 +160,7 @@
         }
 
         .connect-button {
-            background: #1E3A8A;
+            background: #18cb96;
             color: white;
             padding: 0.75rem;
             border: none;
@@ -153,7 +172,7 @@
         }
 
         .connect-button:hover {
-            background: #4A90E2;
+            background: #14a97b;
         }
 
         .alert {
@@ -187,29 +206,9 @@
             }
         }
     </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
+{% endblock %}
 
+{% block content %}
     <main class="investors-container">
         {% if messages %}
             <div class="messages">
@@ -317,5 +316,4 @@
             </div>
         {% endif %}
     </main>
-</body>
-</html> 
+{% endblock %} 

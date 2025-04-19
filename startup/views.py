@@ -9,10 +9,12 @@ import json
 @login_required
 def startup_registration(request):
     try:
-        if StartupProfile.objects.filter(user=request.user).exists():
-            return redirect('startup:startup_profile')
+        # Check if the user already has both a profile and a startup
+        if StartupProfile.objects.filter(user=request.user).exists() and Startup.objects.filter(user=request.user).exists():
+            messages.info(request, "You have already registered your startup.")
+            return redirect('startup:startup_dashboard')
     except Exception as e:
-        print(f"Error checking for existing profile: {e}")
+        print(f"Error checking for existing profile and startup: {e}")
     
     if request.method == 'POST':
         try:
@@ -55,6 +57,7 @@ def startup_registration(request):
             legal_documents = request.FILES.get('legal-documents') if 'legal-documents' in request.FILES else None
             
             startup = Startup(
+                user=request.user,  # Ensure user is assigned
                 name=name,
                 industry_type=industry_type,
                 years_in_business=years_in_business,
@@ -119,30 +122,33 @@ def startup_dashboard(request):
     
     try:
         # Check if the user has a startup profile
-        profile = StartupProfile.objects.get(user=request.user)
-        context['profile'] = profile
-        
         try:
-            # Get the startup
-            startup = Startup.objects.get(user=request.user)
-            context['startup'] = startup
+            profile = StartupProfile.objects.get(user=request.user)
+            context['profile'] = profile
             
-            # Get pending offers
-            pending_offers = Offer.objects.filter(startup=startup, status='pending').order_by('-created_at')
-            context['pending_offers'] = pending_offers
-            context['offer_count'] = pending_offers.count()
-        except Startup.DoesNotExist:
-            # No startup record yet
-            context['startup_missing'] = True
+            try:
+                # Get the startup
+                startup = Startup.objects.get(user=request.user)
+                context['startup'] = startup
+                
+                # Get pending offers
+                pending_offers = Offer.objects.filter(startup=startup, status='pending').order_by('-created_at')
+                context['pending_offers'] = pending_offers
+                context['offer_count'] = pending_offers.count()
+            except Startup.DoesNotExist:
+                # No startup record yet, but there is a profile
+                context['startup_missing'] = True
+                
+            # Get profit data for the chart
+            profit_data = profile.get_monthly_profits(months=6)
+            context['profit_labels'] = json.dumps(profit_data['labels'])
+            context['profit_values'] = json.dumps(profit_data['values'])
             
-        # Get profit data for the chart
-        profit_data = profile.get_monthly_profits(months=6)
-        context['profit_labels'] = json.dumps(profit_data['labels'])
-        context['profit_values'] = json.dumps(profit_data['values'])
-        
-    except StartupProfile.DoesNotExist:
-        # Handle the case when no profile exists
-        context['profile_missing'] = True
+        except StartupProfile.DoesNotExist:
+            # If no profile exists, redirect to registration
+            messages.info(request, "Please complete your startup registration to access your dashboard.")
+            return redirect('startup:startup_registration')
+
     except Exception as e:
         print(f"Error getting startup profile for dashboard: {e}")
         context['error'] = str(e)
@@ -242,13 +248,14 @@ def startup_profile(request):
                     messages.error(request, f'Error creating profile: {str(e)}')
                     return render(request, 'startup/startup_profile.html')
             
-            # If no profile exists and it's a GET request, show the profile form
-            return render(request, 'startup/startup_profile.html')
+            # If no profile exists and it's a GET request, redirect to registration
+            messages.info(request, "Please complete your startup registration first.")
+            return redirect('startup:startup_registration')
     except Exception as e:
         # If any database error occurs (like missing tables)
         print(f"Database error in startup_profile view: {e}")
         messages.error(request, "There was a problem with the database. Please try again later.")
-        return render(request, 'startup/startup_profile.html')
+        return redirect('startup:startup_registration')
 
 @login_required
 def edit_profile(request):
@@ -387,11 +394,12 @@ def connect_with_investor(request, investor_id):
     if request.method == 'POST':
         try:
             # Get the investor profile
-            investor = InvestorProfile.objects.get(id=investor_id)
+            investor = get_object_or_404(InvestorProfile, id=investor_id)
             
-            # Get the startup for the current user or redirect if none exists
-            startup = Startup.objects.filter(user=request.user).first()
-            if not startup:
+            # Get the startup for the current user or return appropriate error
+            try:
+                startup = Startup.objects.get(user=request.user)
+            except Startup.DoesNotExist:
                 messages.error(request, "You need to register your startup before connecting with investors.")
                 return redirect('startup:startup_registration')
             

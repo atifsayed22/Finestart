@@ -16,7 +16,7 @@
         }
 
         .greeting-section {
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
+            background: linear-gradient(135deg, #18cb96, #14a97b);
             color: white;
             padding: 2rem;
             border-radius: 12px;
@@ -54,14 +54,14 @@
         .nav-item {
             padding: 0.5rem 1rem;
             border-radius: 8px;
-            background: #1E3A8A;
+            background: #18cb96;
             color: white;
             text-decoration: none;
             transition: background 0.3s;
         }
 
         .nav-item:hover {
-            background: #4A90E2;
+            background: #14a97b;
         }
 
         .offers-section {
@@ -115,9 +115,10 @@
         }
 
         .alert {
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
         }
 
         .alert-warning {
@@ -126,15 +127,17 @@
         }
         
         .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
+            background-color: rgba(24, 203, 150, 0.1);
+            color: #14a97b;
+            border: 1px solid rgba(24, 203, 150, 0.2);
         }
 
         .profile-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
         }
 
         .profile-action-btn {
@@ -145,7 +148,21 @@
             text-decoration: none;
             font-weight: 500;
             color: white;
-            background: #1E3A8A;
+            background: #18cb96;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-action-btn:hover {
+            background: #14a97b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .profile-action-btn i {
+            margin-right: 8px;
         }
 
         @media (max-width: 768px) {
@@ -195,62 +212,63 @@
         {% elif startup_missing %}
             <div class="alert alert-info">
                 <h2>Complete Your Registration</h2>
-                <p>You need to register your startup details to access all features.</p>
+                <p>You need to register your startup details to access all features and connect with investors.</p>
                 <div class="profile-actions">
                     <a href="{% url 'startup:startup_registration' %}" class="profile-action-btn">
-                        <i class="fas fa-building"></i> Register Startup
+                        <i class="fas fa-file-signature"></i> Register Your Startup Now
                     </a>
                 </div>
             </div>
         {% else %}
             <div class="greeting-section">
-                <h1>Welcome back, {{ welcome_name }}!</h1>
-                <p>Here's what's happening with your startup today.</p>
+                <h1>Welcome, {{ welcome_name }}!</h1>
+                <p>Here's a summary of your startup's performance and activities.</p>
             </div>
-
+            
             <div class="profile-summary">
                 <div class="summary-card">
-                    <h3><i class="fas fa-chart-line"></i> Startup Stage</h3>
-                    <p>{{ profile.startup_stage|default:"Not specified" }}</p>
+                    <h2>Startup Profile</h2>
+                    <p><strong>Name:</strong> {{ profile.startup_name }}</p>
+                    <p><strong>Industry:</strong> {{ profile.get_industry_display }}</p>
+                    <p><strong>Team Size:</strong> {{ profile.team_size }}</p>
+                    <p><strong>CEO:</strong> {{ profile.ceo_name }}</p>
                 </div>
+                
                 <div class="summary-card">
-                    <h3><i class="fas fa-dollar-sign"></i> Monthly Profit</h3>
-                    <p>${{ profile.monthly_profit|floatformat:2 }}</p>
-                </div>
-                <div class="summary-card">
-                    <h3><i class="fas fa-users"></i> Team Size</h3>
-                    <p>{{ profile.team_size|default:"1" }} members</p>
+                    <h2>Performance Metrics</h2>
+                    <p><strong>Monthly Profit:</strong> ${{ profile.monthly_profit }}</p>
+                    <p><strong>Startup Stage:</strong> {{ profile.startup_stage }}</p>
+                    <p><strong>Business Model:</strong> {{ profile.business_model }}</p>
                 </div>
             </div>
-
+            
             <div class="chart-container">
-                <h2>Profit Overview</h2>
+                <h2>Profit/Loss Trend</h2>
                 <canvas id="profitLossChart"></canvas>
             </div>
-
+            
+            {% if pending_offers %}
             <div class="offers-section">
-                <h2>Pending Offers {% if offer_count %}({{ offer_count }}){% endif %}</h2>
-                {% if pending_offers %}
-                    {% for offer in pending_offers %}
-                    <div class="offer-card">
-                        <p><strong>Investor:</strong> {{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</p>
-                        <p><strong>Equity Offered:</strong> {{ offer.equity_percentage }}%</p>
-                        <p><strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%</p>
-                        <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Pending</span></p>
-                        <div class="offer-actions">
-                            <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success">Accept</a>
-                            <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger">Reject</a>
-                        </div>
+                <h2>Pending Offers ({{ offer_count }})</h2>
+                {% for offer in pending_offers %}
+                <div class="offer-card">
+                    <p><strong>From:</strong> {{ offer.investor.user.get_full_name }}</p>
+                    <p><strong>Equity Offered:</strong> {{ offer.equity_percentage }}%</p>
+                    <p><strong>Royalty:</strong> {{ offer.royalty_percentage }}%</p>
+                    <p><strong>Status:</strong> <span class="badge bg-warning text-dark">{{ offer.get_status_display }}</span></p>
+                    <div class="offer-actions">
+                        <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-success">Accept</a>
+                        <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-danger">Reject</a>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No pending offers at the moment.</p>
-                    <p>
-                        <a href="{% url 'startup:find_investors' %}" class="profile-action-btn">
-                            <i class="fas fa-search"></i> Find Investors
-                        </a>
-                    </p>
-                {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="nav-menu">
+                <a href="{% url 'startup:find_investors' %}" class="nav-item">Find Investors</a>
+                <a href="{% url 'startup:manage_offers' %}" class="nav-item">Manage Offers</a>
+                <a href="{% url 'startup:startup_insights' %}" class="nav-item">View Insights</a>
             </div>
         {% endif %}
     </main>
@@ -270,8 +288,8 @@
                 datasets: [{
                     label: 'Monthly Profit',
                     data: values,
-                    borderColor: '#4A90E2',
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    borderColor: '#18cb96',
+                    backgroundColor: 'rgba(24, 203, 150, 0.1)',
                     tension: 0.4,
                     fill: true
                 }]

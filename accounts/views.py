@@ -57,7 +57,8 @@ def user_login(request):
                     if StartupProfile.objects.filter(user=user).exists():
                         return redirect("startup:startup_dashboard")
                     else:
-                        return redirect("startup:startup_profile")
+                        # Redirect to registration form page instead of profile
+                        return redirect("startup:startup_registration")
                 else:
                     # For investor users
                     if InvestorProfile.objects.filter(user=user).exists():
@@ -71,7 +72,7 @@ def user_login(request):
                 if user.user_type.lower() == "investor":
                     return redirect("investor:investor_dashboard")
                 else:
-                    return redirect("startup:startup_dashboard")
+                    return redirect("startup:startup_registration")
         else:
             messages.error(request, "Invalid username or password.")
     

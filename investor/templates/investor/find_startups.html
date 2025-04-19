@@ -11,10 +11,10 @@
             </div>
             <div class="nav-con">
                 <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
+                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
                 <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
                 <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
             </div>
             <div class="log-in-sec margin">
                 <form method="post" action="{% url 'logout' %}">
@@ -24,6 +24,27 @@
             </div>
         </nav>
     </header>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Override any remaining blue colors with our green theme */
+    .btn-primary {
+        background-color: #18cb96 !important;
+        border-color: #18cb96 !important;
+    }
+    .btn-primary:hover {
+        background-color: #14a97b !important;
+        border-color: #14a97b !important;
+    }
+    .card-header {
+        background-color: rgba(24, 203, 150, 0.1) !important;
+        border-bottom: 1px solid rgba(24, 203, 150, 0.125) !important;
+    }
+    .card-header h5 {
+        color: #14a97b !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}

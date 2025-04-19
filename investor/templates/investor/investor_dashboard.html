@@ -1,351 +1,326 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investor Dashboard - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
+
+{% block title %}Investor Dashboard - FineStart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .greeting-section {
+        background: linear-gradient(135deg, #18cb96, #14a97b);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #18cb96;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.875rem;
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        color: #18cb96;
+        margin-bottom: 1rem;
+    }
+
+    .recent-activity {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .activity-list {
+        margin-top: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #18cb96;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-content h4 {
+        margin: 0;
+        color: #18cb96;
+    }
+
+    .activity-content p {
+        margin: 0.25rem 0 0;
+        color: #666;
+        font-size: 0.875rem;
+    }
+
+    .activity-time {
+        color: #999;
+        font-size: 0.875rem;
+    }
+
+    .portfolio-overview {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .portfolio-chart {
+        height: 300px;
+        margin-top: 1rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .profile-action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        color: white;
+        background: #18cb96;
+    }
+
+    .offers-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .offer-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .offer-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .offer-header h4 {
+        margin: 0;
+        color: #18cb96;
+    }
+
+    .offer-status {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-accepted {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    @media (max-width: 768px) {
         .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
-
-        .greeting-section {
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-
+        
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #1E3A8A;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.875rem;
-        }
-
-        .stat-icon {
-            font-size: 1.5rem;
-            color: #4A90E2;
-            margin-bottom: 1rem;
-        }
-
-        .recent-activity {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .activity-list {
-            margin-top: 1rem;
+            grid-template-columns: 1fr;
         }
 
         .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
+            flex-direction: column;
+            text-align: center;
         }
 
         .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-            color: #4A90E2;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-content h4 {
-            margin: 0;
-            color: #1E3A8A;
-        }
-
-        .activity-content p {
-            margin: 0.25rem 0 0;
-            color: #666;
-            font-size: 0.875rem;
+            margin: 0 auto 1rem;
         }
 
         .activity-time {
-            color: #999;
-            font-size: 0.875rem;
+            margin-top: 0.5rem;
         }
+    }
+</style>
+{% endblock %}
 
-        .portfolio-overview {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .portfolio-chart {
-            height: 300px;
-            margin-top: 1rem;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .profile-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .profile-action-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 500;
-            color: white;
-            background: #1E3A8A;
-        }
-
-        .offers-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .offer-card {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .offer-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .offer-header h4 {
-            margin: 0;
-            color: #1E3A8A;
-        }
-
-        .offer-status {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-accepted {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejected {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .activity-item {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .activity-icon {
-                margin: 0 auto 1rem;
-            }
-
-            .activity-time {
-                margin-top: 0.5rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+{% block content %}
+<main class="dashboard-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
             </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
+        {% endfor %}
+    {% endif %}
 
-    <main class="dashboard-container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        {% if profile_missing %}
-            <div class="alert alert-info">
-                <h2>Welcome to FineStart!</h2>
-                <p>You need to set up your investor profile to get started.</p>
-                <div class="profile-actions">
-                    <a href="{% url 'investor:investor_profile' %}" class="profile-action-btn">
-                        <i class="fas fa-user-plus"></i> Create Profile
-                    </a>
-                </div>
+    {% if profile_missing %}
+        <div class="alert alert-info">
+            <h2>Welcome to FineStart!</h2>
+            <p>You need to set up your investor profile to get started.</p>
+            <div class="profile-actions">
+                <a href="{% url 'investor:investor_profile' %}" class="profile-action-btn">
+                    <i class="fas fa-user-plus"></i> Create Profile
+                </a>
             </div>
-        {% else %}
-            <div class="greeting-section">
-                <h1>Welcome back, {{ welcome_name }}!</h1>
-                <p>Here's an overview of your investment portfolio and recent activities</p>
-            </div>
+        </div>
+    {% else %}
+        <div class="greeting-section">
+            <h1>Welcome back, {{ welcome_name }}!</h1>
+            <p>Here's an overview of your investment portfolio and recent activities</p>
+        </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="stat-value">{{ offer_counts.total|default:"0" }}</div>
-                    <div class="stat-label">Total Offers Made</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-handshake"></i>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-value">{{ offer_counts.pending|default:"0" }}</div>
-                    <div class="stat-label">Pending Offers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-value">{{ offer_counts.accepted|default:"0" }}</div>
-                    <div class="stat-label">Accepted Offers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <div class="stat-value">
-                        {% if offer_counts.total > 0 %}
-                            {% widthratio offer_counts.accepted offer_counts.total 100 %}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </div>
-                    <div class="stat-label">Acceptance Rate</div>
-                </div>
+                <div class="stat-value">{{ offer_counts.total|default:"0" }}</div>
+                <div class="stat-label">Total Offers Made</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-value">{{ offer_counts.pending|default:"0" }}</div>
+                <div class="stat-label">Pending Offers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ offer_counts.accepted|default:"0" }}</div>
+                <div class="stat-label">Accepted Offers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-value">
+                    {% if offer_counts.total > 0 %}
+                        {% widthratio offer_counts.accepted offer_counts.total 100 %}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="stat-label">Acceptance Rate</div>
+            </div>
+        </div>
 
-            {% if offers %}
-                <div class="offers-section">
-                    <h2>Your Offers</h2>
-                    {% for offer in offers %}
-                        <div class="offer-card">
-                            <div class="offer-header">
-                                <h4>Offer to {{ offer.startup.name }}</h4>
-                                <span class="offer-status status-{{ offer.status }}">{{ offer.status }}</span>
-                            </div>
-                            <p><strong>Equity:</strong> {{ offer.equity_percentage }}% | <strong>Royalty:</strong> {{ offer.royalty_percentage }}%</p>
-                            <p><strong>Date:</strong> {{ offer.created_at|date:"M d, Y" }}</p>
+        {% if offers %}
+            <div class="offers-section">
+                <h2>Your Offers</h2>
+                {% for offer in offers %}
+                    <div class="offer-card">
+                        <div class="offer-header">
+                            <h4>Offer to {{ offer.startup.name }}</h4>
+                            <span class="offer-status status-{{ offer.status }}">{{ offer.status }}</span>
                         </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <div class="portfolio-overview">
-                <h2>Investment Opportunities</h2>
-                <p>Discover promising startups looking for investment.</p>
-                <div class="profile-actions">
-                    <a href="{% url 'startup:find_startups' %}" class="profile-action-btn">
-                        <i class="fas fa-search"></i> Find Startups
-                    </a>
-                </div>
+                        <p><strong>Equity:</strong> {{ offer.equity_percentage }}% | <strong>Royalty:</strong> {{ offer.royalty_percentage }}%</p>
+                        <p><strong>Date:</strong> {{ offer.created_at|date:"M d, Y" }}</p>
+                    </div>
+                {% endfor %}
             </div>
         {% endif %}
-    </main>
-</body>
-</html> 
+
+        <div class="portfolio-overview">
+            <h2>Investment Opportunities</h2>
+            <p>Discover promising startups looking for investment.</p>
+            <div class="profile-actions">
+                <a href="{% url 'startup:find_startups' %}" class="profile-action-btn">
+                    <i class="fas fa-search"></i> Find Startups
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</main>
+{% endblock %} 

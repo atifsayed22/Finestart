@@ -1,318 +1,292 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discover Startups - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
+
+{% block title %}Discover Startups - FineStart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .discovery-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .search-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #18cb96;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .search-button {
+        background: linear-gradient(135deg, #18cb96, #14a97b);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: opacity 0.3s;
+        align-self: end;
+    }
+
+    .search-button:hover {
+        opacity: 0.9;
+    }
+
+    .startups-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .startup-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s;
+    }
+
+    .startup-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .startup-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .startup-content {
+        padding: 1.5rem;
+    }
+
+    .startup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .startup-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #18cb96;
+        margin: 0;
+    }
+
+    .startup-stage {
+        background: #e5e5e5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .startup-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .startup-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .metric-item {
+        text-align: center;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #18cb96;
+    }
+
+    .metric-label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .startup-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .tag {
+        background: #f5f5f5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-button {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: opacity 0.3s;
+        text-align: center;
+    }
+
+    .view-button {
+        background: #18cb96;
+        color: white;
+    }
+
+    .contact-button {
+        background: #14a97b;
+        color: white;
+    }
+
+    .action-button:hover {
+        opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
         .discovery-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
-
-        .search-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
+        
         .search-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            grid-template-columns: 1fr;
         }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #1E3A8A;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .search-button {
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: opacity 0.3s;
-            align-self: end;
-        }
-
-        .search-button:hover {
-            opacity: 0.9;
-        }
-
+        
         .startups-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+{% endblock %}
 
-        .startup-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-
-        .startup-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .startup-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .startup-content {
-            padding: 1.5rem;
-        }
-
-        .startup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .startup-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1E3A8A;
-            margin: 0;
-        }
-
-        .startup-stage {
-            background: #e5e5e5;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .startup-description {
-            color: #666;
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .startup-metrics {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .metric-item {
-            text-align: center;
-        }
-
-        .metric-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1E3A8A;
-        }
-
-        .metric-label {
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .startup-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .tag {
-            background: #f5f5f5;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .action-button {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: opacity 0.3s;
-            text-align: center;
-        }
-
-        .view-button {
-            background: #4A90E2;
-            color: white;
-        }
-
-        .contact-button {
-            background: #00BFA6;
-            color: white;
-        }
-
-        .action-button:hover {
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            .discovery-container {
-                padding: 1rem;
-            }
-            
-            .search-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .startups-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
+{% block content %}
+<main class="discovery-container">
+    <div class="search-section">
+        <h2>Find Your Next Investment</h2>
+        <form class="search-form" method="GET">
+            <div class="form-group">
+                <label for="industry">Industry</label>
+                <select id="industry" name="industry">
+                    <option value="">All Industries</option>
+                    <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
+                    <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                    <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>FinTech</option>
+                    <option value="ai">AI/ML</option>
+                    <option value="ecommerce">E-commerce</option>
+                </select>
             </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
+            <div class="form-group">
+                <label for="stage">Stage</label>
+                <select id="stage" name="stage">
+                    <option value="">All Stages</option>
+                    <option value="seed">Seed</option>
+                    <option value="early">Early Stage</option>
+                    <option value="growth">Growth</option>
+                    <option value="late">Late Stage</option>
+                </select>
             </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
+            <div class="form-group">
+                <label for="region">Region</label>
+                <select id="region" name="region">
+                    <option value="">All Regions</option>
+                    <option value="north-america">North America</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asia</option>
+                </select>
             </div>
-        </nav>
-    </header>
+            <div class="form-group">
+                <label for="investment">Investment Range</label>
+                <select id="investment" name="investment">
+                    <option value="">Any Range</option>
+                    <option value="0-100k">$0 - $100K</option>
+                    <option value="100k-500k">$100K - $500K</option>
+                    <option value="500k-1m">$500K - $1M</option>
+                    <option value="1m+">$1M+</option>
+                </select>
+            </div>
+            <button type="submit" class="search-button">Search</button>
+        </form>
+    </div>
 
-    <main class="discovery-container">
-        <div class="search-section">
-            <h2>Find Your Next Investment</h2>
-            <form class="search-form" method="GET">
-                <div class="form-group">
-                    <label for="industry">Industry</label>
-                    <select id="industry" name="industry">
-                        <option value="">All Industries</option>
-                        <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
-                        <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
-                        <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>FinTech</option>
-                        <option value="ai">AI/ML</option>
-                        <option value="ecommerce">E-commerce</option>
-                    </select>
+    <div class="startups-grid">
+        {% for startup in startups %}
+        <div class="startup-card">
+            {% if startup.company_logo %}
+                <img src="{{ startup.company_logo.url }}" alt="{{ startup.name }} Logo" class="startup-image">
+            {% else %}
+                <img src="{% static 'images/default_logo.png' %}" alt="Default Logo" class="startup-image">
+            {% endif %}
+            <div class="startup-content">
+                <div class="startup-header">
+                    <h3 class="startup-name">{{ startup.name }}</h3>
                 </div>
-                <div class="form-group">
-                    <label for="stage">Stage</label>
-                    <select id="stage" name="stage">
-                        <option value="">All Stages</option>
-                        <option value="seed">Seed</option>
-                        <option value="early">Early Stage</option>
-                        <option value="growth">Growth</option>
-                        <option value="late">Late Stage</option>
-                    </select>
+                <p class="startup-description">
+                    {{ startup.funding_purpose|truncatewords:20 }}
+                </p>
+                <div class="startup-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">${{ startup.investment_required|floatformat:0 }}</div>
+                        <div class="metric-label">Investment Req.</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ startup.years_in_business }}</div>
+                        <div class="metric-label">Years Active</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="region">Region</label>
-                    <select id="region" name="region">
-                        <option value="">All Regions</option>
-                        <option value="north-america">North America</option>
-                        <option value="europe">Europe</option>
-                        <option value="asia">Asia</option>
-                    </select>
+                <div class="startup-tags">
+                    <span class="tag">{{ startup.get_industry_type_display }}</span>
                 </div>
-                <div class="form-group">
-                    <label for="investment">Investment Range</label>
-                    <select id="investment" name="investment">
-                        <option value="">Any Range</option>
-                        <option value="0-100k">$0 - $100K</option>
-                        <option value="100k-500k">$100K - $500K</option>
-                        <option value="500k-1m">$500K - $1M</option>
-                        <option value="1m+">$1M+</option>
-                    </select>
+                <div class="action-buttons">
+                    <a href="#" class="action-button view-button">View Details</a>
+                    <a href="{% url 'startup:create_offer' startup.id %}" class="action-button contact-button">Make Offer</a>
                 </div>
-                <button type="submit" class="search-button">Search</button>
-            </form>
+            </div>
         </div>
-
-        <div class="startups-grid">
-            {% for startup in startups %}
-            <div class="startup-card">
-                {% if startup.company_logo %}
-                    <img src="{{ startup.company_logo.url }}" alt="{{ startup.name }} Logo" class="startup-image">
-                {% else %}
-                    <img src="{% static 'images/default_logo.png' %}" alt="Default Logo" class="startup-image">
-                {% endif %}
-                <div class="startup-content">
-                    <div class="startup-header">
-                        <h3 class="startup-name">{{ startup.name }}</h3>
-                    </div>
-                    <p class="startup-description">
-                        {{ startup.funding_purpose|truncatewords:20 }}
-                    </p>
-                    <div class="startup-metrics">
-                        <div class="metric-item">
-                            <div class="metric-value">${{ startup.investment_required|floatformat:0 }}</div>
-                            <div class="metric-label">Investment Req.</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">{{ startup.years_in_business }}</div>
-                            <div class="metric-label">Years Active</div>
-                        </div>
-                    </div>
-                    <div class="startup-tags">
-                        <span class="tag">{{ startup.get_industry_type_display }}</span>
-                    </div>
-                    <div class="action-buttons">
-                        <a href="#" class="action-button view-button">View Details</a>
-                        {# DEBUG: {{ startup.id }} #}
-                        <a href="{% url 'startup:create_offer' startup.id %}" class="action-button contact-button">Make Offer</a>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No startups found matching your criteria.</p>
-            {% endfor %}
-        </div>
-    </main>
-</body>
-</html> 
+        {% empty %}
+        <p>No startups found matching your criteria.</p>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %} 
