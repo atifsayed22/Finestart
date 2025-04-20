@@ -4,26 +4,7 @@
 {% block title %}Manage Received Offers{% endblock %}
 
 {% block header %}
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div> 
-                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
+    {{ block.super }}
 {% endblock %}
 
 {% block content %}
@@ -108,12 +89,106 @@
                                 <span class="badge" style="background-color: rgba(220, 53, 69, 0.2); color: #721c24;">{{ offer.get_status_display }}</span>
                             {% endif %}
                         </div>
-                        {% if offer.status == 'pending' %}
-                            <div>
+                        <div>
+                            <button type="button" class="btn btn-sm me-2" style="background-color: #4A90E2; color: white;" data-bs-toggle="modal" data-bs-target="#investorModal{{ offer.id }}">
+                                <i class="fas fa-user"></i> View Investor
+                            </button>
+                            {% if offer.status == 'pending' %}
                                 <a href="{% url 'startup:respond_to_offer' offer.id 'accept' %}" class="btn btn-sm me-2" style="background-color: #18cb96; color: white;">Accept</a>
                                 <a href="{% url 'startup:respond_to_offer' offer.id 'reject' %}" class="btn btn-sm" style="background-color: #dc3545; color: white;">Reject</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investor Details Modal -->
+                <div class="modal fade" id="investorModal{{ offer.id }}" tabindex="-1" aria-labelledby="investorModalLabel{{ offer.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background-color: #18cb96; color: white;">
+                                <h5 class="modal-title" id="investorModalLabel{{ offer.id }}">Investor Profile: {{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                        {% endif %}
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-4 text-center mb-3">
+                                        <div style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; background-color: #f8f9fa; margin: 0 auto; border: 2px solid #18cb96; display: flex; align-items: center; justify-content: center;">
+                                            {% if offer.investor.profile_picture %}
+                                                <img src="{{ offer.investor.profile_picture.url }}" alt="Investor" style="width: 100%; height: 100%; object-fit: cover;">
+                                            {% else %}
+                                                <i class="fas fa-user-tie fa-3x" style="color: #18cb96;"></i>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4>{{ offer.investor.user.get_full_name|default:offer.investor.user.username }}</h4>
+                                        <p><strong>Investor Type:</strong> {{ offer.investor.investor_type }}</p>
+                                        {% if offer.investor.company_name %}
+                                            <p><strong>Company:</strong> {{ offer.investor.company_name }}</p>
+                                        {% endif %}
+                                        {% if offer.investor.location %}
+                                            <p><strong>Location:</strong> {{ offer.investor.location }}</p>
+                                        {% endif %}
+                                        <p><strong>Investment Range:</strong> {{ offer.investor.investment_range }}</p>
+                                        {% if offer.investor.portfolio_size %}
+                                            <p><strong>Portfolio Size:</strong> {{ offer.investor.portfolio_size }} companies</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <hr>
+
+                                {% if offer.investor.investment_focus %}
+                                <div class="mb-3">
+                                    <h5>Investment Focus</h5>
+                                    <p>{{ offer.investor.investment_focus }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if offer.investor.about %}
+                                <div class="mb-3">
+                                    <h5>About</h5>
+                                    <p>{{ offer.investor.about }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mb-3">
+                                    <h5>Current Offer</h5>
+                                    <table class="table">
+                                        <tr>
+                                            <th>Equity Percentage</th>
+                                            <td>{{ offer.equity_percentage }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Royalty Percentage</th>
+                                            <td>{{ offer.royalty_percentage }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Offer Status</th>
+                                            <td>
+                                                {% if offer.status == 'pending' %}
+                                                    <span class="badge" style="background-color: rgba(255, 193, 7, 0.2); color: #856404;">{{ offer.get_status_display }}</span>
+                                                {% elif offer.status == 'accepted' %}
+                                                    <span class="badge" style="background-color: rgba(24, 203, 150, 0.2); color: #14a97b;">{{ offer.get_status_display }}</span>
+                                                {% elif offer.status == 'rejected' %}
+                                                    <span class="badge" style="background-color: rgba(220, 53, 69, 0.2); color: #721c24;">{{ offer.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Offer Date</th>
+                                            <td>{{ offer.created_at|date:"F j, Y" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="mailto:{{ offer.investor.user.email }}" class="btn btn-primary">
+                                    <i class="fas fa-envelope"></i> Contact via Email
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {% endfor %}

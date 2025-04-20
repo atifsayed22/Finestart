@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Investor Dashboard - FineStart{% endblock %}
 
@@ -21,35 +22,35 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
     .stat-card {
-        background: white;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 600;
-        color: #18cb96;
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4299e1;
         margin-bottom: 0.5rem;
     }
 
     .stat-label {
-        color: #666;
-        font-size: 0.875rem;
-    }
-
-    .stat-icon {
-        font-size: 1.5rem;
-        color: #18cb96;
-        margin-bottom: 1rem;
+        font-size: 1rem;
+        color: #4a5568;
     }
 
     .recent-activity {
@@ -159,53 +160,93 @@
     }
 
     .offers-section {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
+        margin-top: 2rem;
+    }
+
+    .offers-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
     }
 
     .offer-card {
-        border: 1px solid #eee;
+        background-color: white;
         border-radius: 8px;
-        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
         margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
     }
 
     .offer-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.5rem;
+        align-items: center;
+        margin-bottom: 1rem;
     }
 
-    .offer-header h4 {
-        margin: 0;
-        color: #18cb96;
+    .offer-title {
+        font-size: 1.25rem;
+        font-weight: bold;
     }
 
     .offer-status {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
     }
 
     .status-pending {
-        background-color: #fff3cd;
-        color: #856404;
+        background-color: #fed7aa;
+        color: #9a3412;
     }
 
     .status-accepted {
-        background-color: #d4edda;
-        color: #155724;
+        background-color: #bbf7d0;
+        color: #166534;
     }
 
     .status-rejected {
-        background-color: #f8d7da;
-        color: #721c24;
+        background-color: #fecaca;
+        color: #991b1b;
+    }
+
+    .offer-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .offer-detail {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .offer-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+
+    .offer-value {
+        font-weight: medium;
+    }
+
+    .offer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .no-offers {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8fafc;
+        border-radius: 8px;
+        margin-top: 1rem;
     }
 
     @media (max-width: 768px) {
@@ -229,6 +270,35 @@
         .activity-time {
             margin-top: 0.5rem;
         }
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .primary-button {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+    }
+
+    .primary-button:hover {
+        background-color: var(--primary-dark);
+        color: white;
+    }
+
+    .secondary-button {
+        background-color: #f8f9fa;
+        color: #495057;
+        border: 1px solid #ced4da;
+    }
+
+    .secondary-button:hover {
+        background-color: #e9ecef;
+        color: #212529;
     }
 </style>
 {% endblock %}
@@ -261,64 +331,111 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-handshake"></i>
-                </div>
-                <div class="stat-value">{{ offer_counts.total|default:"0" }}</div>
-                <div class="stat-label">Total Offers Made</div>
+                <div class="stat-number">{{ stats.active_offers|default:"0" }}</div>
+                <div class="stat-label">Active Offers</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-value">{{ offer_counts.pending|default:"0" }}</div>
-                <div class="stat-label">Pending Offers</div>
+                <div class="stat-number">{{ stats.startups_connected|default:"0" }}</div>
+                <div class="stat-label">Connected Startups</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-value">{{ offer_counts.accepted|default:"0" }}</div>
-                <div class="stat-label">Accepted Offers</div>
+                <div class="stat-number">{{ stats.total_investment|default:"$0" }}</div>
+                <div class="stat-label">Total Investment</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="stat-value">
-                    {% if offer_counts.total > 0 %}
-                        {% widthratio offer_counts.accepted offer_counts.total 100 %}%
-                    {% else %}
-                        0%
-                    {% endif %}
-                </div>
-                <div class="stat-label">Acceptance Rate</div>
+                <div class="stat-number">{{ stats.pending_requests|default:"0" }}</div>
+                <div class="stat-label">Pending Requests</div>
             </div>
         </div>
 
-        {% if offers %}
-            <div class="offers-section">
-                <h2>Your Offers</h2>
+        <div class="offers-section">
+            <div class="offers-header">
+                <h2>Recent Offers</h2>
+                <a href="{% url 'investor:startup_discovery' %}" class="btn primary-button">Create New Offer</a>
+            </div>
+            
+            {% if offers %}
                 {% for offer in offers %}
                     <div class="offer-card">
                         <div class="offer-header">
-                            <h4>Offer to {{ offer.startup.name }}</h4>
-                            <span class="offer-status status-{{ offer.status }}">{{ offer.status }}</span>
+                            <div class="offer-title">{{ offer.startup.name }}</div>
+                            {% if offer.status == 'pending' %}
+                                <div class="offer-status status-pending">Pending</div>
+                            {% elif offer.status == 'accepted' %}
+                                <div class="offer-status status-accepted">Accepted</div>
+                            {% elif offer.status == 'rejected' %}
+                                <div class="offer-status status-rejected">Rejected</div>
+                            {% endif %}
                         </div>
-                        <p><strong>Equity:</strong> {{ offer.equity_percentage }}% | <strong>Royalty:</strong> {{ offer.royalty_percentage }}%</p>
-                        <p><strong>Date:</strong> {{ offer.created_at|date:"M d, Y" }}</p>
+                        
+                        <div class="offer-details">
+                            <div class="offer-detail">
+                                <span class="offer-label">Investment Amount</span>
+                                <span class="offer-value">${{ offer.investment_amount|floatformat:0|default:"0" }}</span>
+                            </div>
+                            <div class="offer-detail">
+                                <span class="offer-label">Equity Percentage</span>
+                                <span class="offer-value">{{ offer.equity_percentage }}%</span>
+                            </div>
+                            <div class="offer-detail">
+                                <span class="offer-label">Date Offered</span>
+                                <span class="offer-value">{{ offer.created_at|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="offer-detail">
+                                <span class="offer-label">Industry</span>
+                                <span class="offer-value">{{ offer.startup.industry }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="offer-actions">
+                            <a href="#" class="btn secondary-button">View Details</a>
+                            {% if offer.status == 'pending' %}
+                                <a href="#" class="btn primary-button">Edit Offer</a>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
-            </div>
-        {% endif %}
+            {% else %}
+                <div class="no-offers">
+                    <p>You haven't made any offers yet.</p>
+                    <p>Create an offer to start connecting with promising startups!</p>
+                    <a href="{% url 'investor:find_startups' %}" class="btn primary-button mt-4">Discover Startups</a>
+                </div>
+            {% endif %}
+        </div>
 
-        <div class="portfolio-overview">
-            <h2>Investment Opportunities</h2>
-            <p>Discover promising startups looking for investment.</p>
-            <div class="profile-actions">
-                <a href="{% url 'startup:find_startups' %}" class="profile-action-btn">
-                    <i class="fas fa-search"></i> Find Startups
-                </a>
+        <div class="recommended-section mt-5">
+            <h2>Recommended for You</h2>
+            <div class="startup-grid">
+                {% if recommended_startups %}
+                    {% for startup in recommended_startups %}
+                        <div class="startup-card">
+                            <div class="startup-header">
+                                <h3>{{ startup.name }}</h3>
+                                <span class="startup-industry">{{ startup.industry }}</span>
+                            </div>
+                            <div class="startup-body">
+                                <p>{{ startup.description|truncatechars:150 }}</p>
+                                <div class="startup-stats">
+                                    <div class="startup-stat">
+                                        <span class="label">Seeking</span>
+                                        <span class="value">${{ startup.investment_required|floatformat:0|default:"0" }}</span>
+                                    </div>
+                                    <div class="startup-stat">
+                                        <span class="label">Years</span>
+                                        <span class="value">{{ startup.years_in_business }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="startup-footer">
+                                <a href="#" class="btn secondary-button">View Profile</a>
+                                <a href="{% url 'startup:create_offer' startup.id %}" class="btn primary-button">Make Offer</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-startups">No recommended startups available at this time. Try exploring our <a href="{% url 'investor:find_startups' %}">startup discovery</a> page.</p>
+                {% endif %}
             </div>
         </div>
     {% endif %}

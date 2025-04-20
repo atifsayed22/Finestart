@@ -4,135 +4,231 @@
 {% block title %}Find Startups{% endblock %}
 
 {% block header %}
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
+    {{ block.super }}
 {% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Override any remaining blue colors with our green theme */
-    .btn-primary {
-        background-color: #18cb96 !important;
-        border-color: #18cb96 !important;
+    .startup-card {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
     }
-    .btn-primary:hover {
-        background-color: #14a97b !important;
-        border-color: #14a97b !important;
+    
+    .startup-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
     }
-    .card-header {
-        background-color: rgba(24, 203, 150, 0.1) !important;
-        border-bottom: 1px solid rgba(24, 203, 150, 0.125) !important;
+    
+    .startup-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .card-header h5 {
-        color: #14a97b !important;
+    
+    .startup-body {
+        padding: 20px;
+        background-color: white;
+    }
+    
+    .startup-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .tag-industry {
+        background-color: rgba(24, 203, 150, 0.15);
+        color: var(--primary-dark);
+    }
+    
+    .tag-market {
+        background-color: rgba(98, 0, 238, 0.1);
+        color: #6200ee;
+    }
+    
+    .tag-years {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+    
+    .tag-growth {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+    
+    .investment-required {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin: 10px 0;
+    }
+    
+    .startup-description {
+        margin: 15px 0;
+        color: #555;
+    }
+    
+    .filter-section {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    
+    .filter-section h3 {
+        margin-bottom: 20px;
+        color: var(--primary-dark);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Find Startups</h2>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" role="alert">
-                {{ message }}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4">Find Startups</h1>
+    
+    <div class="filter-section">
+        <h3>Filter Startups</h3>
+        <form method="get" action="{% url 'investor:find_startups' %}" class="row g-3">
+            <div class="col-md-4">
+                <label for="industry" class="form-label">Industry</label>
+                <select class="form-select" id="industry" name="industry">
+                    <option value="">All Industries</option>
+                    <option value="Technology" {% if request.GET.industry == 'Technology' %}selected{% endif %}>Technology</option>
+                    <option value="Healthcare" {% if request.GET.industry == 'Healthcare' %}selected{% endif %}>Healthcare</option>
+                    <option value="Finance" {% if request.GET.industry == 'Finance' %}selected{% endif %}>Finance</option>
+                    <option value="Education" {% if request.GET.industry == 'Education' %}selected{% endif %}>Education</option>
+                    <option value="E-commerce" {% if request.GET.industry == 'E-commerce' %}selected{% endif %}>E-commerce</option>
+                </select>
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <!-- Filter Form -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <h5>Filter Startups</h5>
-        </div>
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <label for="industry" class="form-label">Industry</label>
-                    <select name="industry" id="industry" class="form-select">
-                        <option value="">All Industries</option>
-                        <option value="tech" {% if current_filters.industry == 'tech' %}selected{% endif %}>Technology</option>
-                        <option value="fintech" {% if current_filters.industry == 'fintech' %}selected{% endif %}>Fintech</option>
-                        <option value="healthcare" {% if current_filters.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
-                        <option value="education" {% if current_filters.industry == 'education' %}selected{% endif %}>Education</option>
-                        <option value="other" {% if current_filters.industry == 'other' %}selected{% endif %}>Other</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="years_in_business" class="form-label">Years in Business (min)</label>
-                    <input type="number" class="form-control" id="years_in_business" name="years_in_business" value="{{ current_filters.years_in_business }}">
-                </div>
-                <div class="col-md-4">
-                    <label for="growth_trend" class="form-label">Growth Trend</label>
-                    <select name="growth_trend" id="growth_trend" class="form-select">
-                        <option value="">All Trends</option>
-                        <option value="growing" {% if current_filters.growth_trend == 'growing' %}selected{% endif %}>Growing</option>
-                        <option value="stable" {% if current_filters.growth_trend == 'stable' %}selected{% endif %}>Stable</option>
-                        <option value="declining" {% if current_filters.growth_trend == 'declining' %}selected{% endif %}>Declining</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{% url 'startup:find_startups' %}" class="btn btn-outline-secondary">Clear Filters</a>
-                </div>
-            </form>
-        </div>
+            <div class="col-md-4">
+                <label for="years_in_business" class="form-label">Years in Business</label>
+                <select class="form-select" id="years_in_business" name="years_in_business">
+                    <option value="">Any</option>
+                    <option value="Less than 1" {% if request.GET.years_in_business == 'Less than 1' %}selected{% endif %}>Less than 1</option>
+                    <option value="1-3" {% if request.GET.years_in_business == '1-3' %}selected{% endif %}>1-3 years</option>
+                    <option value="3-5" {% if request.GET.years_in_business == '3-5' %}selected{% endif %}>3-5 years</option>
+                    <option value="5+" {% if request.GET.years_in_business == '5+' %}selected{% endif %}>5+ years</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="growth_trend" class="form-label">Growth Trend</label>
+                <select class="form-select" id="growth_trend" name="growth_trend">
+                    <option value="">Any</option>
+                    <option value="Rapid" {% if request.GET.growth_trend == 'Rapid' %}selected{% endif %}>Rapid</option>
+                    <option value="Steady" {% if request.GET.growth_trend == 'Steady' %}selected{% endif %}>Steady</option>
+                    <option value="Slow" {% if request.GET.growth_trend == 'Slow' %}selected{% endif %}>Slow</option>
+                </select>
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'investor:find_startups' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
     </div>
-
-    <!-- Startups List -->
-    {% if startups %}
-        <div class="row">
+    
+    <div class="row">
+        {% if startups %}
             {% for startup in startups %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>{{ startup.name }}</h5>
-                            {% if startup.company_logo %}
-                                <img src="{{ startup.company_logo.url }}" alt="{{ startup.name }} Logo" style="height: 40px;">
-                            {% endif %}
+                <div class="col-lg-6 mb-4">
+                    <div class="startup-card">
+                        <div class="startup-header">
+                            <h5 class="mb-0">{{ startup.name }}</h5>
+                            <span class="tag tag-growth">{{ startup.growth_trend }}</span>
                         </div>
-                        <div class="card-body">
-                            <p><strong>Industry:</strong> {{ startup.get_industry_type_display }}</p>
-                            <p><strong>Years in Business:</strong> {{ startup.years_in_business }}</p>
-                            <p><strong>Growth Trend:</strong> {{ startup.get_growth_trend_display }}</p>
-                            <p><strong>Investment Required:</strong> ${{ startup.investment_required }}</p>
-                            <hr>
-                            <p><strong>Target Market:</strong> {{ startup.target_market|truncatechars:100 }}</p>
+                        <div class="startup-body">
+                            <div class="tags mb-3">
+                                <span class="tag tag-industry">{{ startup.industry }}</span>
+                                <span class="tag tag-years">{{ startup.years_in_business }} years</span>
+                                <span class="tag tag-market">{{ startup.target_market }}</span>
+                            </div>
+                            
+                            <div class="investment-required">
+                                Investment: ${{ startup.investment_required }}
+                            </div>
+                            
+                            <div class="startup-description">
+                                {{ startup.description|truncatechars:150 }}
+                            </div>
                         </div>
-                        <div class="card-footer bg-white border-top-0">
-                            <a href="{% url 'startup:create_offer' startup.id %}" class="btn btn-primary">Make an Offer</a>
+                        <div class="startup-footer">
+                            <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ startup.id }}">
+                                Contact Startup
+                            </a>
+                            <a href="#" class="btn btn-sm btn-outline-primary ms-2">View Details</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Modal -->
+                    <div class="modal fade" id="contactModal{{ startup.id }}" tabindex="-1" aria-labelledby="contactModalLabel{{ startup.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="contactModalLabel{{ startup.id }}">Contact {{ startup.name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" action="{% url 'investor:create_offer' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="startup_id" value="{{ startup.id }}">
+                                        
+                                        <div class="mb-3">
+                                            <label for="message{{ startup.id }}" class="form-label">Message</label>
+                                            <textarea class="form-control" id="message{{ startup.id }}" name="message" rows="4" 
+                                                placeholder="Introduce yourself and why you're interested in this startup"></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="investment_amount{{ startup.id }}" class="form-label">Investment Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="investment_amount{{ startup.id }}" 
+                                                    name="investment_amount" placeholder="50000">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="equity_percentage{{ startup.id }}" class="form-label">Equity Percentage</label>
+                                            <div class="input-group">
+                                                <input type="number" step="0.1" class="form-control" id="equity_percentage{{ startup.id }}" 
+                                                    name="equity_percentage" placeholder="5.0">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">Send Offer</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            {% if error_message %}
-                {{ error_message }}
-            {% else %}
-                No startups found matching your criteria.
-            {% endif %}
-        </div>
-    {% endif %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> No startups match your search criteria. Try adjusting your filters.
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %} 

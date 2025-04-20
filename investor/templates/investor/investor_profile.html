@@ -1,144 +1,349 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investor Profile - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        .profile-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 2rem;
-        }
-        
-        .profile-header {
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .profile-content {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .profile-section {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .profile-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .info-grid, .preferences-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .info-item, .preference-item {
-            margin-bottom: 1rem;
-        }
-        
-        label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        input[type="text"],
-        input[type="email"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .submit-button {
-            background: #1E3A8A;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: background 0.3s;
-        }
-        
-        .submit-button:hover {
-            background: #4A90E2;
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'investor:investor_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:startup_discovery' %}">Discover Startups</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:portfolio_tracker' %}">Portfolio</a></div>
-                <div class="nav-con-el"><a href="{% url 'investor:investor_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_startups' %}">Find Startups</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
 
-    <main class="profile-container">
-        <div class="profile-header">
-            <h1>Investor Profile</h1>
-        </div>
+{% block title %}Investor Profile - FineStart{% endblock %}
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-content {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .profile-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .profile-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .info-grid, .preferences-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .info-item, .preference-item {
+        margin-bottom: 1rem;
+    }
+    
+    label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .submit-button {
+        background: var(--primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: background 0.3s;
+    }
+    
+    .submit-button:hover {
+        background: var(--primary-dark);
+    }
+    
+    .profile-picture-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin-right: 2rem;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #4a5568;
+    }
+    
+    .profile-picture {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-picture-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e2e8f0;
+        color: #4a5568;
+        font-size: 2rem;
+    }
+    
+    .change-photo-button {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        text-align: center;
+        padding: 5px 0;
+        cursor: pointer;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .profile-picture-container:hover .change-photo-button {
+        opacity: 1;
+    }
+    
+    .profile-identity {
+        flex: 1;
+    }
+    
+    .profile-upload-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-input {
+        position: absolute;
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        z-index: -1;
+    }
+    
+    .file-label {
+        background-color: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-block;
+        margin-right: 1rem;
+        margin-bottom: 0;
+    }
+    
+    .file-name {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    .preview-container {
+        margin-top: 1rem;
+        text-align: center;
+    }
+    
+    .preview-container img {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: contain;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .preview-container button {
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="profile-container">
+    <div class="profile-header">
+        {% if investor %}
+            <div class="profile-picture-container">
+                {% if investor.profile_picture %}
+                    <img src="{{ investor.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <div class="profile-picture-placeholder">
+                        {{ investor.user.first_name|first|upper }}{{ investor.user.last_name|first|upper }}
                     </div>
-                {% endfor %}
+                {% endif %}
+                <div class="change-photo-button" id="change-photo-btn">Change Photo</div>
             </div>
+            <div class="profile-identity">
+                <h1>{{ investor.user.get_full_name }}</h1>
+                <p>{{ investor.user.email }}</p>
+                <p>{{ investor.investor_type }} Investor{% if investor.company_name %} at {{ investor.company_name }}{% endif %}</p>
+                <p>{{ investor.location }}</p>
+            </div>
+        {% else %}
+            <h1>Complete Your Investor Profile</h1>
         {% endif %}
+    </div>
 
-        <div class="profile-content">
-            {% if investor %}
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="profile-content">
+        {% if investor %}
+            {% if request.GET.edit == 'true' %}
+                <!-- Edit profile form -->
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="edit_mode" value="true">
+                    
+                    <div class="profile-section">
+                        <h2>Investor Information</h2>
+                        
+                        <div class="form-group">
+                            <label for="investor_type">Investor Type</label>
+                            <select id="investor_type" name="investor_type" required>
+                                <option value="Angel" {% if investor.investor_type == 'Angel' %}selected{% endif %}>Angel Investor</option>
+                                <option value="VC" {% if investor.investor_type == 'VC' %}selected{% endif %}>Venture Capital</option>
+                                <option value="Corporate" {% if investor.investor_type == 'Corporate' %}selected{% endif %}>Corporate</option>
+                                <option value="Private Equity" {% if investor.investor_type == 'Private Equity' %}selected{% endif %}>Private Equity</option>
+                                <option value="Individual" {% if investor.investor_type == 'Individual' %}selected{% endif %}>Individual</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="investment_range">Investment Range</label>
+                            <select id="investment_range" name="investment_range" required>
+                                <option value="0-50000" {% if investor.investment_range == '0-50000' %}selected{% endif %}>$0 - $50,000</option>
+                                <option value="50000-200000" {% if investor.investment_range == '50000-200000' %}selected{% endif %}>$50,000 - $200,000</option>
+                                <option value="200000-1000000" {% if investor.investment_range == '200000-1000000' %}selected{% endif %}>$200,000 - $1,000,000</option>
+                                <option value="1000000+" {% if investor.investment_range == '1000000+' %}selected{% endif %}>$1,000,000+</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="company_name">Company Name (if applicable)</label>
+                            <input type="text" id="company_name" name="company_name" value="{{ investor.company_name }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" placeholder="City, Country" value="{{ investor.location }}">
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>Investment Preferences</h2>
+                        
+                        <div class="form-group">
+                            <label for="investment_focus">Investment Focus (comma separated)</label>
+                            <input type="text" id="investment_focus" name="investment_focus" placeholder="Fintech, AI, Healthcare" value="{{ investor.investment_focus }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="portfolio_size">Current Portfolio Size (number of companies)</label>
+                            <input type="number" id="portfolio_size" name="portfolio_size" min="0" value="{{ investor.portfolio_size }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bio">Short Bio</label>
+                            <textarea id="bio" name="bio" rows="4" placeholder="Tell startups about yourself...">{{ investor.bio }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>Profile Media</h2>
+                        
+                        <div class="form-group">
+                            <label for="profile_picture">Profile Picture</label>
+                            <div class="profile-upload-container">
+                                <input type="file" id="profile_picture" name="profile_picture" class="file-input" accept="image/*">
+                                <label for="profile_picture" class="file-label">Choose a file</label>
+                                <span class="file-name" id="profile-file-name">
+                                    {% if investor.profile_picture %}Current: {{ investor.profile_picture.name|default:"No file chosen" }}{% else %}No file chosen{% endif %}
+                                </span>
+                            </div>
+                            {% if investor.profile_picture %}
+                            <div class="preview-container" id="profile-preview-container" style="display: block;">
+                                <img id="profile-preview" src="{{ investor.profile_picture.url }}" alt="Preview">
+                                <button type="button" id="remove-profile-picture">Remove</button>
+                            </div>
+                            {% else %}
+                            <div class="preview-container" id="profile-preview-container" style="display: none;">
+                                <img id="profile-preview" src="#" alt="Preview">
+                                <button type="button" id="remove-profile-picture">Remove</button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="company_logo">Company Logo (if applicable)</label>
+                            <div class="profile-upload-container">
+                                <input type="file" id="company_logo" name="company_logo" class="file-input" accept="image/*">
+                                <label for="company_logo" class="file-label">Choose a file</label>
+                                <span class="file-name" id="company-file-name">
+                                    {% if investor.company_logo %}Current: {{ investor.company_logo.name|default:"No file chosen" }}{% else %}No file chosen{% endif %}
+                                </span>
+                            </div>
+                            {% if investor.company_logo %}
+                            <div class="preview-container" id="company-preview-container" style="display: block;">
+                                <img id="company-preview" src="{{ investor.company_logo.url }}" alt="Preview">
+                                <button type="button" id="remove-company-logo">Remove</button>
+                            </div>
+                            {% else %}
+                            <div class="preview-container" id="company-preview-container" style="display: none;">
+                                <img id="company-preview" src="#" alt="Preview">
+                                <button type="button" id="remove-company-logo">Remove</button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'investor:investor_profile' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                    </div>
+                </form>
+            {% else %}
                 <!-- Display existing profile -->
                 <div class="profile-section">
                     <h2>Personal Information</h2>
@@ -197,88 +402,182 @@
                 {% endif %}
 
                 <div class="profile-section">
-                    <a href="#" class="submit-button" style="text-decoration: none; display: inline-block;">Edit Profile</a>
+                    <a href="{% url 'investor:investor_profile' %}?edit=true" class="btn btn-primary" style="text-decoration: none; display: inline-block;">Edit Profile</a>
                 </div>
-            {% else %}
-                <!-- Show profile creation form -->
-                <div class="alert alert-info">
-                    <p>Please complete your investor profile to access all features of the platform.</p>
+            {% endif %}
+        {% else %}
+            <!-- Show profile creation form -->
+            <div class="alert alert-info">
+                <p>Please complete your investor profile to access all features of the platform.</p>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="profile-section">
+                    <h2>Investor Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="investor_type">Investor Type</label>
+                        <select id="investor_type" name="investor_type" required>
+                            <option value="Angel">Angel Investor</option>
+                            <option value="VC">Venture Capital</option>
+                            <option value="Corporate">Corporate</option>
+                            <option value="Private Equity">Private Equity</option>
+                            <option value="Individual">Individual</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="investment_range">Investment Range</label>
+                        <select id="investment_range" name="investment_range" required>
+                            <option value="0-50000">$0 - $50,000</option>
+                            <option value="50000-200000">$50,000 - $200,000</option>
+                            <option value="200000-1000000">$200,000 - $1,000,000</option>
+                            <option value="1000000+">$1,000,000+</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company_name">Company Name (if applicable)</label>
+                        <input type="text" id="company_name" name="company_name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="City, Country">
+                    </div>
                 </div>
                 
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="profile-section">
-                        <h2>Investor Information</h2>
-                        
-                        <div class="form-group">
-                            <label for="investor_type">Investor Type</label>
-                            <select id="investor_type" name="investor_type" required>
-                                <option value="Angel">Angel Investor</option>
-                                <option value="VC">Venture Capital</option>
-                                <option value="Corporate">Corporate</option>
-                                <option value="Private Equity">Private Equity</option>
-                                <option value="Individual">Individual</option>
-                            </select>
+                <div class="profile-section">
+                    <h2>Investment Preferences</h2>
+                    
+                    <div class="form-group">
+                        <label for="investment_focus">Investment Focus (comma separated)</label>
+                        <input type="text" id="investment_focus" name="investment_focus" placeholder="Fintech, AI, Healthcare">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="portfolio_size">Current Portfolio Size (number of companies)</label>
+                        <input type="number" id="portfolio_size" name="portfolio_size" min="0" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio">Short Bio</label>
+                        <textarea id="bio" name="bio" rows="4" placeholder="Tell startups about yourself..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h2>Profile Media</h2>
+                    
+                    <div class="form-group">
+                        <label for="profile_picture">Profile Picture</label>
+                        <div class="profile-upload-container">
+                            <input type="file" id="profile_picture" name="profile_picture" class="file-input" accept="image/*">
+                            <label for="profile_picture" class="file-label">Choose a file</label>
+                            <span class="file-name" id="profile-file-name">No file chosen</span>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="investment_range">Investment Range</label>
-                            <select id="investment_range" name="investment_range" required>
-                                <option value="0-50000">$0 - $50,000</option>
-                                <option value="50000-200000">$50,000 - $200,000</option>
-                                <option value="200000-1000000">$200,000 - $1,000,000</option>
-                                <option value="1000000+">$1,000,000+</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="company_name">Company Name (if applicable)</label>
-                            <input type="text" id="company_name" name="company_name">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="location">Location</label>
-                            <input type="text" id="location" name="location" placeholder="City, Country">
+                        <div class="preview-container" id="profile-preview-container" style="display: none;">
+                            <img id="profile-preview" src="#" alt="Preview">
+                            <button type="button" id="remove-profile-picture">Remove</button>
                         </div>
                     </div>
                     
-                    <div class="profile-section">
-                        <h2>Investment Preferences</h2>
-                        
-                        <div class="form-group">
-                            <label for="investment_focus">Investment Focus (comma separated)</label>
-                            <input type="text" id="investment_focus" name="investment_focus" placeholder="Fintech, AI, Healthcare">
+                    <div class="form-group">
+                        <label for="company_logo">Company Logo (if applicable)</label>
+                        <div class="profile-upload-container">
+                            <input type="file" id="company_logo" name="company_logo" class="file-input" accept="image/*">
+                            <label for="company_logo" class="file-label">Choose a file</label>
+                            <span class="file-name" id="company-file-name">No file chosen</span>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="portfolio_size">Current Portfolio Size (number of companies)</label>
-                            <input type="number" id="portfolio_size" name="portfolio_size" min="0" value="0">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="bio">Short Bio</label>
-                            <textarea id="bio" name="bio" rows="4" placeholder="Tell startups about yourself..."></textarea>
+                        <div class="preview-container" id="company-preview-container" style="display: none;">
+                            <img id="company-preview" src="#" alt="Preview">
+                            <button type="button" id="remove-company-logo">Remove</button>
                         </div>
                     </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Create Profile</button>
+            </form>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // File input preview for profile picture and company logo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Profile picture handling
+        const profileInput = document.getElementById('profile_picture');
+        const profileFileName = document.getElementById('profile-file-name');
+        const profilePreviewContainer = document.getElementById('profile-preview-container');
+        const profilePreview = document.getElementById('profile-preview');
+        const removeProfileBtn = document.getElementById('remove-profile-picture');
+        
+        if (profileInput) {
+            profileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    profileFileName.textContent = file.name;
                     
-                    <div class="profile-section">
-                        <h2>Profile Media</h2>
-                        
-                        <div class="form-group">
-                            <label for="profile_picture">Profile Picture</label>
-                            <input type="file" id="profile_picture" name="profile_picture">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="company_logo">Company Logo (if applicable)</label>
-                            <input type="file" id="company_logo" name="company_logo">
-                        </div>
-                    </div>
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePreview.src = e.target.result;
+                        profilePreviewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            if (removeProfileBtn) {
+                removeProfileBtn.addEventListener('click', function() {
+                    profileInput.value = '';
+                    profileFileName.textContent = 'No file chosen';
+                    profilePreviewContainer.style.display = 'none';
+                });
+            }
+        }
+        
+        // Company logo handling
+        const companyInput = document.getElementById('company_logo');
+        const companyFileName = document.getElementById('company-file-name');
+        const companyPreviewContainer = document.getElementById('company-preview-container');
+        const companyPreview = document.getElementById('company-preview');
+        const removeCompanyBtn = document.getElementById('remove-company-logo');
+        
+        if (companyInput) {
+            companyInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    companyFileName.textContent = file.name;
                     
-                    <button type="submit" class="submit-button">Create Profile</button>
-                </form>
-            {% endif %}
-        </div>
-    </main>
-</body>
-</html> 
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        companyPreview.src = e.target.result;
+                        companyPreviewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            if (removeCompanyBtn) {
+                removeCompanyBtn.addEventListener('click', function() {
+                    companyInput.value = '';
+                    companyFileName.textContent = 'No file chosen';
+                    companyPreviewContainer.style.display = 'none';
+                });
+            }
+        }
+        
+        // For existing profile - change photo button
+        const changePhotoBtn = document.getElementById('change-photo-btn');
+        if (changePhotoBtn) {
+            changePhotoBtn.addEventListener('click', function() {
+                // Open file dialog or redirect to edit form
+                document.querySelector('a.btn-primary').click();
+            });
+        }
+    });
+</script>
+{% endblock %} 

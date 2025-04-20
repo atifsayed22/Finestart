@@ -1,143 +1,216 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startup Profile - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
+
+{% block title %}Startup Profile - FineStart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .logo-upload {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .logo-upload img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .logo-upload input[type="file"] {
+        display: none;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .form-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #1E3A8A;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .form-group textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .save-button {
+        background: linear-gradient(135deg, #4A90E2, #00BFA6);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: opacity 0.3s;
+    }
+
+    .save-button:hover {
+        opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
         .profile-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
-
+        
         .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-direction: column;
+            text-align: center;
         }
+    }
 
-        .logo-upload {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            overflow: hidden;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+    /* Monthly Profit Tracking Styles */
+    .monthly-profit-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1rem;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    .current-profit {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .profit-history-container h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .profit-entries {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .profit-entry {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem;
+        background-color: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        align-items: flex-end;
+    }
+
+    .month-selector {
+        flex: 1;
+    }
+
+    .profit-amount {
+        flex: 1;
+    }
+
+    @media (max-width: 768px) {
+        .profit-entry {
+            flex-direction: column;
+            align-items: stretch;
         }
+    }
 
-        .logo-upload img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .profit-actions {
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profit-chart-container {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .remove-entry-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem;
+        cursor: pointer;
+        margin-left: 0.5rem;
+        align-self: flex-end;
+        height: 38px;
+    }
+    
+    .remove-entry-btn:hover {
+        background-color: #d32f2f;
+    }
+    
+    #add-profit-entry {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    #add-profit-entry:hover {
+        background-color: #3e8e41;
+    }
+</style>
+{% endblock %}
 
-        .logo-upload input[type="file"] {
-            display: none;
-        }
+{% block header %}
+    {{ block.super }}
+{% endblock %}
 
-        .profile-info {
-            flex: 1;
-        }
-
-        .form-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #1E3A8A;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .form-group textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        .save-button {
-            background: linear-gradient(135deg, #4A90E2, #00BFA6);
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: opacity 0.3s;
-        }
-
-        .save-button:hover {
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            .profile-container {
-                padding: 1rem;
-            }
-            
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 0 1rem;">
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">
-                        <p>Logout</p>
-                    </button>
-                </form>
-            </div>
-        </nav>
-    </header>
-
+{% block content %}
     <main class="profile-container">
         {% if messages %}
             <div class="messages">
@@ -174,7 +247,22 @@
                 </div>
                 <div class="form-group">
                     <label for="industry">Industry</label>
-                    <input type="text" id="industry" name="industry" value="{% if profile %}{{ profile.industry }}{% endif %}" required>
+                    <select id="industry" name="industry" required>
+                        <option value="" disabled {% if not profile %}selected{% endif %}>Select an industry</option>
+                        <option value="Technology" {% if profile and profile.industry == 'Technology' %}selected{% endif %}>Technology</option>
+                        <option value="Healthcare" {% if profile and profile.industry == 'Healthcare' %}selected{% endif %}>Healthcare</option>
+                        <option value="Finance" {% if profile and profile.industry == 'Finance' %}selected{% endif %}>Finance</option>
+                        <option value="Education" {% if profile and profile.industry == 'Education' %}selected{% endif %}>Education</option>
+                        <option value="E-commerce" {% if profile and profile.industry == 'E-commerce' %}selected{% endif %}>E-commerce</option>
+                        <option value="Manufacturing" {% if profile and profile.industry == 'Manufacturing' %}selected{% endif %}>Manufacturing</option>
+                        <option value="Real Estate" {% if profile and profile.industry == 'Real Estate' %}selected{% endif %}>Real Estate</option>
+                        <option value="Entertainment" {% if profile and profile.industry == 'Entertainment' %}selected{% endif %}>Entertainment</option>
+                        <option value="Food & Beverage" {% if profile and profile.industry == 'Food & Beverage' %}selected{% endif %}>Food & Beverage</option>
+                        <option value="Transportation" {% if profile and profile.industry == 'Transportation' %}selected{% endif %}>Transportation</option>
+                        <option value="Energy" {% if profile and profile.industry == 'Energy' %}selected{% endif %}>Energy</option>
+                        <option value="Agriculture" {% if profile and profile.industry == 'Agriculture' %}selected{% endif %}>Agriculture</option>
+                        <option value="Other" {% if profile and profile.industry == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="company_description">Company Description</label>
@@ -195,53 +283,269 @@
             </div>
 
             <div class="form-section">
-                <h2>Business Details</h2>
-                <div class="form-group">
-                    <label for="startup_stage">Startup Stage</label>
-                    <select id="startup_stage" name="startup_stage" required>
-                        <option value="" {% if not profile or not profile.startup_stage %}selected{% endif %}>Select Stage</option>
-                        <option value="idea" {% if profile and profile.startup_stage == 'idea' %}selected{% endif %}>Idea Stage</option>
-                        <option value="pre-seed" {% if profile and profile.startup_stage == 'pre-seed' %}selected{% endif %}>Pre-Seed</option>
-                        <option value="seed" {% if profile and profile.startup_stage == 'seed' %}selected{% endif %}>Seed</option>
-                        <option value="series-a" {% if profile and profile.startup_stage == 'series-a' %}selected{% endif %}>Series A</option>
-                        <option value="series-b" {% if profile and profile.startup_stage == 'series-b' %}selected{% endif %}>Series B</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="equity_structure">Equity Structure</label>
-                    <textarea id="equity_structure" name="equity_structure" placeholder="Describe your current equity structure...">{% if profile %}{{ profile.equity_structure }}{% endif %}</textarea>
+                <h2>Monthly Profit Tracking</h2>
+                <p class="section-description">Add your monthly profit data to generate accurate profit trend graphs for investors.</p>
+                
+                <div class="monthly-profit-container">
+                    <div class="form-group current-profit">
+                        <label for="monthly_profit">Current Monthly Profit ($)</label>
+                        <input type="number" id="monthly_profit" name="monthly_profit" step="0.01" value="{% if profile %}{{ profile.monthly_profit }}{% else %}0{% endif %}" required>
+                        <small>This will be recorded for the current month.</small>
+                    </div>
+                    
+                    <div class="profit-history-container">
+                        <h3>Past Monthly Profits</h3>
+                        <p>Add historical monthly profit data for better trend visualization.</p>
+                        
+                        <div id="profit-entries">
+                            {% for i in "12345" %}
+                            <div class="profit-entry">
+                                <div class="form-group month-selector">
+                                    <label for="profit_month_{{ forloop.counter }}">Month</label>
+                                    <input type="month" id="profit_month_{{ forloop.counter }}" name="profit_month_{{ forloop.counter }}" 
+                                           max="{{ current_month }}" class="profit-month">
+                                </div>
+                                <div class="form-group profit-amount">
+                                    <label for="profit_amount_{{ forloop.counter }}">Amount ($)</label>
+                                    <input type="number" id="profit_amount_{{ forloop.counter }}" name="profit_amount_{{ forloop.counter }}" 
+                                           step="0.01" value="0" class="profit-value">
+                                </div>
+                                <button type="button" class="remove-entry-btn">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="profit-actions">
+                            <button type="button" id="add-profit-entry" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Entry
+                            </button>
+                        </div>
+                        
+                        <div class="profit-chart-container">
+                            <h3>Profit Trend</h3>
+                            <canvas id="profit-chart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-section">
-                <h2>Business Model</h2>
+                <h2>Business Details</h2>
                 <div class="form-group">
-                    <label for="business_model">Business Model Description</label>
-                    <textarea id="business_model" name="business_model" placeholder="Describe your business model, revenue streams, and target market...">{% if profile %}{{ profile.business_model }}{% endif %}</textarea>
+                    <label for="startup_stage">Startup Stage</label>
+                    <select id="startup_stage" name="startup_stage" required>
+                        <option value="idea" {% if profile and profile.startup_stage == 'idea' %}selected{% endif %}>Idea Stage</option>
+                        <option value="mvp" {% if profile and profile.startup_stage == 'mvp' %}selected{% endif %}>MVP Ready</option>
+                        <option value="early_traction" {% if profile and profile.startup_stage == 'early_traction' %}selected{% endif %}>Early Traction</option>
+                        <option value="scaling" {% if profile and profile.startup_stage == 'scaling' %}selected{% endif %}>Scaling</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="business_model">Business Model</label>
+                    <select id="business_model" name="business_model" required>
+                        <option value="b2b" {% if profile and profile.business_model == 'b2b' %}selected{% endif %}>B2B</option>
+                        <option value="b2c" {% if profile and profile.business_model == 'b2c' %}selected{% endif %}>B2C</option>
+                        <option value="b2b2c" {% if profile and profile.business_model == 'b2b2c' %}selected{% endif %}>B2B2C</option>
+                        <option value="marketplace" {% if profile and profile.business_model == 'marketplace' %}selected{% endif %}>Marketplace</option>
+                        <option value="saas" {% if profile and profile.business_model == 'saas' %}selected{% endif %}>SaaS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="funding_stage">Funding Stage</label>
+                    <select id="funding_stage" name="funding_stage" required>
+                        <option value="pre_seed" {% if profile and profile.funding_stage == 'pre_seed' %}selected{% endif %}>Pre-Seed</option>
+                        <option value="seed" {% if profile and profile.funding_stage == 'seed' %}selected{% endif %}>Seed</option>
+                        <option value="series_a" {% if profile and profile.funding_stage == 'series_a' %}selected{% endif %}>Series A</option>
+                        <option value="series_b" {% if profile and profile.funding_stage == 'series_b' %}selected{% endif %}>Series B</option>
+                        <option value="series_c" {% if profile and profile.funding_stage == 'series_c' %}selected{% endif %}>Series C+</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="funding_needed">Funding Needed ($)</label>
+                    <input type="number" id="funding_needed" name="funding_needed" min="0" step="1000" value="{% if profile %}{{ profile.funding_needed }}{% else %}0{% endif %}" required>
                 </div>
             </div>
 
-            <button type="submit" class="save-button">{% if profile %}Update{% else %}Create{% endif %} Profile</button>
+            <div class="form-section">
+                <h2>Contact Information</h2>
+                <div class="form-group">
+                    <label for="website">Website URL</label>
+                    <input type="url" id="website" name="website" value="{% if profile %}{{ profile.website }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="contact_email">Contact Email</label>
+                    <input type="email" id="contact_email" name="contact_email" value="{% if profile %}{{ profile.contact_email }}{% else %}{{ user.email }}{% endif %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" value="{% if profile %}{{ profile.phone_number }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="{% if profile %}{{ profile.location }}{% endif %}">
+                </div>
+            </div>
+
+            <button type="submit" class="save-button">
+                {% if profile %}Update{% else %}Save{% endif %} Profile
+            </button>
         </form>
     </main>
 
     <script>
-        // Logo upload preview
-        document.getElementById('logo-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('logo-preview').src = e.target.result;
+        // JavaScript for logo preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoInput = document.getElementById('logo-input');
+            const logoPreview = document.getElementById('logo-preview');
+            const logoUpload = document.querySelector('.logo-upload');
+            
+            logoUpload.addEventListener('click', function() {
+                logoInput.click();
+            });
+            
+            logoInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        logoPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(this.files[0]);
                 }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Make the logo image clickable to trigger file input
-        document.querySelector('.logo-upload').addEventListener('click', function() {
-            document.getElementById('logo-input').click();
+            });
         });
     </script>
-</body>
-</html> 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Handle logo preview
+    $("#logo-upload").change(function() {
+      var file = this.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          $("#logo-preview").attr("src", e.target.result);
+          $(".logo-preview-container").show();
+          $(".logo-placeholder").hide();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Handle profit chart
+    const profitChart = new Chart(
+      document.getElementById('profit-chart').getContext('2d'),
+      {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Monthly Profit ($)',
+            data: [],
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Profit ($)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            }
+          }
+        }
+      }
+    );
+
+    // Update chart with profit entries
+    function updateProfitChart() {
+      const months = [];
+      const profits = [];
+      
+      // Get all profit entries that have valid data
+      $('.profit-entry').each(function() {
+        const month = $(this).find('.profit-month').val();
+        const profit = parseFloat($(this).find('.profit-value').val());
+        
+        if (month && !isNaN(profit)) {
+          // Format the month for display (e.g., "2023-05" -> "May 2023")
+          const date = new Date(month + "-01");
+          const formattedMonth = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+          
+          months.push(formattedMonth);
+          profits.push(profit);
+        }
+      });
+      
+      // Sort by date
+      const sortedData = months.map((month, i) => ({ month, profit: profits[i] }))
+        .sort((a, b) => new Date(a.month) - new Date(b.month));
+      
+      // Update chart data
+      profitChart.data.labels = sortedData.map(d => d.month);
+      profitChart.data.datasets[0].data = sortedData.map(d => d.profit);
+      profitChart.update();
+    }
+
+    // Monitor changes to profit entries
+    $(document).on('change', '.profit-month, .profit-value', function() {
+      updateProfitChart();
+    });
+
+    // Initialize with any existing data
+    updateProfitChart();
+
+    // Add new profit entry
+    $('#add-profit-entry').click(function() {
+      const entryIndex = $('.profit-entry').length + 1;
+      const newEntry = `
+        <div class="profit-entry">
+          <div class="form-group month-selector">
+            <label for="profit_month_${entryIndex}">Month</label>
+            <input type="month" id="profit_month_${entryIndex}" name="profit_month_${entryIndex}" 
+                   max="${getCurrentMonth()}" class="profit-month">
+          </div>
+          <div class="form-group profit-amount">
+            <label for="profit_amount_${entryIndex}">Amount ($)</label>
+            <input type="number" id="profit_amount_${entryIndex}" name="profit_amount_${entryIndex}" 
+                   step="0.01" value="0" class="profit-value">
+          </div>
+          <button type="button" class="remove-entry-btn">
+            <i class="fas fa-times"></i> Remove
+          </button>
+        </div>
+      `;
+      $('#profit-entries').append(newEntry);
+    });
+
+    // Remove profit entry
+    $(document).on('click', '.remove-entry-btn', function() {
+      $(this).closest('.profit-entry').remove();
+      updateProfitChart();
+    });
+
+    // Helper function to get current month in YYYY-MM format
+    function getCurrentMonth() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      return `${year}-${month}`;
+    }
+  });
+</script>
+{% endblock %} 

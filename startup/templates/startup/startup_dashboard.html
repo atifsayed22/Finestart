@@ -1,204 +1,185 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startup Dashboard - FineStart</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
+
+{% block title %}Startup Dashboard - FineStart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .greeting-section {
+        background: linear-gradient(135deg, #18cb96, #14a97b);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .profile-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .chart-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .nav-menu {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .nav-item {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+        transition: background 0.3s;
+    }
+
+    .offers-section {
+        margin-top: 2rem;
+    }
+
+    .offer-card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        background: white;
+    }
+
+    .offer-actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        color: white;
+    }
+
+    .btn-success {
+        background: #28a745;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .bg-warning {
+        background-color: #ffc107;
+    }
+
+    .text-dark {
+        color: #343a40;
+    }
+
+    .alert {
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .alert-info {
+        background-color: rgba(24, 203, 150, 0.1);
+        color: #14a97b;
+        border: 1px solid rgba(24, 203, 150, 0.2);
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        justify-content: center;
+    }
+
+    .profile-action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+        color: white;
+        background: #18cb96;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .profile-action-btn:hover {
+        background: #14a97b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .profile-action-btn i {
+        margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
         .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
-
-        .greeting-section {
-            background: linear-gradient(135deg, #18cb96, #14a97b);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-
+        
         .profile-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+{% endblock %}
 
-        .summary-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+{% block header %}
+    {{ block.super }}
+{% endblock %}
 
-        .chart-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .nav-item {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            background: #18cb96;
-            color: white;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-
-        .nav-item:hover {
-            background: #14a97b;
-        }
-
-        .offers-section {
-            margin-top: 2rem;
-        }
-
-        .offer-card {
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            background: white;
-        }
-
-        .offer-actions {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 500;
-            color: white;
-        }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-
-        .bg-warning {
-            background-color: #ffc107;
-        }
-
-        .text-dark {
-            color: #343a40;
-        }
-
-        .alert {
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .alert-info {
-            background-color: rgba(24, 203, 150, 0.1);
-            color: #14a97b;
-            border: 1px solid rgba(24, 203, 150, 0.2);
-        }
-
-        .profile-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: center;
-        }
-
-        .profile-action-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 500;
-            color: white;
-            background: #18cb96;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .profile-action-btn:hover {
-            background: #14a97b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .profile-action-btn i {
-            margin-right: 8px;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-            
-            .profile-summary {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo-sec">
-                <img src="{% static 'images/logo.png' %}" alt="FineStart Logo" class="logo">
-            </div>
-            <div class="nav-con">
-                <div class="nav-con-el"><a href="{% url 'startup:startup_dashboard' %}">Dashboard</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_profile' %}">Profile</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:manage_offers' %}">Manage Offers</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:find_investors' %}">Find Investors</a></div>
-                <div class="nav-con-el"><a href="{% url 'startup:startup_insights' %}">Insights</a></div>
-            </div>
-            <div class="log-in-sec margin">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="log-in">Logout</button>
-                </form>
-            </div>
-        </nav>
-    </header>
-
+{% block content %}
     <main class="dashboard-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
         {% if profile_missing %}
             <div class="alert alert-info">
                 <h2>Welcome to FineStart!</h2>
@@ -224,7 +205,7 @@
                 <h1>Welcome, {{ welcome_name }}!</h1>
                 <p>Here's a summary of your startup's performance and activities.</p>
             </div>
-            
+
             <div class="profile-summary">
                 <div class="summary-card">
                     <h2>Startup Profile</h2>
@@ -240,6 +221,16 @@
                     <p><strong>Startup Stage:</strong> {{ profile.startup_stage }}</p>
                     <p><strong>Business Model:</strong> {{ profile.business_model }}</p>
                 </div>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Offer Statistics</h3>
+                <p><strong>Total Offers:</strong> {{ total_offers }}</p>
+                <p><strong>Pending:</strong> {{ pending_offers|length }}</p>
+                <p><strong>Accepted:</strong> {{ accepted_offers|length }}</p>
+                <a href="{% url 'startup:manage_offers' %}" class="btn" style="background-color: #18cb96; color: white;">
+                    Manage All Offers
+                </a>
             </div>
             
             <div class="chart-container">
@@ -266,9 +257,9 @@
             {% endif %}
             
             <div class="nav-menu">
-                <a href="{% url 'startup:find_investors' %}" class="nav-item">Find Investors</a>
-                <a href="{% url 'startup:manage_offers' %}" class="nav-item">Manage Offers</a>
-                <a href="{% url 'startup:startup_insights' %}" class="nav-item">View Insights</a>
+                <a href="{% url 'startup:find_investors' %}" class="nav-item" style="background: #18cb96;">Find Investors</a>
+                <a href="{% url 'startup:manage_offers' %}" class="nav-item" style="background: #18cb96;">Manage Offers</a>
+                <a href="{% url 'startup:startup_insights' %}" class="nav-item" style="background: #18cb96;">View Insights</a>
             </div>
         {% endif %}
     </main>
@@ -305,5 +296,4 @@
         });
         {% endif %}
     </script>
-</body>
-</html> 
+{% endblock %} 

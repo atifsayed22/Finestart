@@ -613,3 +613,116 @@ def find_startups(request):
 
     # Redirect to the consolidated view in the investor app
     return redirect('investor:startup_discovery')
+
+@login_required
+def add_profit_entry(request):
+    """
+    AJAX view to add a profit entry for a specific month
+    """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            # Get required data from the request
+            month_year = request.POST.get('month')
+            profit_amount = request.POST.get('amount')
+            
+            # Validate data
+            if not month_year or not profit_amount:
+                return JsonResponse({'status': 'error', 'message': 'Month and profit amount are required'}, status=400)
+            
+            try:
+                profit_amount = float(profit_amount)
+                if profit_amount < 0:
+                    return JsonResponse({'status': 'error', 'message': 'Profit amount cannot be negative'}, status=400)
+            except ValueError:
+                return JsonResponse({'status': 'error', 'message': 'Invalid profit amount'}, status=400)
+            
+            # Convert month string to date object (format: YYYY-MM)
+            try:
+                import datetime
+                year, month = map(int, month_year.split('-'))
+                entry_date = datetime.date(year, month, 1)
+            except (ValueError, TypeError):
+                return JsonResponse({'status': 'error', 'message': 'Invalid date format'}, status=400)
+            
+            # Get startup profile
+            from accounts.models import StartupProfile, MonthlyProfit
+            try:
+                profile = StartupProfile.objects.get(user=request.user)
+            except StartupProfile.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Startup profile not found'}, status=404)
+            
+            # Create or update the profit entry
+            profit_entry, created = MonthlyProfit.objects.update_or_create(
+                startup=profile,
+                date=entry_date,
+                defaults={'amount': profit_amount}
+            )
+            
+            # Get updated profit data
+            profit_data = profile.get_monthly_profits(months=12)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Profit entry added successfully',
+                'profit_data': {
+                    'labels': profit_data['labels'],
+                    'values': profit_data['values']
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@login_required
+def delete_profit_entry(request):
+    """
+    AJAX view to delete a profit entry for a specific month
+    """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            # Get month-year from request
+            month_year = request.POST.get('month')
+            
+            if not month_year:
+                return JsonResponse({'status': 'error', 'message': 'Month is required'}, status=400)
+            
+            # Convert month string to date object (format: YYYY-MM)
+            try:
+                import datetime
+                year, month = map(int, month_year.split('-'))
+                entry_date = datetime.date(year, month, 1)
+            except (ValueError, TypeError):
+                return JsonResponse({'status': 'error', 'message': 'Invalid date format'}, status=400)
+            
+            # Get startup profile
+            from accounts.models import StartupProfile, MonthlyProfit
+            try:
+                profile = StartupProfile.objects.get(user=request.user)
+            except StartupProfile.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Startup profile not found'}, status=404)
+            
+            # Try to delete the entry
+            try:
+                entry = MonthlyProfit.objects.get(startup=profile, date=entry_date)
+                entry.delete()
+            except MonthlyProfit.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Profit entry not found'}, status=404)
+            
+            # Get updated profit data
+            profit_data = profile.get_monthly_profits(months=12)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Profit entry deleted successfully',
+                'profit_data': {
+                    'labels': profit_data['labels'],
+                    'values': profit_data['values']
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
