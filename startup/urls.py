@@ -18,4 +18,5 @@ urlpatterns = [
     path('find_startups/', views.find_startups, name='find_startups'),
     path('add_profit_entry/', views.add_profit_entry, name='add_profit_entry'),
     path('delete_profit_entry/', views.delete_profit_entry, name='delete_profit_entry'),
+    path('profit_data/', views.profit_data, name='profit_data'),
 ]

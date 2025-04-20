@@ -169,8 +169,222 @@ def startup_dashboard(request):
     
     return render(request, 'startup/startup_dashboard.html', context)
 
+@login_required
+def profit_data(request):
+    try:
+        # Get the startup profile for the current user
+        profile = StartupProfile.objects.get(user=request.user)
+        
+        # Get the profit entries for this startup
+        profit_entries = MonthlyProfit.objects.filter(startup=profile).order_by('date')
+        
+        # Format data for the chart
+        profit_data = []
+        for entry in profit_entries:
+            formatted_date = entry.date.strftime('%b %Y')  # Format: 'Jan 2023'
+            profit_data.append({
+                'date': formatted_date,
+                'amount': float(entry.amount)
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'profit_data': profit_data
+        })
+    except StartupProfile.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'No startup profile found for this user'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
 def startup_insights(request):
-    return render(request, 'startup/startup_insights.html')
+    try:
+        # Get the startup profile and main startup record
+        profile = StartupProfile.objects.get(user=request.user)
+        startup = get_object_or_404(Startup, user=request.user)
+        
+        # Calculate startup score (0-100)
+        score = calculate_startup_score(startup, profile)
+        
+        # Calculate score breakdown
+        score_breakdown = {
+            'info_score': calculate_info_score(startup, profile),
+            'financial_score': calculate_financial_score(startup, profile),
+            'maturity_score': calculate_maturity_score(startup, profile),
+            'team_score': calculate_team_score(profile),
+            'market_score': calculate_market_score(startup, profile)
+        }
+        
+        # Calculate percentages for progress bars
+        score_breakdown['info_percent'] = (score_breakdown['info_score'] / 20) * 100
+        score_breakdown['financial_percent'] = (score_breakdown['financial_score'] / 30) * 100
+        score_breakdown['maturity_percent'] = (score_breakdown['maturity_score'] / 25) * 100
+        score_breakdown['team_percent'] = (score_breakdown['team_score'] / 10) * 100
+        score_breakdown['market_percent'] = (score_breakdown['market_score'] / 15) * 100
+        
+        # Calculate risk assessment
+        risk_assessment = assess_startup_risk(startup, profile)
+        
+        # Get profit data for charts
+        profit_data = profile.get_monthly_profits(months=12)
+        
+        context = {
+            'profile': profile,
+            'startup': startup,
+            'score': score,
+            'score_breakdown': score_breakdown,
+            'risk_assessment': risk_assessment,
+            'profit_labels': json.dumps(profit_data['labels']),
+            'profit_values': json.dumps(profit_data['values']),
+        }
+        return render(request, 'startup/startup_insights.html', context)
+    except StartupProfile.DoesNotExist:
+        messages.warning(request, "Please complete your startup profile first.")
+        return redirect('startup:edit_profile')
+    except Startup.DoesNotExist:
+        messages.warning(request, "Please complete your startup registration first.")
+        return redirect('startup:startup_registration')
+
+def calculate_info_score(startup, profile):
+    """Calculate score for information quality (max 20 points)"""
+    score = 0
+    
+    # Quality of company description
+    if profile.company_description and len(profile.company_description) > 100:
+        score += 10
+    elif profile.company_description:
+        score += 5
+    
+    # Profile picture
+    if profile.profile_picture:
+        score += 5
+    
+    # Pitch video
+    if startup.pitch_video:
+        score += 5
+    
+    return min(20, score)
+
+def calculate_financial_score(startup, profile):
+    """Calculate score for financial metrics (max 30 points)"""
+    score = 0
+    
+    # Revenue
+    if startup.annual_revenue > 0:
+        revenue_score = min(15, startup.annual_revenue / 100000)
+        score += revenue_score
+    
+    # Profit margin
+    if startup.profit_margin > 0:
+        margin_score = min(15, startup.profit_margin * 0.15)
+        score += margin_score
+    
+    return min(30, int(score))
+
+def calculate_maturity_score(startup, profile):
+    """Calculate score for business maturity (max 25 points)"""
+    score = 0
+    
+    # Years in business
+    if startup.years_in_business > 0:
+        years_score = min(15, startup.years_in_business * 3)
+        score += years_score
+    
+    # Business model clarity
+    if profile.business_model:
+        score += 5
+    
+    # Equity structure
+    if profile.equity_structure:
+        score += 5
+    
+    return min(25, int(score))
+
+def calculate_team_score(profile):
+    """Calculate score for team (max 10 points)"""
+    score = 0
+    
+    # Team size
+    if profile.team_size > 0:
+        team_score = min(10, profile.team_size)
+        score += team_score
+    
+    return min(10, int(score))
+
+def calculate_market_score(startup, profile):
+    """Calculate score for market factors (max 15 points)"""
+    score = 0
+    
+    # Target market clarity
+    if startup.target_market:
+        score += 5
+    
+    # Growth trend
+    if startup.growth_trend == 'rapid':
+        score += 10
+    elif startup.growth_trend == 'steady':
+        score += 5
+    
+    return min(15, int(score))
+
+def calculate_startup_score(startup, profile):
+    """Calculate a score from 0-100 based on various factors"""
+    # Combine all score components
+    info_score = calculate_info_score(startup, profile)
+    financial_score = calculate_financial_score(startup, profile)
+    maturity_score = calculate_maturity_score(startup, profile)
+    team_score = calculate_team_score(profile)
+    market_score = calculate_market_score(startup, profile)
+    
+    # Sum all scores
+    total_score = info_score + financial_score + maturity_score + team_score + market_score
+    
+    return min(100, int(total_score))
+
+def assess_startup_risk(startup, profile):
+    """Assess risk level for investors (Low, Medium, High)"""
+    risk_factors = 0
+    
+    # Financial risk factors
+    if startup.annual_revenue < 10000:
+        risk_factors += 2
+    elif startup.annual_revenue < 50000:
+        risk_factors += 1
+    
+    if startup.profit_margin <= 0:
+        risk_factors += 2
+    elif startup.profit_margin < 0.1:  # less than 10%
+        risk_factors += 1
+    
+    # Business maturity factors
+    if startup.years_in_business < 1:
+        risk_factors += 2
+    elif startup.years_in_business < 3:
+        risk_factors += 1
+    
+    # Market factors
+    if startup.growth_trend == 'declining':
+        risk_factors += 2
+    elif startup.growth_trend == 'stable':
+        risk_factors += 1
+    
+    # Team factors
+    if profile.team_size < 3:
+        risk_factors += 1
+    
+    # Determine risk level
+    if risk_factors >= 6:
+        return 'High'
+    elif risk_factors >= 3:
+        return 'Medium'
+    else:
+        return 'Low'
 
 @login_required
 def startup_profile(request):

@@ -3,14 +3,382 @@
 
 {% block title %}Startup Insights{% endblock %}
 
+{% block extra_css %}
+<style>
+    .insights-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .insights-header {
+        background: linear-gradient(135deg, #4A90E2, #1976D2);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .score-section {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .score-section {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .score-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .score-details {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: conic-gradient(#4CAF50 0%, #4CAF50 var(--score-percent), #f0f0f0 var(--score-percent), #f0f0f0 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+    }
+    
+    .score-value {
+        position: relative;
+        z-index: 1;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .risk-label {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+    
+    .risk-low {
+        background-color: rgba(76, 175, 80, 0.2);
+        color: #2E7D32;
+    }
+    
+    .risk-medium {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #F57F17;
+    }
+    
+    .risk-high {
+        background-color: rgba(244, 67, 54, 0.2);
+        color: #C62828;
+    }
+    
+    .progress-container {
+        margin-bottom: 1rem;
+    }
+    
+    .progress-bar {
+        height: 10px;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: #4A90E2;
+        border-radius: 5px;
+    }
+    
+    .chart-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .chart-container {
+        height: 250px;
+        margin-top: 1rem;
+    }
+    
+    .recommendations {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .recommendation-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .recommendation-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
 {% block header %}
     {{ block.super }}
 {% endblock %}
 
 {% block content %}
-    <!-- Content for the insights page will go here -->
-    <div class="container mt-4">
+<div class="insights-container">
+    <div class="insights-header">
         <h1>Startup Insights</h1>
-        <p>Your analytics and insights will appear here.</p>
+        <p>Data-driven analysis and recommendations for your startup</p>
     </div>
+    
+    <div class="score-section">
+        <div class="score-card">
+            <h2>Startup Score</h2>
+            <div class="score-circle" style="--score-percent: {{ score }}%">
+                <span class="score-value">{{ score }}</span>
+            </div>
+            <p>out of 100</p>
+            <div class="risk-assessment">
+                <p>Investor Risk: 
+                    <span class="risk-label risk-{% if risk_assessment == 'Low' %}low{% elif risk_assessment == 'Medium' %}medium{% else %}high{% endif %}">
+                        {{ risk_assessment }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="score-details">
+            <h2>Score Breakdown</h2>
+            <div class="progress-container">
+                <div class="flex-between">
+                    <span>Company Information</span>
+                    <span>{{ score_breakdown.info_score }} / 20</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score_breakdown.info_percent }}%"></div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="flex-between">
+                    <span>Financial Metrics</span>
+                    <span>{{ score_breakdown.financial_score }} / 30</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score_breakdown.financial_percent }}%"></div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="flex-between">
+                    <span>Business Maturity</span>
+                    <span>{{ score_breakdown.maturity_score }} / 25</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score_breakdown.maturity_percent }}%"></div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="flex-between">
+                    <span>Team Size</span>
+                    <span>{{ score_breakdown.team_score }} / 10</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score_breakdown.team_percent }}%"></div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="flex-between">
+                    <span>Market Factors</span>
+                    <span>{{ score_breakdown.market_score }} / 15</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ score_breakdown.market_percent }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chart-section">
+        <div class="chart-card">
+            <h2>Monthly Profit Trend</h2>
+            <div class="chart-container">
+                <canvas id="profit-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <h2>Key Performance Indicators</h2>
+            <table class="table">
+                <tr>
+                    <th>Monthly Profit:</th>
+                    <td>${{ profile.monthly_profit }}</td>
+                </tr>
+                <tr>
+                    <th>Annual Revenue:</th>
+                    <td>${{ startup.annual_revenue }}</td>
+                </tr>
+                <tr>
+                    <th>Profit Margin:</th>
+                    <td>{{ startup.profit_margin }}%</td>
+                </tr>
+                <tr>
+                    <th>Years in Business:</th>
+                    <td>{{ startup.years_in_business }}</td>
+                </tr>
+                <tr>
+                    <th>Growth Trend:</th>
+                    <td>{{ startup.growth_trend|title }}</td>
+                </tr>
+                <tr>
+                    <th>Business Model:</th>
+                    <td>{{ profile.business_model|upper }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="recommendations">
+        <h2>Recommendations to Improve Your Score</h2>
+        
+        {% if score < 100 %}
+            {% if score_breakdown.info_score < 20 %}
+            <div class="recommendation-item">
+                <h4>Enhance Company Information</h4>
+                <p>Improve your company description and upload a professional profile picture. A detailed company description helps investors understand your business better.</p>
+                <a href="{% url 'startup:edit_profile' %}" class="btn btn-primary">Update Profile</a>
+            </div>
+            {% endif %}
+            
+            {% if score_breakdown.financial_score < 30 %}
+            <div class="recommendation-item">
+                <h4>Improve Financial Metrics</h4>
+                <p>Focus on increasing your monthly profit and overall revenue. Regularly update your profit data to show positive trends.</p>
+                <a href="{% url 'startup:startup_profile' %}" class="btn btn-primary">Update Financials</a>
+            </div>
+            {% endif %}
+            
+            {% if not startup.pitch_video %}
+            <div class="recommendation-item">
+                <h4>Add a Pitch Video</h4>
+                <p>A compelling pitch video can significantly improve your startup's appeal to investors.</p>
+                <a href="{% url 'startup:startup_upload_pitch' %}" class="btn btn-primary">Upload Pitch</a>
+            </div>
+            {% endif %}
+            
+            {% if score < 70 %}
+            <div class="recommendation-item">
+                <h4>Build Investor Appeal</h4>
+                <p>Work on your growth strategy and market positioning. Highlight your competitive advantages and unique selling propositions.</p>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="recommendation-item">
+                <h4>Excellent Score!</h4>
+                <p>Your startup has an excellent score. Continue to maintain your strong performance and regularly update your financial data.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup profit chart
+        const profitChart = new Chart(
+            document.getElementById('profit-chart').getContext('2d'),
+            {
+                type: 'line',
+                data: {
+                    labels: {{ profit_labels|safe }},
+                    datasets: [{
+                        label: 'Monthly Profit ($)',
+                        data: {{ profit_values|safe }},
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        borderColor: 'rgba(74, 144, 226, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    });
+</script>
 {% endblock %} 
