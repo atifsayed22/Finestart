@@ -393,6 +393,64 @@
                 </div>
             </div>
 
+            <!-- Monthly Profit Tracking Section -->
+            <div class="form-section">
+                <h2>Monthly Profit Tracking</h2>
+                <p>Track your startup's monthly profit to show growth to potential investors.</p>
+                
+                <div class="monthly-profit-container">
+                    <div class="current-profit">
+                        <h3>Current Monthly Profit</h3>
+                        <p>This is the profit amount for the current month. To add historical data or update specific months, use the entries below.</p>
+                    </div>
+                    
+                    <div class="profit-history-container">
+                        <h3>Profit History</h3>
+                        <div class="profit-entries" id="profit-entries-container">
+                            <!-- Existing profit entries will be loaded here -->
+                            {% if profit_entries %}
+                                {% for entry in profit_entries %}
+                                <div class="profit-entry" data-id="{{ entry.id }}">
+                                    <div class="month-selector">
+                                        <label>Month</label>
+                                        <input type="month" class="form-control" value="{{ entry.date|date:'Y-m' }}" readonly>
+                                    </div>
+                                    <div class="profit-amount">
+                                        <label>Amount ($)</label>
+                                        <input type="number" class="form-control" value="{{ entry.amount }}" readonly>
+                                    </div>
+                                    <button class="remove-entry-btn" data-id="{{ entry.id }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>No profit history entries yet. Add your first entry below.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="profit-entry new-entry">
+                            <div class="month-selector">
+                                <label>Month</label>
+                                <input type="month" id="new-profit-month" class="form-control" required>
+                            </div>
+                            <div class="profit-amount">
+                                <label>Amount ($)</label>
+                                <input type="number" id="new-profit-amount" class="form-control" step="0.01" min="0" required>
+                            </div>
+                            <button id="add-profit-entry" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profit-chart-container">
+                    <h3>Profit Trend</h3>
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+
             <!-- File Uploads Section -->
             <div class="form-section">
                 <h2>Documents and Media</h2>
@@ -510,19 +568,19 @@
                 <h2>Contact Information</h2>
                 <div class="form-group">
                     <label for="website">Website URL</label>
-                    <input type="url" id="website" name="website" value="{% if profile %}{{ profile.website }}{% endif %}">
+                    <input type="url" id="website" name="website" value="{% if profile and profile.website %}{{ profile.website }}{% endif %}" placeholder="https://example.com">
                 </div>
                 <div class="form-group">
                     <label for="contact_email">Contact Email</label>
-                    <input type="email" id="contact_email" name="contact_email" value="{% if profile %}{{ profile.contact_email }}{% else %}{{ user.email }}{% endif %}" required>
+                    <input type="email" id="contact_email" name="contact_email" value="{% if profile and profile.contact_email %}{{ profile.contact_email }}{% elif user %}{{ user.email }}{% endif %}" required placeholder="contact@yourstartup.com">
                 </div>
                 <div class="form-group">
                     <label for="phone_number">Phone Number</label>
-                    <input type="tel" id="phone_number" name="phone_number" value="{% if profile %}{{ profile.phone_number }}{% endif %}">
+                    <input type="tel" id="phone_number" name="phone_number" value="{% if profile and profile.phone_number %}{{ profile.phone_number }}{% endif %}" placeholder="+1 (123) 456-7890">
                 </div>
                 <div class="form-group">
                     <label for="location">City</label>
-                    <input type="text" id="location" name="location" value="{% if profile %}{{ profile.location }}{% endif %}">
+                    <input type="text" id="location" name="location" value="{% if profile and profile.location %}{{ profile.location }}{% endif %}" placeholder="New York, San Francisco, etc.">
                 </div>
 
                 <!-- Add Country dropdown -->
@@ -736,6 +794,13 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Initialize data from Django context -->
+<script>
+    // Global variables for profit data - convert Django template data to valid JavaScript
+    var profitLabels = JSON.parse('{% if profit_data %}{{ profit_data.labels|escapejs }}{% else %}[]{% endif %}');
+    var profitValues = JSON.parse('{% if profit_data %}{{ profit_data.values|escapejs }}{% else %}[]{% endif %}');
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Profile picture upload
@@ -802,6 +867,203 @@
                 });
             }
         });
+        
+        // Monthly Profit Tracking
+        const addProfitButton = document.getElementById('add-profit-entry');
+        const newProfitMonth = document.getElementById('new-profit-month');
+        const newProfitAmount = document.getElementById('new-profit-amount');
+        const profitEntriesContainer = document.getElementById('profit-entries-container');
+        
+        if (addProfitButton && newProfitMonth && newProfitAmount) {
+            // Set default month to current month
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            newProfitMonth.value = `${year}-${month}`;
+            
+            addProfitButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!newProfitMonth.value || !newProfitAmount.value) {
+                    alert('Please enter both month and profit amount');
+                    return;
+                }
+                
+                // Create data for AJAX request
+                const data = {
+                    date: newProfitMonth.value + '-01', // Add day to make a valid date
+                    amount: newProfitAmount.value
+                };
+                
+                // Send AJAX request to add profit entry
+                fetch('{% url "startup:add_profit_entry" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken() // Function to get CSRF token
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create new entry in UI
+                        const entryDate = new Date(newProfitMonth.value + '-01');
+                        const formattedDate = entryDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                        
+                        const newEntry = document.createElement('div');
+                        newEntry.className = 'profit-entry';
+                        newEntry.dataset.id = data.profit_id;
+                        newEntry.innerHTML = `
+                            <div class="month-selector">
+                                <label>Month</label>
+                                <input type="month" class="form-control" value="${newProfitMonth.value}" readonly>
+                            </div>
+                            <div class="profit-amount">
+                                <label>Amount ($)</label>
+                                <input type="number" class="form-control" value="${newProfitAmount.value}" readonly>
+                            </div>
+                            <button class="remove-entry-btn" data-id="${data.profit_id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        
+                        // Add the new entry to the container
+                        if (profitEntriesContainer.querySelector('p')) {
+                            profitEntriesContainer.innerHTML = ''; // Remove "no entries" message
+                        }
+                        
+                        profitEntriesContainer.appendChild(newEntry);
+                        
+                        // Reset the form
+                        newProfitAmount.value = '';
+                        
+                        // Set up the delete button
+                        setupDeleteButton(newEntry.querySelector('.remove-entry-btn'));
+                        
+                        // Show success message
+                        showAlert('success', 'Profit entry added successfully');
+                        
+                        // Refresh the chart (in a real implementation)
+                        // refreshProfitChart();
+                    } else {
+                        showAlert('danger', 'Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'An error occurred while adding the profit entry');
+                });
+            });
+            
+            // Function to set up delete buttons
+            function setupDeleteButton(button) {
+                button.addEventListener('click', function() {
+                    const entryId = this.dataset.id;
+                    
+                    // Send AJAX request to delete profit entry
+                    fetch('{% url "startup:delete_profit_entry" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        body: JSON.stringify({ profit_id: entryId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the entry from the UI
+                            const entryElement = document.querySelector(`.profit-entry[data-id="${entryId}"]`);
+                            if (entryElement) {
+                                entryElement.remove();
+                                if (profitEntriesContainer.children.length === 0) {
+                                    profitEntriesContainer.innerHTML = '<p>No profit history entries yet. Add your first entry below.</p>';
+                                }
+                                
+                                // Show success message
+                                showAlert('success', 'Profit entry deleted successfully');
+                                
+                                // Refresh the chart (in a real implementation)
+                                // refreshProfitChart();
+                            }
+                        } else {
+                            showAlert('danger', 'Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while deleting the profit entry');
+                    });
+                });
+            }
+            
+            // Set up existing delete buttons
+            document.querySelectorAll('.remove-entry-btn').forEach(setupDeleteButton);
+            
+            // Helper function to get CSRF token
+            function getCsrfToken() {
+                return document.querySelector('[name=csrfmiddlewaretoken]').value;
+            }
+            
+            // Helper function to show alerts
+            function showAlert(type, message) {
+                const alertContainer = document.createElement('div');
+                alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+                alertContainer.role = 'alert';
+                alertContainer.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Add the alert to the page
+                const formSection = document.querySelector('.form-section');
+                formSection.parentNode.insertBefore(alertContainer, formSection);
+                
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    alertContainer.classList.remove('show');
+                    setTimeout(() => alertContainer.remove(), 500);
+                }, 5000);
+            }
+        }
+        
+        // Initialize profit chart if data is available
+        const profitChart = document.getElementById('profitChart');
+        if (profitChart) {
+            // Use the global variables we defined in the earlier script tag
+            if (profitLabels.length > 0 && profitValues.length > 0) {
+                new Chart(profitChart, {
+                    type: 'line',
+                    data: {
+                        labels: profitLabels,
+                        datasets: [{
+                            label: 'Monthly Profit ($)',
+                            data: profitValues,
+                            backgroundColor: 'rgba(24, 203, 150, 0.2)',
+                            borderColor: 'rgba(24, 203, 150, 1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                profitChart.parentElement.innerHTML = '<p class="text-center my-5">No profit data available yet. Add monthly entries to see your profit trend.</p>';
+            }
+        }
     });
 </script>
 {% endblock %} 

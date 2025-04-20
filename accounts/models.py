@@ -42,6 +42,13 @@ class StartupProfile(models.Model):
     business_model = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone.now)
     
+    # Contact information fields
+    website = models.URLField(max_length=255, blank=True, null=True)
+    contact_email = models.EmailField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+
     def __str__(self):
         return self.startup_name
     

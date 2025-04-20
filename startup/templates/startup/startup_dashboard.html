@@ -269,8 +269,8 @@
         {% if profit_labels and profit_values %}
         // Real profit/loss chart data
         const ctx = document.getElementById('profitLossChart').getContext('2d');
-        const labels = {{ profit_labels|safe }};
-        const values = {{ profit_values|safe }};
+        const labels = JSON.parse('{{ profit_labels|escapejs }}');
+        const values = JSON.parse('{{ profit_values|escapejs }}');
         
         new Chart(ctx, {
             type: 'line',

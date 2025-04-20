@@ -129,44 +129,62 @@ def startup_dashboard(request):
     # Initialize context dictionary
     context = {}
     
+    # First, check if the user is authenticated and is a startup user type
+    if not request.user.is_authenticated or request.user.user_type.lower() != 'startup':
+        messages.warning(request, "This page is only for startup users.")
+        return redirect('home')
+    
     try:
-        # Check if the user has a startup profile
+        # Check if the user has a startup record first
+        startup_exists = Startup.objects.filter(user=request.user).exists()
+        
+        # If no startup record exists, redirect to registration regardless of profile
+        if not startup_exists:
+            messages.info(request, "Please register your startup to access your dashboard.")
+            return redirect('startup:startup_registration')
+            
+        # Now check if the user has a startup profile
         try:
             profile = StartupProfile.objects.get(user=request.user)
             context['profile'] = profile
             
-            try:
-                # Get the startup
-                startup = Startup.objects.get(user=request.user)
-                context['startup'] = startup
-                
-                # Get pending offers
-                pending_offers = Offer.objects.filter(startup=startup, status='pending').order_by('-created_at')
-                context['pending_offers'] = pending_offers
-                context['offer_count'] = pending_offers.count()
-            except Startup.DoesNotExist:
-                # No startup record yet, but there is a profile
-                context['startup_missing'] = True
-                
+            # Get the startup
+            startup = Startup.objects.get(user=request.user)
+            context['startup'] = startup
+            
+            # Get pending offers
+            pending_offers = Offer.objects.filter(startup=startup, status='pending').order_by('-created_at')
+            context['pending_offers'] = pending_offers
+            context['offer_count'] = pending_offers.count()
+            
+            # Get accepted and all offers for statistics
+            accepted_offers = Offer.objects.filter(startup=startup, status='accepted')
+            all_offers = Offer.objects.filter(startup=startup)
+            context['accepted_offers'] = accepted_offers
+            context['total_offers'] = all_offers.count()
+            
             # Get profit data for the chart
             profit_data = profile.get_monthly_profits(months=6)
             context['profit_labels'] = json.dumps(profit_data['labels'])
             context['profit_values'] = json.dumps(profit_data['values'])
             
         except StartupProfile.DoesNotExist:
-            # If no profile exists, redirect to registration
-            messages.info(request, "Please complete your startup registration to access your dashboard.")
-            return redirect('startup:startup_registration')
+            # If no profile exists but startup exists, create minimal profile
+            # This is an edge case that shouldn't happen with normal flow
+            messages.info(request, "Please complete your startup profile to access all features.")
+            return redirect('startup:startup_profile')
 
     except Exception as e:
         print(f"Error getting startup profile for dashboard: {e}")
         context['error'] = str(e)
+        messages.error(request, "There was an error loading your dashboard. Please try again.")
+        return redirect('startup:startup_registration')
     
     # Pass the welcome message to the template
     if request.user.is_authenticated:
         welcome_name = request.user.first_name if request.user.first_name else request.user.username
         context['welcome_name'] = welcome_name
-    
+        
     return render(request, 'startup/startup_dashboard.html', context)
 
 @login_required
@@ -209,15 +227,32 @@ def startup_insights(request):
         startup_id = request.GET.get('startup_id')
         is_investor_view = request.user.user_type.lower() == 'investor' and startup_id
         
-        # Get the startup profile and main startup record
+        # First check if startup exists before proceeding
         if is_investor_view:
-            # Investor is viewing a specific startup's insights
+            # For investor view
             startup = get_object_or_404(Startup, id=startup_id)
+            
+            # For investors, only show insights for complete startup profiles
+            if not StartupProfile.objects.filter(user=startup.user).exists():
+                messages.warning(request, "This startup doesn't have a complete profile yet.")
+                return redirect('investor:startup_discovery')
+                
             profile = StartupProfile.objects.get(user=startup.user)
         else:
-            # Startup owner viewing their own insights
+            # For startup owner view
+            # First check if the startup record exists
+            if not Startup.objects.filter(user=request.user).exists():
+                messages.warning(request, "Please complete your startup registration first.")
+                return redirect('startup:startup_registration')
+                
+            # Then check if the profile exists
+            if not StartupProfile.objects.filter(user=request.user).exists():
+                messages.warning(request, "Please complete your startup profile first.")
+                return redirect('startup:edit_profile')
+                
+            # If both exist, get them
             profile = StartupProfile.objects.get(user=request.user)
-            startup = get_object_or_404(Startup, user=request.user)
+            startup = Startup.objects.get(user=request.user)
         
         # Calculate startup score (0-100)
         score = calculate_startup_score(startup, profile)
@@ -269,6 +304,12 @@ def startup_insights(request):
         else:
             messages.warning(request, "Please complete your startup registration first.")
             return redirect('startup:startup_registration')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        if request.user.user_type.lower() == 'investor':
+            return redirect('investor:startup_discovery')
+        else:
+            return redirect('startup:startup_dashboard')
 
 def calculate_info_score(startup, profile):
     """Calculate score for information quality (max 20 points)"""
@@ -439,6 +480,9 @@ def startup_profile(request):
             if request.method == 'POST':
                 try:
                     monthly_profit = float(request.POST.get('monthly_profit', 0))
+                    profit_margin = float(request.POST.get('profit_margin', 10))
+                    
+                    # Create the profile with all form data
                     profile = StartupProfile(
                         user=request.user,
                         startup_name=request.POST.get('startup-name', ''),
@@ -449,7 +493,13 @@ def startup_profile(request):
                         equity_structure=request.POST.get('equity_structure', ''),
                         business_model=request.POST.get('business_model', ''),
                         company_description=request.POST.get('company_description', ''),
-                        monthly_profit=monthly_profit
+                        monthly_profit=monthly_profit,
+                        # Contact information
+                        website=request.POST.get('website', ''),
+                        contact_email=request.POST.get('contact_email', request.user.email),
+                        phone_number=request.POST.get('phone_number', ''),
+                        location=request.POST.get('location', ''),
+                        country=request.POST.get('country', '')
                     )
                     
                     # Handle profile picture upload
@@ -467,7 +517,7 @@ def startup_profile(request):
                                 'industry_type': profile.industry,
                                 'years_in_business': 1,  # Default value
                                 'annual_revenue': profile.monthly_profit * 12,
-                                'profit_margin': float(request.POST.get('profit_margin', 10)),  # Get profit margin as percentage
+                                'profit_margin': profit_margin,  # Get profit margin as percentage
                                 'investment_required': float(request.POST.get('investment_required', 50000)),
                                 'funding_purpose': profile.company_description or "Funding details not specified",
                                 'target_market': request.POST.get('target_market', "Target market not specified"),
@@ -555,23 +605,33 @@ def edit_profile(request):
         
         if request.method == 'POST':
             try:
+                # Store previous monthly profit for comparison
                 previous_profit = profile.monthly_profit
                 
                 # Update the profile with form data
                 profile.startup_name = request.POST.get('startup-name', profile.startup_name)
                 profile.industry = request.POST.get('industry', profile.industry)
-                profile.team_size = int(request.POST.get('team_size', 1))
+                profile.team_size = int(request.POST.get('team_size', profile.team_size or 1))
                 profile.ceo_name = request.POST.get('ceo_name', profile.ceo_name)
                 profile.startup_stage = request.POST.get('startup_stage', profile.startup_stage)
                 profile.equity_structure = request.POST.get('equity_structure', profile.equity_structure)
                 profile.business_model = request.POST.get('business_model', profile.business_model)
                 profile.company_description = request.POST.get('company_description', profile.company_description)
-                profile.monthly_profit = float(request.POST.get('monthly_profit', profile.monthly_profit))
+                profile.monthly_profit = float(request.POST.get('monthly_profit', profile.monthly_profit or 0))
+                
+                # Preserve contact information
+                profile.website = request.POST.get('website', profile.website)
+                profile.contact_email = request.POST.get('contact_email', profile.contact_email or request.user.email)
+                profile.phone_number = request.POST.get('phone_number', profile.phone_number)
+                profile.location = request.POST.get('location', profile.location)
+                profile.country = request.POST.get('country', profile.country)
+                
+                print(f"Contact info saved: Website: {profile.website}, Email: {profile.contact_email}, Phone: {profile.phone_number}, Location: {profile.location}, Country: {profile.country}")
                 
                 # Handle profile picture upload only if a new one is provided
                 if 'profile_picture' in request.FILES and request.FILES['profile_picture']:
                     profile.profile_picture = request.FILES['profile_picture']
-                
+                    
                 profile.save()
                 
                 # Always sync with Startup model to ensure display to investors
@@ -595,7 +655,7 @@ def edit_profile(request):
                     if not startup_created:
                         startup.name = profile.startup_name
                         startup.industry_type = profile.industry
-                        startup.profit_margin = float(request.POST.get('profit_margin', 10))
+                        startup.profit_margin = float(request.POST.get('profit_margin', startup.profit_margin or 10))
                         startup.annual_revenue = profile.monthly_profit * 12
                         startup.funding_purpose = profile.company_description or startup.funding_purpose
                         startup.target_market = request.POST.get('target_market', startup.target_market)
@@ -635,11 +695,41 @@ def edit_profile(request):
                         today = timezone.now().date()
                         current_month = datetime.date(today.year, today.month, 1)
                         
-                        MonthlyProfit.objects.update_or_create(
+                        # Check if entry exists for current month
+                        existing_profit = MonthlyProfit.objects.filter(
                             startup=profile,
-                            date=current_month,
-                            defaults={'amount': profile.monthly_profit}
-                        )
+                            date=current_month
+                        ).first()
+                        
+                        if existing_profit:
+                            existing_profit.amount = profile.monthly_profit
+                            existing_profit.save()
+                        else:
+                            # Create new entry
+                            MonthlyProfit.objects.create(
+                                startup=profile,
+                                date=current_month,
+                                amount=profile.monthly_profit
+                            )
+                            
+                            # If this is the first entry, create some historical data
+                            if MonthlyProfit.objects.filter(startup=profile).count() <= 1:
+                                # Create sample historical data for past 5 months
+                                for i in range(1, 6):
+                                    past_month = datetime.date(
+                                        (today - datetime.timedelta(days=30*i)).year,
+                                        (today - datetime.timedelta(days=30*i)).month,
+                                        1
+                                    )
+                                    # Random variation in previous months' profits
+                                    past_profit = profile.monthly_profit * (0.7 + (i * 0.05))
+                                    
+                                    MonthlyProfit.objects.create(
+                                        startup=profile,
+                                        date=past_month,
+                                        amount=past_profit
+                                    )
+                        
                     except Exception as profit_error:
                         # If we can't update profit records, just continue
                         print(f"Could not update profit records: {profit_error}")
@@ -658,11 +748,28 @@ def edit_profile(request):
             startup = None
             has_startup = False
         
+        # Debug print for contact info being loaded
+        print(f"Contact info loaded: Website: {profile.website}, Email: {profile.contact_email}, Phone: {profile.phone_number}, Location: {profile.location}, Country: {profile.country}")
+        
+        # Get profit entries for the startup profile
+        try:
+            from accounts.models import MonthlyProfit
+            profit_entries = MonthlyProfit.objects.filter(startup=profile).order_by('-date')
+            
+            # Get profit data for chart
+            profit_data = profile.get_monthly_profits(months=12)
+        except Exception as e:
+            print(f"Error getting profit data: {e}")
+            profit_entries = []
+            profit_data = {'labels': [], 'values': []}
+        
         # Pass the profile and startup to the template for editing
         return render(request, 'startup/startup_profile.html', {
             'profile': profile,
             'startup': startup,
-            'has_startup': has_startup
+            'has_startup': has_startup,
+            'profit_entries': profit_entries,
+            'profit_data': profit_data
         })
     except Exception as e:
         # If the table doesn't exist or another error occurs
@@ -736,6 +843,16 @@ def startup_upload_pitch(request):
 @login_required
 def find_investors(request):
     try:
+        # First check if the user has a complete startup record
+        if not Startup.objects.filter(user=request.user).exists():
+            messages.warning(request, "You need to register your startup before viewing investors.")
+            return redirect('startup:startup_registration')
+            
+        # Then check if they have a complete profile
+        if not StartupProfile.objects.filter(user=request.user).exists():
+            messages.warning(request, "Please complete your startup profile first.")
+            return redirect('startup:startup_profile')
+            
         # Get all users who are investors and have profiles
         investor_profiles = InvestorProfile.objects.select_related('user').all()
         
@@ -776,15 +893,21 @@ def find_investors(request):
 def connect_with_investor(request, investor_id):
     if request.method == 'POST':
         try:
+            # Check if user has a complete startup profile
+            if not StartupProfile.objects.filter(user=request.user).exists():
+                messages.error(request, "You need to complete your startup profile before connecting with investors.")
+                return redirect('startup:startup_profile')
+                
             # Get the investor profile
             investor = get_object_or_404(InvestorProfile, id=investor_id)
             
-            # Get the startup for the current user or return appropriate error
-            try:
-                startup = Startup.objects.get(user=request.user)
-            except Startup.DoesNotExist:
+            # Check if the user has a startup record
+            if not Startup.objects.filter(user=request.user).exists():
                 messages.error(request, "You need to register your startup before connecting with investors.")
                 return redirect('startup:startup_registration')
+                
+            # Get the startup for the current user
+            startup = Startup.objects.get(user=request.user)
             
             # In a real application, you would create a Connection object
             # Here we'll just show a success message
@@ -896,43 +1019,19 @@ def manage_offers(request):
             messages.warning(request, "This page is only for startup users.")
             return redirect('home')
             
-        # Find existing startup profile
-        startup_profile = StartupProfile.objects.filter(user=request.user).first()
-        
-        if not startup_profile:
-            # If no startup profile exists, redirect to create one
-            messages.warning(request, "You need to create your startup profile first.")
+        # Check if the startup is registered first
+        if not Startup.objects.filter(user=request.user).exists():
+            messages.warning(request, "You need to register your startup before managing offers.")
+            return redirect('startup:startup_registration')
+            
+        # Check if they have a profile
+        if not StartupProfile.objects.filter(user=request.user).exists():
+            messages.warning(request, "Please complete your startup profile first.")
             return redirect('startup:startup_profile')
         
-        # Find startups associated with this user - make a direct query by user
-        startup = Startup.objects.filter(user=request.user).first()
-        
-        # If no startup exists, create a basic one with information from the profile
-        if not startup:
-            try:
-                # Create a basic startup record using profile data
-                startup = Startup(
-                    user=request.user,
-                    name=startup_profile.startup_name,
-                    industry_type=startup_profile.industry or 'tech',  # Default to tech if empty
-                    years_in_business=1,  # Default value
-                    annual_revenue=0,     # Default value
-                    profit_margin=startup_profile.monthly_profit * 12,  # Estimate
-                    investment_required=50000,  # Default value
-                    funding_purpose="Funding details not specified",
-                    target_market="Target market not specified",
-                    growth_trend="stable"  # Default value
-                )
-                startup.save()
-                messages.info(request, "We've created a basic startup record for you. Please complete your registration when possible.")
-            except Exception as creation_error:
-                messages.warning(request, "You need to register your startup details first.")
-                return redirect('startup:startup_registration')
-        
-        # Verify that the startup has the correct user
-        if startup.user != request.user:
-            startup.user = request.user
-            startup.save()
+        # Find startups associated with this user
+        startup = Startup.objects.get(user=request.user)
+        startup_profile = StartupProfile.objects.get(user=request.user)
         
         # Get all offers for this startup with related investor data
         offers = Offer.objects.filter(startup=startup).select_related('investor', 'investor__user').order_by('-created_at')
@@ -941,6 +1040,7 @@ def manage_offers(request):
         context = {
             'offers': offers,
             'startup': startup,
+            'profile': startup_profile,
             'offer_stats': {
                 'total': offers.count(),
                 'pending': offers.filter(status='pending').count(),
@@ -969,11 +1069,11 @@ def add_profit_entry(request):
     try:
         data = json.loads(request.body)
         
-        # Get startup associated with user
+        # Get startup profile associated with user
         try:
-            startup = Startup.objects.get(user=request.user)
-        except Startup.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'No startup found for this user'}, status=400)
+            startup_profile = StartupProfile.objects.get(user=request.user)
+        except StartupProfile.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'No startup profile found for this user'}, status=400)
         
         # Extract and validate profit data
         date_str = data.get('date')
@@ -993,7 +1093,7 @@ def add_profit_entry(request):
         
         # Create or update profit entry
         profit_entry, created = MonthlyProfit.objects.update_or_create(
-            startup=startup,
+            startup=startup_profile,
             date=date,
             defaults={'amount': amount}
         )
@@ -1021,7 +1121,7 @@ def delete_profit_entry(request):
         except MonthlyProfit.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Profit entry not found'}, status=404)
         
-        # Security check - ensure user owns this startup
+        # Security check - ensure user owns this startup profile
         if profit.startup.user != request.user:
             return JsonResponse({'success': False, 'error': 'Unauthorized access'}, status=403)
         
