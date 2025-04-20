@@ -8,6 +8,8 @@
 {% endblock %}
 
 {% block extra_css %}
+    <!-- Add Font Awesome CDN for the icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         .investors-container {
             max-width: 1200px;
@@ -297,4 +299,50 @@
             </div>
         {% endif %}
     </main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Make sure DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle form submission for search filters
+        const searchForm = document.querySelector('.search-filters');
+        if (searchForm) {
+            console.log('Search form initialized');
+        }
+
+        // Handle connect buttons with better feedback
+        const connectForms = document.querySelectorAll('.investor-body form');
+        if (connectForms.length > 0) {
+            connectForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Find the button within this form
+                    const button = this.querySelector('.connect-button');
+                    if (button) {
+                        // Disable button to prevent multiple submissions
+                        button.disabled = true;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                    }
+                    // Let the form submit naturally
+                    return true;
+                });
+            });
+            console.log('Connect buttons initialized: ' + connectForms.length);
+        }
+
+        // Check for message alerts and auto-fade them after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            setTimeout(function() {
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 1s ease-out';
+                    alert.style.opacity = '0';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 1000);
+                });
+            }, 5000);
+        }
+    });
+</script>
 {% endblock %} 

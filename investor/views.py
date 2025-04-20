@@ -62,84 +62,103 @@ def startup_discovery(request):
         
     try:
         # Get all startups with their documents
-        startups = Startup.objects.all()
+        startups = Startup.objects.all().select_related('user')
         
         # Get filter parameters
         industry = request.GET.get('industry')
-        years_in_business = request.GET.get('years_in_business')
-        growth_trend = request.GET.get('growth_trend')
+        years_range = request.GET.get('years')
+        growth_trend = request.GET.get('growth')
+        score_range = request.GET.get('score')
+        risk_level = request.GET.get('risk')
         
         # Apply filters if they are provided
         if industry:
             startups = startups.filter(industry_type=industry)
-        if years_in_business:
-            try:
-                years_val = int(years_in_business)
-                startups = startups.filter(years_in_business__gte=years_val)
-            except (ValueError, TypeError):
-                # Invalid value, ignore this filter
-                pass
+        
+        if years_range:
+            if years_range == '0-1':
+                startups = startups.filter(years_in_business__lt=1)
+            elif years_range == '1-3':
+                startups = startups.filter(years_in_business__gte=1, years_in_business__lt=3)
+            elif years_range == '3-5':
+                startups = startups.filter(years_in_business__gte=3, years_in_business__lt=5)
+            elif years_range == '5+':
+                startups = startups.filter(years_in_business__gte=5)
+        
         if growth_trend:
             startups = startups.filter(growth_trend=growth_trend)
         
+        # Import the scoring and risk assessment functions from startup views
+        from startup.views import calculate_startup_score, assess_startup_risk
+        
         # Prepare startup data with documents for display
         startup_data = []
+        
+        # First pass to get scores and risk assessments
+        startups_with_scores = []
         for startup in startups:
+            try:
+                # Get the startup profile if it exists
+                from accounts.models import StartupProfile
+                startup_profile = StartupProfile.objects.get(user=startup.user)
+                
+                # Calculate score and risk assessment
+                score = calculate_startup_score(startup, startup_profile)
+                risk_assessment = assess_startup_risk(startup, startup_profile)
+                
+                # Apply score filter if specified
+                if score_range:
+                    min_score, max_score = map(int, score_range.split('-'))
+                    if not (min_score <= score <= max_score):
+                        continue
+                
+                # Apply risk filter if specified
+                if risk_level and risk_assessment != risk_level:
+                    continue
+                
+                # Add score and risk to startup object
+                startup.score = score
+                startup.risk_assessment = risk_assessment
+                
+                startups_with_scores.append(startup)
+            except StartupProfile.DoesNotExist:
+                # Skip startups without profiles
+                continue
+        
+        # Sort by score (highest first)
+        startups_with_scores.sort(key=lambda x: x.score, reverse=True)
+        
+        # Build the final data structure
+        for startup in startups_with_scores:
             startup_info = {
                 'startup': startup,
                 'has_pitch': bool(startup.pitch_video),
                 'has_proposal': bool(startup.business_proposal),
                 'has_legal_docs': bool(startup.legal_documents),
-                'has_logo': bool(startup.company_logo)
+                'has_logo': bool(startup.company_logo),
+                'score': startup.score,
+                'risk_assessment': startup.risk_assessment
             }
             startup_data.append(startup_info)
         
-        # Get the investor profile for context
-        try:
-            investor_profile = InvestorProfile.objects.get(user=request.user)
-            context = {
-                'startups': startups,
-                'startup_data': startup_data,
-                'investor': investor_profile,
-                'current_filters': {
-                    'industry': industry,
-                    'years_in_business': years_in_business,
-                    'growth_trend': growth_trend,
-                }
-            }
-        except InvestorProfile.DoesNotExist:
-            # Investor doesn't have a profile yet
-            context = {
-                'startups': startups,
-                'startup_data': startup_data,
-                'profile_missing': True,
-                'current_filters': {
-                    'industry': industry,
-                    'years_in_business': years_in_business,
-                    'growth_trend': growth_trend,
-                }
-            }
-        
-        # Redirect to consolidated view if AJAX request or directly render
-        return render(request, 'investor/startup_discovery.html', context)
-        
-    except Exception as e:
-        # Log the error
-        print(f"Error in startup_discovery: {e}")
-        # Create empty context with error message
+        # Prepare context with filter options
         context = {
-            'startups': [],
-            'startup_data': [],
-            'error_message': "Unable to retrieve startups. Please try again later.",
-            'current_filters': {
-                'industry': None,
-                'years_in_business': None,
-                'growth_trend': None,
+            'startup_data': startup_data,
+            'filter_options': {
+                'industry': industry,
+                'years_range': years_range,
+                'growth_trend': growth_trend,
+                'score_range': score_range,
+                'risk_level': risk_level
             }
         }
-        from django.contrib import messages
-        messages.error(request, "There was an error retrieving startups. Please try again later.")
+        
         return render(request, 'investor/startup_discovery.html', context)
+    except Exception as e:
+        # Handle errors
+        from django.contrib import messages
+        messages.error(request, f"Error loading startup data: {str(e)}")
+        return render(request, 'investor/startup_discovery.html', {'startup_data': []})
 
 @login_required
 def portfolio_tracker(request):

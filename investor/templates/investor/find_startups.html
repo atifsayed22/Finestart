@@ -98,6 +98,75 @@
         margin-bottom: 20px;
         color: var(--primary-dark);
     }
+    
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        margin-right: 10px;
+    }
+    
+    .score-high {
+        background-color: #4CAF50;
+    }
+    
+    .score-medium {
+        background-color: #FFC107;
+    }
+    
+    .score-low {
+        background-color: #F44336;
+    }
+    
+    .risk-indicator {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .risk-low {
+        background-color: rgba(76, 175, 80, 0.2);
+        color: #2E7D32;
+    }
+    
+    .risk-medium {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #F57F17;
+    }
+    
+    .risk-high {
+        background-color: rgba(244, 67, 54, 0.2);
+        color: #C62828;
+    }
+    
+    .score-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .score-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .score-title {
+        font-size: 0.8rem;
+        color: #555;
+    }
+    
+    .score-value {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
 </style>
 {% endblock %}
 
@@ -120,27 +189,47 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label for="years_in_business" class="form-label">Years in Business</label>
-                <select class="form-select" id="years_in_business" name="years_in_business">
+                <label for="years" class="form-label">Years in Business</label>
+                <select class="form-select" id="years" name="years">
                     <option value="">Any</option>
-                    <option value="Less than 1" {% if request.GET.years_in_business == 'Less than 1' %}selected{% endif %}>Less than 1</option>
-                    <option value="1-3" {% if request.GET.years_in_business == '1-3' %}selected{% endif %}>1-3 years</option>
-                    <option value="3-5" {% if request.GET.years_in_business == '3-5' %}selected{% endif %}>3-5 years</option>
-                    <option value="5+" {% if request.GET.years_in_business == '5+' %}selected{% endif %}>5+ years</option>
+                    <option value="0-1" {% if request.GET.years == '0-1' %}selected{% endif %}>Less than 1 year</option>
+                    <option value="1-3" {% if request.GET.years == '1-3' %}selected{% endif %}>1-3 years</option>
+                    <option value="3-5" {% if request.GET.years == '3-5' %}selected{% endif %}>3-5 years</option>
+                    <option value="5+" {% if request.GET.years == '5+' %}selected{% endif %}>More than 5 years</option>
                 </select>
             </div>
             <div class="col-md-4">
-                <label for="growth_trend" class="form-label">Growth Trend</label>
-                <select class="form-select" id="growth_trend" name="growth_trend">
+                <label for="growth" class="form-label">Growth Trend</label>
+                <select class="form-select" id="growth" name="growth">
                     <option value="">Any</option>
-                    <option value="Rapid" {% if request.GET.growth_trend == 'Rapid' %}selected{% endif %}>Rapid</option>
-                    <option value="Steady" {% if request.GET.growth_trend == 'Steady' %}selected{% endif %}>Steady</option>
-                    <option value="Slow" {% if request.GET.growth_trend == 'Slow' %}selected{% endif %}>Slow</option>
+                    <option value="rapid" {% if request.GET.growth == 'rapid' %}selected{% endif %}>Rapid</option>
+                    <option value="steady" {% if request.GET.growth == 'steady' %}selected{% endif %}>Steady</option>
+                    <option value="slow" {% if request.GET.growth == 'slow' %}selected{% endif %}>Slow</option>
                 </select>
             </div>
-            <div class="col-12 mt-3">
-                <button type="submit" class="btn btn-primary">Apply Filters</button>
-                <a href="{% url 'investor:find_startups' %}" class="btn btn-outline-secondary">Reset</a>
+            
+            <!-- Add new filters for score and risk -->
+            <div class="col-md-4">
+                <label for="score" class="form-label">Startup Score</label>
+                <select class="form-select" id="score" name="score">
+                    <option value="">Any Score</option>
+                    <option value="70-100" {% if request.GET.score == '70-100' %}selected{% endif %}>High (70-100)</option>
+                    <option value="40-70" {% if request.GET.score == '40-70' %}selected{% endif %}>Medium (40-70)</option>
+                    <option value="0-40" {% if request.GET.score == '0-40' %}selected{% endif %}>Low (0-40)</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="risk" class="form-label">Risk Level</label>
+                <select class="form-select" id="risk" name="risk">
+                    <option value="">Any Risk Level</option>
+                    <option value="Low" {% if request.GET.risk == 'Low' %}selected{% endif %}>Low Risk</option>
+                    <option value="Medium" {% if request.GET.risk == 'Medium' %}selected{% endif %}>Medium Risk</option>
+                    <option value="High" {% if request.GET.risk == 'High' %}selected{% endif %}>High Risk</option>
+                </select>
+            </div>
+            
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter Results</button>
             </div>
         </form>
     </div>
@@ -155,6 +244,22 @@
                             <span class="tag tag-growth">{{ startup.growth_trend }}</span>
                         </div>
                         <div class="startup-body">
+                            <!-- Add Score and Risk Section -->
+                            <div class="score-section">
+                                <div class="score-badge {% if startup.score >= 70 %}score-high{% elif startup.score >= 40 %}score-medium{% else %}score-low{% endif %}">
+                                    {{ startup.score }}
+                                </div>
+                                <div class="score-details">
+                                    <span class="score-title">Startup Score</span>
+                                    <span class="score-value">{{ startup.score }}/100</span>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="risk-indicator risk-{{ startup.risk_assessment|lower }}">
+                                        {{ startup.risk_assessment }} Risk
+                                    </span>
+                                </div>
+                            </div>
+                            
                             <div class="tags mb-3">
                                 <span class="tag tag-industry">{{ startup.industry }}</span>
                                 <span class="tag tag-years">{{ startup.years_in_business }} years</span>
@@ -173,7 +278,7 @@
                             <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ startup.id }}">
                                 Contact Startup
                             </a>
-                            <a href="#" class="btn btn-sm btn-outline-primary ms-2">View Details</a>
+                            <a href="{% url 'startup:startup_insights' %}?startup_id={{ startup.id }}" class="btn btn-sm btn-outline-primary ms-2">View Insights</a>
                         </div>
                     </div>
                     

@@ -205,9 +205,19 @@ def profit_data(request):
 @login_required
 def startup_insights(request):
     try:
+        # Check if this is an investor viewing a specific startup's insights
+        startup_id = request.GET.get('startup_id')
+        is_investor_view = request.user.user_type.lower() == 'investor' and startup_id
+        
         # Get the startup profile and main startup record
-        profile = StartupProfile.objects.get(user=request.user)
-        startup = get_object_or_404(Startup, user=request.user)
+        if is_investor_view:
+            # Investor is viewing a specific startup's insights
+            startup = get_object_or_404(Startup, id=startup_id)
+            profile = StartupProfile.objects.get(user=startup.user)
+        else:
+            # Startup owner viewing their own insights
+            profile = StartupProfile.objects.get(user=request.user)
+            startup = get_object_or_404(Startup, user=request.user)
         
         # Calculate startup score (0-100)
         score = calculate_startup_score(startup, profile)
@@ -242,14 +252,23 @@ def startup_insights(request):
             'risk_assessment': risk_assessment,
             'profit_labels': json.dumps(profit_data['labels']),
             'profit_values': json.dumps(profit_data['values']),
+            'is_investor_view': is_investor_view,
         }
         return render(request, 'startup/startup_insights.html', context)
     except StartupProfile.DoesNotExist:
-        messages.warning(request, "Please complete your startup profile first.")
-        return redirect('startup:edit_profile')
+        if request.user.user_type.lower() == 'investor':
+            messages.warning(request, "This startup doesn't have a complete profile yet.")
+            return redirect('investor:startup_discovery')
+        else:
+            messages.warning(request, "Please complete your startup profile first.")
+            return redirect('startup:edit_profile')
     except Startup.DoesNotExist:
-        messages.warning(request, "Please complete your startup registration first.")
-        return redirect('startup:startup_registration')
+        if request.user.user_type.lower() == 'investor':
+            messages.warning(request, "This startup doesn't exist or has been removed.")
+            return redirect('investor:startup_discovery')
+        else:
+            messages.warning(request, "Please complete your startup registration first.")
+            return redirect('startup:startup_registration')
 
 def calculate_info_score(startup, profile):
     """Calculate score for information quality (max 20 points)"""
@@ -505,16 +524,55 @@ def edit_profile(request):
                 # Handle profile picture upload only if a new one is provided
                 if 'profile_picture' in request.FILES and request.FILES['profile_picture']:
                     profile.profile_picture = request.FILES['profile_picture']
-                    
-                    # Also update the startup company_logo to match if it exists
-                    try:
-                        startup = Startup.objects.get(user=request.user)
-                        startup.company_logo = request.FILES['profile_picture']
-                        startup.save()
-                    except Startup.DoesNotExist:
-                        pass  # No startup entity to update
                 
                 profile.save()
+                
+                # Always sync with Startup model to ensure display to investors
+                try:
+                    startup, startup_created = Startup.objects.get_or_create(
+                        user=request.user,
+                        defaults={
+                            'name': profile.startup_name,
+                            'industry_type': profile.industry,
+                            'years_in_business': 1,  # Default value
+                            'annual_revenue': profile.monthly_profit * 12,
+                            'profit_margin': profile.monthly_profit,
+                            'investment_required': 50000,  # Default value
+                            'funding_purpose': profile.company_description or "Funding details not specified",
+                            'target_market': "Target market not specified",
+                            'growth_trend': "stable"  # Default value
+                        }
+                    )
+                    
+                    # Update existing startup data with profile data
+                    if not startup_created:
+                        startup.name = profile.startup_name
+                        startup.industry_type = profile.industry
+                        startup.profit_margin = profile.monthly_profit
+                        startup.annual_revenue = profile.monthly_profit * 12
+                        startup.funding_purpose = profile.company_description or startup.funding_purpose
+                    
+                    # Always sync the company logo/profile picture
+                    if 'profile_picture' in request.FILES and request.FILES['profile_picture']:
+                        startup.company_logo = request.FILES['profile_picture']
+                    elif profile.profile_picture and not startup.company_logo:
+                        # If startup has no logo but profile has picture, use that
+                        startup.company_logo = profile.profile_picture
+                    
+                    # Handle business proposal and legal documents upload
+                    if 'business_proposal' in request.FILES and request.FILES['business_proposal']:
+                        startup.business_proposal = request.FILES['business_proposal']
+                    
+                    if 'legal_documents' in request.FILES and request.FILES['legal_documents']:
+                        startup.legal_documents = request.FILES['legal_documents']
+                    
+                    if 'pitch_video' in request.FILES and request.FILES['pitch_video']:
+                        startup.pitch_video = request.FILES['pitch_video']
+                    
+                    startup.save()
+                    
+                except Exception as startup_error:
+                    print(f"Error syncing with Startup model: {startup_error}")
                 
                 # Update monthly profit record if profit changed
                 if previous_profit != profile.monthly_profit:
@@ -542,8 +600,20 @@ def edit_profile(request):
                 messages.error(request, f'Error updating profile: {str(e)}')
                 return render(request, 'startup/startup_profile.html', {'profile': profile})
         
-        # Pass the profile to the template for editing
-        return render(request, 'startup/startup_profile.html', {'profile': profile})
+        # For GET request, get associated startup for documents
+        try:
+            startup = Startup.objects.get(user=request.user)
+            has_startup = True
+        except Startup.DoesNotExist:
+            startup = None
+            has_startup = False
+        
+        # Pass the profile and startup to the template for editing
+        return render(request, 'startup/startup_profile.html', {
+            'profile': profile,
+            'startup': startup,
+            'has_startup': has_startup
+        })
     except Exception as e:
         # If the table doesn't exist or another error occurs
         print(f"Database error in edit_profile: {e}")

@@ -166,6 +166,43 @@
         justify-content: space-between;
         align-items: center;
     }
+    
+    .investor-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .action-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .primary-button {
+        background-color: #4A90E2;
+        color: white;
+        border: none;
+    }
+    
+    .primary-button:hover {
+        background-color: #1976D2;
+    }
+    
+    .secondary-button {
+        background-color: transparent;
+        color: #4A90E2;
+        border: 1px solid #4A90E2;
+    }
+    
+    .secondary-button:hover {
+        background-color: rgba(74, 144, 226, 0.1);
+    }
 </style>
 {% endblock %}
 
@@ -176,8 +213,19 @@
 {% block content %}
 <div class="insights-container">
     <div class="insights-header">
-        <h1>Startup Insights</h1>
-        <p>Data-driven analysis and recommendations for your startup</p>
+        <h1>{% if is_investor_view %}{{ startup.name }} - {% endif %}Startup Insights</h1>
+        <p>Data-driven analysis and recommendations for {% if is_investor_view %}this{% else %}your{% endif %} startup</p>
+        
+        {% if is_investor_view %}
+        <div class="investor-actions">
+            <a href="{% url 'startup:create_offer' startup.id %}" class="action-button primary-button">
+                <i class="fas fa-handshake me-2"></i> Make Investment Offer
+            </a>
+            <a href="{% url 'investor:startup_discovery' %}" class="action-button secondary-button">
+                <i class="fas fa-arrow-left me-2"></i> Back to Discovery
+            </a>
+        </div>
+        {% endif %}
     </div>
     
     <div class="score-section">
@@ -289,6 +337,7 @@
         </div>
     </div>
     
+    {% if not is_investor_view %}
     <div class="recommendations">
         <h2>Recommendations to Improve Your Score</h2>
         
@@ -330,6 +379,47 @@
             </div>
         {% endif %}
     </div>
+    {% else %}
+    <div class="recommendations">
+        <h2>Investment Opportunity Analysis</h2>
+        
+        {% if risk_assessment == 'Low' %}
+        <div class="recommendation-item">
+            <h4>Low Risk Investment</h4>
+            <p>This startup presents a low-risk investment opportunity. The business has strong financials, stable growth, and good market positioning. Consider making an investment offer with standard equity terms.</p>
+        </div>
+        {% elif risk_assessment == 'Medium' %}
+        <div class="recommendation-item">
+            <h4>Medium Risk Investment</h4>
+            <p>This startup presents a medium-risk investment opportunity. While it shows potential, there are some risk factors to consider. You may want to request additional information before making an investment decision.</p>
+        </div>
+        {% else %}
+        <div class="recommendation-item">
+            <h4>High Risk Investment</h4>
+            <p>This startup presents a high-risk investment opportunity. It may still have potential, but consider structuring any investment with appropriate risk mitigation measures such as milestone-based funding or convertible notes.</p>
+        </div>
+        {% endif %}
+        
+        <div class="recommendation-item">
+            <h4>Suggested Investment Approach</h4>
+            <ul>
+                {% if score >= 70 %}
+                <li>Consider a standard equity investment</li>
+                <li>This startup scores in the top tier of available opportunities</li>
+                <li>Recommended for inclusion in a diversified portfolio</li>
+                {% elif score >= 40 %}
+                <li>Consider a staged investment with milestones</li>
+                <li>Request additional information about growth plans</li>
+                <li>May be suitable as part of a diverse investment strategy</li>
+                {% else %}
+                <li>Consider mentorship or incubation before direct investment</li>
+                <li>Higher risk profile suggests convertible notes may be appropriate</li>
+                <li>Recommended for investors with high risk tolerance</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
