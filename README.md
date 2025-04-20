@@ -1,147 +1,298 @@
 # FineStart - Startup-Investor Matchmaking Platform
 
-FineStart is a comprehensive platform connecting startups with potential investors, providing tools for startup profile management, investor discovery, and financial tracking.
+FineStart is a web application designed to connect startups with potential investors. It provides a platform for startups to showcase their business profiles and for investors to discover promising ventures.
 
-## Startup Scoring System
+## Project Structure
 
-The platform includes a proprietary scoring algorithm that evaluates startups on a scale of 0-100 based on various factors. This score helps investors quickly assess startup quality and helps founders understand their startup's strengths and weaknesses.
+The application is divided into three main Django apps:
 
-### Score Components
+1. **Accounts**: Handles user authentication, registration, and profile management
+2. **Startup**: Contains functionality specific to startup users
+3. **Investor**: Contains functionality specific to investor users
 
-The scoring system evaluates 5 key areas:
+## Features
 
-1. **Company Information (20 points)**
-   - Company description quality (5-10 points)
-   - Profile picture presence (5 points)
-   - Pitch video availability (5 points)
+- Dual user types (Startup and Investor)
+- Comprehensive user profiles
+- Startup financial tracking
+- Investor portfolio management
+- Investment offer system
+- Startup discovery for investors
+- Investor discovery for startups
+- Insights and analytics
 
-2. **Financial Metrics (30 points)**
-   - Annual revenue (up to 15 points)
-   - Profit margin (up to 15 points)
+## Implementation Details
 
-3. **Business Maturity (25 points)**
-   - Years in business (up to 15 points)
-   - Business model clarity (5 points)
-   - Equity structure definition (5 points)
+### Accounts App
 
-4. **Team Size (10 points)**
-   - Larger teams receive higher scores (up to 10 points)
+#### Models
 
-5. **Market Factors (15 points)**
-   - Target market definition (5 points)
-   - Growth trend (10 points for rapid growth, 5 for steady growth)
+- **CustomUser**: Extends Django's AbstractUser with additional fields:
+  - `user_type`: Distinguishes between 'startup' and 'investor' users
+  - `is_verified`: Indicates if the user has verified their account
 
-### How Scores Are Calculated
+- **StartupProfile**: Stores detailed information about a startup:
+  - Basic information (name, industry, team size, etc.)
+  - Financial details (monthly profit)
+  - Business model and equity structure
+  - Contact information (website, email, phone, location)
+  - Profile picture
 
-- **Annual Revenue Scoring**: 1 point for every $6,667 in revenue, up to 15 points max
-- **Profit Margin Scoring**: 1 point for every 0.67% profit margin, up to 15 points max
-- **Years in Business**: 3 points per year, up to 15 points max
-- **Team Size**: 1 point per team member, up to 10 points max
+- **MonthlyProfit**: Tracks a startup's profit over time:
+  - Associated with a StartupProfile
+  - Contains date and amount fields
+  - Used for generating profit trend charts
 
-## Risk Assessment Algorithm
+- **InvestorProfile**: Stores detailed information about an investor:
+  - Investment preferences (type, range)
+  - Company details (if applicable)
+  - Portfolio size
+  - Contact information
 
-The risk assessment algorithm determines whether a startup represents a Low, Medium, or High risk investment opportunity.
+#### Views
 
-### Risk Factors Evaluated
+- **Authentication Views**: Login, logout, and registration functionality
+  - Different redirection based on user type
+  - Custom forms for startup and investor registration
 
-The system counts risk factors in these categories:
+- **Profile Management Views**: Create and update user profiles
+  - Separate workflows for startup and investor profiles
+  - File upload handling for profile pictures and documents
 
-1. **Financial Risk**
-   - Annual revenue < $10,000: +2 risk factors
-   - Annual revenue < $50,000: +1 risk factor
-   - Profit margin ≤ 0%: +2 risk factors
-   - Profit margin < 10%: +1 risk factor
+### Startup App
 
-2. **Business Maturity**
-   - Years in business < 1: +2 risk factors
-   - Years in business < 3: +1 risk factor
+#### Models
 
-3. **Market Factors**
-   - Declining growth trend: +2 risk factors
-   - Stable growth trend: +1 risk factor
+- **Startup**: Contains business details beyond profile information:
+  - Financial metrics (annual revenue, profit margin)
+  - Investment requirements
+  - Business documentation (proposals, legal docs)
+  - Growth trends
 
-4. **Team Factors**
-   - Team size < 3: +1 risk factor
+- **Offer**: Represents investment offers:
+  - Associated with a startup and investor
+  - Includes details like equity percentage and royalty percentage
+  - Tracks offer status (pending, accepted, rejected)
 
-### Risk Categorization
+#### Views
 
-- **Low Risk**: 0-2 risk factors
-- **Medium Risk**: 3-5 risk factors
-- **High Risk**: 6+ risk factors
+1. **startup_registration** (`/startup/register/`)
+   - Handles startup registration with detailed business information
+   - Processes form submissions with file uploads
+   - Creates both Startup and StartupProfile records
+   - Implements AJAX support for dynamic form submission
+   - Error handling for missing or invalid fields
 
-## Implementing These Features for Investors
+2. **startup_dashboard** (`/startup/dashboard/`)
+   - Entry point for startup users after login
+   - Displays summary of startup metrics and pending offers
+   - Shows profit/loss chart using Chart.js
+   - Provides navigation to other startup features
+   - Handles cases for incomplete profiles or missing startup registration
 
-### Displaying Startup Insights to Investors
+3. **startup_profile** (`/startup/profile/`)
+   - Displays the startup's complete profile
+   - Shows profit trend chart using monthly profit data
+   - Links to profile editing functionality
 
-To implement the display of startup scores and risk assessment to investors:
+4. **edit_profile** (`/startup/profile/edit/`)
+   - Form for updating startup profile information
+   - Handles file uploads (profile picture, documents)
+   - Updates associated Startup record for data consistency
+   - Monthly profit tracking with historical data
 
-1. **Startup Discovery Page**:
-   - Add score and risk indicators to each startup card
-   - Use color-coding (green/yellow/red) for risk levels
-   - Sort startups by score (default highest first)
+5. **profit_data** (`/startup/profit_data/`)
+   - AJAX endpoint for fetching profit history
+   - Returns JSON for chart rendering
 
-2. **Startup Detail View**:
-   - Add a "View Insights" button that shows the detailed scoring breakdown
-   - Display the score prominently at the top of the detail page
-   - Show risk assessment with explanatory text
+6. **add_profit_entry** (`/startup/add_profit_entry/`)
+   - AJAX endpoint for adding a new monthly profit entry
+   - Validates date and amount data
+   - Creates or updates MonthlyProfit records
 
-3. **Filtering Options**:
-   - Add filters for score ranges (e.g., 70-100, 40-70, 0-40)
-   - Add filters for risk level (Low, Medium, High)
-   - Allow sorting by different score components
+7. **delete_profit_entry** (`/startup/delete_profit_entry/`)
+   - AJAX endpoint for removing profit entries
+   - Security verification to ensure user owns the entry
 
-### Technical Implementation
+8. **startup_insights** (`/startup/insights/`)
+   - Provides analytics and scoring for the startup
+   - Calculates various performance metrics:
+     - Information quality score
+     - Financial score
+     - Maturity score
+     - Team score
+     - Market score
+   - Performs risk assessment for investors
+   - Displays profit trend visualization
 
-The scoring and risk assessment are implemented in the `startup/views.py` file with the following functions:
+9. **find_investors** (`/startup/find_investors/`)
+   - Lists available investors with filtering options
+   - Filters by investor type, investment range, and location
+   - Displays investor cards with relevant information
+   - Includes form for contacting/connecting with investors
 
-- `calculate_startup_score()`: Main function that calculates the overall score
-- `calculate_info_score()`: Evaluates company information quality
-- `calculate_financial_score()`: Evaluates financial metrics
-- `calculate_maturity_score()`: Evaluates business maturity
-- `calculate_team_score()`: Evaluates team size
-- `calculate_market_score()`: Evaluates market factors
-- `assess_startup_risk()`: Determines the risk level
+10. **connect_with_investor** (`/startup/connect_with_investor/<investor_id>/`)
+    - Handles connection requests to investors
+    - Validates startup profile completeness
+    - Success/error messaging system
 
-These scores are displayed on the insights page (`startup/templates/startup/startup_insights.html`) with visualizations including:
+11. **manage_offers** (`/startup/manage_offers/`)
+    - Lists all offers received by the startup
+    - Groups offers by status (pending, accepted, rejected)
+    - Provides interface to respond to pending offers
+    - Displays offer statistics
 
-- Circular progress indicator for the overall score
-- Progress bars for each score component
-- Color-coded risk level indicator
-- Monthly profit trend chart
-- Personalized recommendations based on the score
+12. **respond_to_offer** (`/startup/respond_to_offer/<offer_id>/<response>/`)
+    - Processes startup responses to investment offers
+    - Updates offer status based on response (accept/reject)
+    - Redirects back to offer management view
 
-## Setup and Installation
+13. **startup_upload_pitch** (`/startup/upload_pitch/`)
+    - Specialized view for uploading and managing pitch videos
+    - Updates both Startup and StartupProfile records
+    - Handles file validation and storage
 
-### Requirements
-- Python 3.8+
-- Django 3.2+
+### Investor App
+
+#### Views
+
+1. **investor_dashboard** (`/investor/dashboard/`)
+   - Main dashboard for investor users
+   - Displays portfolio summary and investment statistics
+   - Shows pending and recent offers
+   - Provides navigation to investor features
+
+2. **investor_profile** (`/investor/profile/`)
+   - Displays and manages investor profile information
+   - Handles profile picture and company logo uploads
+   - Updates preferences and investment criteria
+
+3. **startup_discovery** (`/investor/discover/`)
+   - Lists startups matching investor criteria
+   - Advanced filtering by industry, growth stage, etc.
+   - Sorted view of potential investment opportunities
+   - Interface for viewing detailed startup information
+
+4. **portfolio_tracker** (`/investor/portfolio/`)
+   - Tracks current investments and their performance
+   - Visualizes portfolio distribution
+   - Monitors return on investment metrics
+
+5. **create_offer** (`/startup/create_offer/<startup_id>/`)
+   - Form for creating investment offers
+   - Validates equity and royalty percentages
+   - Associates offer with the investor and target startup
+
+6. **find_startups** (`/investor/find_startups/`)
+   - Search interface for discovering startups
+   - Filters startups by various criteria
+   - Displays startup cards with key metrics
+
+## Routing
+
+### Accounts App URLs
+
+```python
+urlpatterns = [
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('signup/', views.signup, name='signup'),
+    # Profile routes handled by respective apps
+]
+```
+
+### Startup App URLs
+
+```python
+app_name = 'startup'
+
+urlpatterns = [
+    path('register/', views.startup_registration, name='startup_registration'),
+    path('dashboard/', views.startup_dashboard, name='startup_dashboard'),
+    path('insights/', views.startup_insights, name='startup_insights'),
+    path('profile/', views.startup_profile, name='startup_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('find_investors/', views.find_investors, name='find_investors'),
+    path('connect_with_investor/<int:investor_id>/', views.connect_with_investor, 
+        name='connect_with_investor'),
+    path('upload_pitch/', views.startup_upload_pitch, name='startup_upload_pitch'),
+    path('manage_offers/', views.manage_offers, name='manage_offers'),
+    path('create_offer/<int:startup_id>/', views.create_offer, name='create_offer'),
+    path('respond_to_offer/<int:offer_id>/<str:response>/', views.respond_to_offer, 
+        name='respond_to_offer'),
+    path('find_startups/', views.find_startups, name='find_startups'),
+    path('add_profit_entry/', views.add_profit_entry, name='add_profit_entry'),
+    path('delete_profit_entry/', views.delete_profit_entry, name='delete_profit_entry'),
+    path('profit_data/', views.profit_data, name='profit_data'),
+]
+```
+
+### Investor App URLs
+
+```python
+app_name = 'investor'
+
+urlpatterns = [
+    path('dashboard/', views.investor_dashboard, name='investor_dashboard'),
+    path('profile/', views.investor_profile, name='investor_profile'),
+    path('discover/', views.startup_discovery, name='startup_discovery'),
+    path('portfolio/', views.portfolio_tracker, name='portfolio_tracker'),
+    # Additional investor-specific routes
+]
+```
+
+## Templates Structure
+
+Each app has its own templates directory following this structure:
+
+```
+templates/
+├── accounts/
+│   ├── login.html
+│   └── signup.html
+├── startup/
+│   ├── startup_dashboard.html
+│   ├── startup_profile.html
+│   ├── find_investors.html
+│   ├── manage_offers.html
+│   └── ...
+└── investor/
+    ├── investor_dashboard.html
+    ├── investor_profile.html
+    ├── startup_discovery.html
+    └── ...
+```
+
+## Authentication Flow
+
+1. User registers selecting their user type (startup/investor)
+2. Upon login, users are redirected based on their type:
+   - Startup users to `/startup/dashboard/`
+   - Investor users to `/investor/dashboard/`
+3. New users are prompted to complete their profiles
+
+## Data Flow for Investment Process
+
+1. Investor discovers startups via `/investor/discover/`
+2. Investor creates an offer via `/startup/create_offer/<startup_id>/`
+3. Startup receives offer notification on their dashboard
+4. Startup reviews and manages offers via `/startup/manage_offers/`
+5. Startup accepts or rejects offer via `/startup/respond_to_offer/<offer_id>/<response>/`
+6. If accepted, offer appears in investor's portfolio
+
+## Technical Implementation Notes
+
+- Django template system with extensive use of template inheritance
+- AJAX for dynamic data updates (profit entries, filtering)
+- Form validation on both client and server side
+- Security measures to ensure users can only access their own data
+- File upload handling for various document types
 - Chart.js for data visualization
 
-### Installation
+## Installation and Setup
 
-1. Clone the repository:
-```
-git clone https://github.com/yourusername/finestart.git
-cd finestart
-```
-
-2. Create a virtual environment and activate it:
-```
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```
-pip install -r requirements.txt
-```
-
-4. Run migrations:
-```
-python manage.py migrate
-```
-
-5. Run the development server:
-```
-python manage.py runserver
-``` 
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Apply migrations: `python manage.py migrate`
+4. Create a superuser: `python manage.py createsuperuser`
+5. Run the development server: `python manage.py runserver` 
