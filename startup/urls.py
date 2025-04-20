@@ -16,4 +16,6 @@ urlpatterns = [
     path('create_offer/<int:startup_id>/', views.create_offer, name='create_offer'),
     path('respond_to_offer/<int:offer_id>/<str:response>/', views.respond_to_offer, name='respond_to_offer'),
     path('find_startups/', views.find_startups, name='find_startups'),
+    path('add_profit_entry/', views.add_profit_entry, name='add_profit_entry'),
+    path('delete_profit_entry/', views.delete_profit_entry, name='delete_profit_entry'),
 ]

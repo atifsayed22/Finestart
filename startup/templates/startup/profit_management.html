@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profit Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profit-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .profit-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-bottom: 2rem;
+    }
+    
+    .form-control:focus {
+        border-color: #6c63ff;
+        box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
+    }
+    
+    .btn-primary {
+        background-color: #6c63ff;
+        border-color: #6c63ff;
+    }
+    
+    .btn-primary:hover {
+        background-color: #5a52d5;
+        border-color: #5a52d5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Profit Management</h1>
+            <p class="text-muted">Track and manage your startup's monthly profit data</p>
+            <div id="alert-container"></div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card profit-card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Profit Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="profit-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="card profit-card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Add New Profit Entry</h5>
+                </div>
+                <div class="card-body">
+                    <form id="add-profit-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="profit-date" class="form-label">Month</label>
+                            <input type="month" class="form-control" id="profit-date" required>
+                            <div class="form-text">Select the month and year for this profit entry</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profit-amount" class="form-label">Profit Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="profit-amount" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Entry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card profit-card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Profit Entries</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="profit-entries-table" class="table table-hover {% if not profit_entries %}d-none{% endif %}">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in profit_entries %}
+                                <tr id="profit-row-{{ entry.id }}">
+                                    <td>{{ entry.date|date:"F Y" }}</td>
+                                    <td>${{ entry.amount|floatformat:2 }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger delete-profit-btn" data-profit-id="{{ entry.id }}">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="no-profits-message" class="text-center py-5 {% if profit_entries %}d-none{% endif %}">
+                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                            <p class="mb-0">No profit entries yet. Add your first entry to start tracking!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize chart data
+    const profitData = {
+        labels: [{% for entry in profit_entries %}'{{ entry.date|date:"M Y" }}',{% endfor %}],
+        values: [{% for entry in profit_entries %}{{ entry.amount }},{% endfor %}]
+    };
+</script>
+<script src="{% static 'js/profit_management.js' %}"></script>
+{% endblock %}
