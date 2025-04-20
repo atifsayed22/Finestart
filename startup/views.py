@@ -412,11 +412,23 @@ def startup_profile(request):
         # Check if the user already has a profile
         try:
             profile = StartupProfile.objects.get(user=request.user)
+            
+            # Get associated startup model for documents
+            try:
+                startup = Startup.objects.get(user=request.user)
+                has_startup = True
+            except Startup.DoesNotExist:
+                startup = None
+                has_startup = False
+                
             # Get profit data for the chart
             profit_data = profile.get_monthly_profits(months=6)
+            
             # If profile exists, show the profile view
             return render(request, 'startup/profile_view.html', {
                 'profile': profile,
+                'startup': startup,
+                'has_startup': has_startup,
                 'profit_data': {
                     'labels': profit_data['labels'],
                     'values': profit_data['values']
@@ -445,6 +457,41 @@ def startup_profile(request):
                         profile.profile_picture = request.FILES['profile_picture']
                         
                     profile.save()
+                    
+                    # Create or update associated Startup entry for investor visibility
+                    try:
+                        startup, created = Startup.objects.get_or_create(
+                            user=request.user,
+                            defaults={
+                                'name': profile.startup_name,
+                                'industry_type': profile.industry,
+                                'years_in_business': 1,  # Default value
+                                'annual_revenue': profile.monthly_profit * 12,
+                                'profit_margin': float(request.POST.get('profit_margin', 10)),  # Get profit margin as percentage
+                                'investment_required': float(request.POST.get('investment_required', 50000)),
+                                'funding_purpose': profile.company_description or "Funding details not specified",
+                                'target_market': request.POST.get('target_market', "Target market not specified"),
+                                'growth_trend': request.POST.get('growth_trend', "stable")  # Default value
+                            }
+                        )
+                        
+                        # Always sync the company logo/profile picture
+                        if 'profile_picture' in request.FILES:
+                            startup.company_logo = request.FILES['profile_picture']
+                            
+                        # Handle business documents upload
+                        if 'business_proposal' in request.FILES:
+                            startup.business_proposal = request.FILES['business_proposal']
+                            
+                        if 'legal_documents' in request.FILES:
+                            startup.legal_documents = request.FILES['legal_documents']
+                            
+                        if 'pitch_video' in request.FILES:
+                            startup.pitch_video = request.FILES['pitch_video']
+                            
+                        startup.save()
+                    except Exception as startup_error:
+                        print(f"Error syncing with Startup model: {startup_error}")
                     
                     # Create monthly profit record
                     try:
@@ -536,11 +583,11 @@ def edit_profile(request):
                             'industry_type': profile.industry,
                             'years_in_business': 1,  # Default value
                             'annual_revenue': profile.monthly_profit * 12,
-                            'profit_margin': profile.monthly_profit,
-                            'investment_required': 50000,  # Default value
+                            'profit_margin': float(request.POST.get('profit_margin', 10)),  # Get profit margin as percentage
+                            'investment_required': float(request.POST.get('investment_required', 50000)),
                             'funding_purpose': profile.company_description or "Funding details not specified",
-                            'target_market': "Target market not specified",
-                            'growth_trend': "stable"  # Default value
+                            'target_market': request.POST.get('target_market', "Target market not specified"),
+                            'growth_trend': request.POST.get('growth_trend', "stable")  # Default value
                         }
                     )
                     
@@ -548,9 +595,12 @@ def edit_profile(request):
                     if not startup_created:
                         startup.name = profile.startup_name
                         startup.industry_type = profile.industry
-                        startup.profit_margin = profile.monthly_profit
+                        startup.profit_margin = float(request.POST.get('profit_margin', 10))
                         startup.annual_revenue = profile.monthly_profit * 12
                         startup.funding_purpose = profile.company_description or startup.funding_purpose
+                        startup.target_market = request.POST.get('target_market', startup.target_market)
+                        startup.growth_trend = request.POST.get('growth_trend', startup.growth_trend)
+                        startup.investment_required = float(request.POST.get('investment_required', startup.investment_required))
                     
                     # Always sync the company logo/profile picture
                     if 'profile_picture' in request.FILES and request.FILES['profile_picture']:
@@ -639,21 +689,34 @@ def startup_upload_pitch(request):
                 startup.pitch_video = pitch_video
                 startup.save()
                 
-                # Ensure the startup profile exists
+                # Ensure the startup profile exists and sync data
                 try:
                     profile, created = StartupProfile.objects.get_or_create(
                         user=request.user,
                         defaults={
                             'startup_name': startup.name,
                             'industry': startup.industry_type,
-                            'monthly_profit': startup.profit_margin
+                            'monthly_profit': startup.annual_revenue / 12 if startup.annual_revenue else 0,
+                            'company_description': startup.funding_purpose
                         }
                     )
                     
+                    # Update profile with startup data if created
+                    if created:
+                        profile.monthly_profit = startup.annual_revenue / 12 if startup.annual_revenue else 0
+                        profile.startup_name = startup.name
+                        profile.industry = startup.industry_type
+                        profile.save()
+                    
                     # If the profile doesn't have a picture but the startup has a logo, use that
-                    if created and not profile.profile_picture and startup.company_logo:
+                    if not profile.profile_picture and startup.company_logo:
                         profile.profile_picture = startup.company_logo
                         profile.save()
+                    # If the startup doesn't have a logo but the profile has a picture, use that
+                    elif not startup.company_logo and profile.profile_picture:
+                        startup.company_logo = profile.profile_picture
+                        startup.save()
+                        
                 except Exception as e:
                     print(f"Error updating startup profile: {e}")
                 
