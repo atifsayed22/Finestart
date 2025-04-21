@@ -149,35 +149,6 @@
             color: #6c757d;
         }
         
-        .notification-icon {
-            position: relative;
-            margin: 0 1rem;
-            font-size: 1.2rem;
-            color: #6c757d;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .notification-icon:hover {
-            color: var(--primary);
-        }
-        
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
         .dropdown-menu {
             border: none;
             border-radius: 12px;
@@ -429,11 +400,6 @@
                     </ul>
                     
                     <div class="d-flex align-items-center profile-menu">
-                        <div class="notification-icon">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </div>
-                        
                         <div class="dropdown profile-dropdown">
                             <a class="profile-toggle d-flex align-items-center" 
                                href="#" id="profileDropdown" role="button" 
@@ -480,24 +446,11 @@
                                         </a>
                                     </li>
                                 {% endif %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'home' %}">
-                                        <i class="fas fa-home"></i> Home
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="fas fa-cog"></i> Settings
-                                    </a>
-                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> Logout
-                                        </button>
-                                    </form>
+                                    <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -512,6 +465,30 @@
         </div>
     </nav>
     {% endblock %}
+
+    <!-- Logout Confirmation Modal -->
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutConfirmModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <main class="container mt-4"> 
         {% if messages %}

@@ -242,3 +242,102 @@ def investor_profile(request):
 def find_startups(request):
     messages.info(request, "You've been redirected to our enhanced startup discovery page.")
     return redirect('investor:startup_discovery')
+
+@login_required
+def view_offer(request, offer_id):
+    # Check if user is an investor
+    if request.user.user_type.lower() != 'investor':
+        messages.warning(request, "This page is only for investor users.")
+        return redirect('home')
+    
+    try:
+        # Get the investor profile
+        investor = InvestorProfile.objects.get(user=request.user)
+        
+        # Get the offer, ensuring it belongs to the current investor
+        offer = Offer.objects.get(id=offer_id, investor=investor)
+        
+        # Get the startup associated with the offer
+        startup = offer.startup
+        
+        context = {
+            'offer': offer,
+            'startup': startup,
+        }
+        
+        return render(request, 'investor/view_offer.html', context)
+    
+    except InvestorProfile.DoesNotExist:
+        messages.error(request, "Investor profile not found.")
+        return redirect('investor:investor_dashboard')
+    
+    except Offer.DoesNotExist:
+        messages.error(request, "Offer not found or you don't have permission to view it.")
+        return redirect('investor:investor_dashboard')
+    
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('investor:investor_dashboard')
+
+@login_required
+def edit_offer(request, offer_id):
+    # Check if user is an investor
+    if request.user.user_type.lower() != 'investor':
+        messages.warning(request, "This page is only for investor users.")
+        return redirect('home')
+    
+    try:
+        # Get the investor profile
+        investor = InvestorProfile.objects.get(user=request.user)
+        
+        # Get the offer, ensuring it belongs to the current investor and is still pending
+        offer = Offer.objects.get(id=offer_id, investor=investor, status='pending')
+        
+        # Get the startup associated with the offer
+        startup = offer.startup
+        
+        if request.method == 'POST':
+            # Update the offer based on form data
+            try:
+                # Validate investment amount
+                investment_amount = float(request.POST.get('investment_amount'))
+                if investment_amount <= 0:
+                    raise ValueError("Investment amount must be greater than 0.")
+                
+                # Validate equity percentage
+                equity_percentage = float(request.POST.get('equity_percentage'))
+                if equity_percentage <= 0 or equity_percentage > 100:
+                    raise ValueError("Equity percentage must be between 0 and 100.")
+                
+                # Update the offer
+                offer.investment_amount = investment_amount
+                offer.equity_percentage = equity_percentage
+                offer.details = request.POST.get('details', '')
+                offer.save()
+                
+                messages.success(request, "Offer updated successfully.")
+                return redirect('investor:view_offer', offer_id=offer.id)
+                
+            except ValueError as ve:
+                messages.error(request, f"Validation error: {str(ve)}")
+            except Exception as e:
+                messages.error(request, f"Error updating offer: {str(e)}")
+        
+        context = {
+            'offer': offer,
+            'startup': startup,
+        }
+        
+        return render(request, 'investor/edit_offer.html', context)
+    
+    except InvestorProfile.DoesNotExist:
+        messages.error(request, "Investor profile not found.")
+        return redirect('investor:investor_dashboard')
+    
+    except Offer.DoesNotExist:
+        messages.error(request, "Offer not found, not in pending state, or you don't have permission to edit it.")
+        return redirect('investor:investor_dashboard')
+    
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('investor:investor_dashboard')

@@ -388,9 +388,9 @@
                         </div>
                         
                         <div class="offer-actions">
-                            <a href="#" class="btn secondary-button">View Details</a>
+                            <a href="{% url 'investor:view_offer' offer.id %}" class="btn secondary-button">View Details</a>
                             {% if offer.status == 'pending' %}
-                                <a href="#" class="btn primary-button">Edit Offer</a>
+                                <a href="{% url 'investor:edit_offer' offer.id %}" class="btn primary-button">Edit Offer</a>
                             {% endif %}
                         </div>
                     </div>

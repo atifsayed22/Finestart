@@ -9,6 +9,50 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
+    <!-- Inline styles for password strength meter as a fallback -->
+    <style>
+        #password-strength {
+            margin-top: 8px;
+            height: 10px;
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        .weak {
+            width: 33% !important;
+            background-color: #ff4d4d !important;
+        }
+        
+        .medium {
+            width: 66% !important;
+            background-color: #ffaa00 !important;
+        }
+        
+        .strong {
+            width: 100% !important;
+            background-color: #2ecc71 !important;
+        }
+        
+        #strength-text {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
 </head>
 
 <body>
@@ -151,6 +195,18 @@
             const passwordInput = document.querySelector("#id_password1");
             const strengthBar = document.querySelector("#strength-bar");
             const strengthText = document.querySelector("#strength-text");
+            
+            // Initialize the strength bar style properties directly
+            if (strengthBar) {
+                strengthBar.style.width = "0%";
+                strengthBar.style.backgroundColor = "#ddd";
+                strengthBar.style.position = "absolute";
+                strengthBar.style.left = "0";
+                strengthBar.style.top = "0";
+                strengthBar.style.height = "100%";
+                strengthBar.style.borderRadius = "5px";
+                strengthBar.style.transition = "width 0.3s ease-in-out, background-color 0.3s ease-in-out";
+            }
         
             passwordInput.addEventListener("input", function () {
                 const password = passwordInput.value;
@@ -165,25 +221,40 @@
         
                 // Reset classes
                 strengthBar.classList.remove("weak", "medium", "strong");
+                
+                // Reset inline styles that might be overridden
+                strengthBar.style.width = "0%";
         
                 // Set strength level
                 let strengthClass = "";
                 let strengthLabel = "";
+                let strengthColor = "";
+                let strengthWidth = "0%";
         
                 if (strength <= 2) {
                     strengthClass = "weak";
                     strengthLabel = "Weak 😢";
+                    strengthColor = "#ff4d4d";
+                    strengthWidth = "33%";
                 } else if (strength === 3 || strength === 4) {
                     strengthClass = "medium";
                     strengthLabel = "Medium 🙂";
+                    strengthColor = "#ffaa00";
+                    strengthWidth = "66%";
                 } else if (strength >= 5) {
                     strengthClass = "strong";
                     strengthLabel = "Strong 💪";
+                    strengthColor = "#2ecc71";
+                    strengthWidth = "100%";
                 }
         
                 // Apply class and text
                 strengthBar.classList.add(strengthClass);
                 strengthText.textContent = strengthLabel;
+                
+                // Also apply direct styles as a fallback
+                strengthBar.style.width = strengthWidth;
+                strengthBar.style.backgroundColor = strengthColor;
             });
         });
         

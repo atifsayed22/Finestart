@@ -174,8 +174,14 @@
 
 {% block content %}
 <main class="portfolio-container">
+    <!-- Implementation notice banner -->
+    <div class="alert alert-info mb-4" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Note:</strong> The portfolio tracking feature is currently being implemented. The data displayed on this page is for demonstration purposes only and does not represent real investments.
+    </div>
+
     <div class="portfolio-summary">
-        <h2>Portfolio Summary</h2>
+        <h2>Portfolio Summary <span class="badge bg-secondary ms-2">Coming Soon</span></h2>
         <div class="summary-grid">
             <div class="summary-card">
                 <div class="summary-value">$250,000</div>
@@ -200,7 +206,7 @@
     </div>
 
     <div class="portfolio-chart">
-        <h2>Portfolio Performance</h2>
+        <h2>Portfolio Performance <span class="badge bg-secondary ms-2">Coming Soon</span></h2>
         <div class="chart-container">
             <!-- Placeholder for an interactive chart -->
             <div style="width:100%; height:100%; background:#f8f9fa; display:flex; align-items:center; justify-content:center; color:#666;">
@@ -210,7 +216,7 @@
     </div>
 
     <div class="investments-list">
-        <h2>Your Investments</h2>
+        <h2>Your Investments <span class="badge bg-secondary ms-2">Coming Soon</span></h2>
         
         <div class="investment-item">
             <img src="{% static 'images/startup-logo-1.png' %}" alt="TechFusion" class="investment-logo">
