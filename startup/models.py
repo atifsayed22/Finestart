@@ -111,6 +111,7 @@ class Offer(models.Model):
     investor = models.ForeignKey(InvestorProfile, on_delete=models.CASCADE, related_name='offers')
     startup = models.ForeignKey(Startup, on_delete=models.CASCADE, related_name='offers')
     equity_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of equity offered")
+    royalty_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of revenue as royalty", default=0)
     investment_amount = models.DecimalField(max_digits=12, decimal_places=2, help_text="Amount of investment offered", default=0)
     details = models.TextField(blank=True, null=True, help_text="Additional details of the offer")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')

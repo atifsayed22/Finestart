@@ -962,22 +962,36 @@ def create_offer(request, startup_id):
                 }
             )
             
+            # Get form data
             equity_percentage = request.POST.get('equity_percentage')
-            royalty_percentage = request.POST.get('royalty_percentage')
+            royalty_percentage = request.POST.get('royalty_percentage', 0)
+            investment_amount = request.POST.get('investment_amount', 0)
+            message = request.POST.get('message', '')
 
             # Validate percentages
             if not (0 <= float(equity_percentage) <= 100):
                 messages.error(request, 'Equity percentage must be between 0 and 100.')
                 return redirect('startup:create_offer', startup_id=startup.id)
-            if not (0 <= float(royalty_percentage) <= 100):
-                messages.error(request, 'Royalty percentage must be between 0 and 100.')
-                return redirect('startup:create_offer', startup_id=startup.id)
+            
+            if royalty_percentage:
+                if not (0 <= float(royalty_percentage) <= 100):
+                    messages.error(request, 'Royalty percentage must be between 0 and 100.')
+                    return redirect('startup:create_offer', startup_id=startup.id)
+            
+            # Validate investment amount
+            if investment_amount:
+                if float(investment_amount) <= 0:
+                    messages.error(request, 'Investment amount must be greater than 0.')
+                    return redirect('startup:create_offer', startup_id=startup.id)
 
+            # Create the offer
             offer = Offer.objects.create(
                 investor=investor_profile,
                 startup=startup,
                 equity_percentage=equity_percentage,
                 royalty_percentage=royalty_percentage,
+                investment_amount=investment_amount,
+                details=message
             )
 
             messages.success(request, 'Offer sent successfully!')

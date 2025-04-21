@@ -162,6 +162,73 @@ def startup_discovery(request):
         return render(request, 'investor/startup_discovery.html', {'startup_data': []})
 
 @login_required
+def create_offer(request):
+    """Handle offer creation from the find_startups page modal"""
+    # Check if user is an investor
+    if request.user.user_type.lower() != 'investor':
+        messages.warning(request, "This action is only for investor users.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        try:
+            # Get startup ID from form
+            startup_id = request.POST.get('startup_id')
+            if not startup_id:
+                raise ValueError("No startup specified")
+            
+            startup = Startup.objects.get(id=startup_id)
+            
+            # Get or create investor profile
+            investor_profile = InvestorProfile.objects.get(user=request.user)
+            
+            # Get form data
+            equity_percentage = request.POST.get('equity_percentage')
+            royalty_percentage = request.POST.get('royalty_percentage', 0)
+            investment_amount = request.POST.get('investment_amount', 0)
+            message = request.POST.get('message', '')
+            
+            # Validate data
+            if not equity_percentage or float(equity_percentage) <= 0 or float(equity_percentage) > 100:
+                messages.error(request, "Equity percentage must be between 0 and 100.")
+                return redirect('investor:find_startups')
+            
+            if royalty_percentage and (float(royalty_percentage) < 0 or float(royalty_percentage) > 100):
+                messages.error(request, "Royalty percentage must be between 0 and 100.")
+                return redirect('investor:find_startups')
+            
+            if not investment_amount or float(investment_amount) <= 0:
+                messages.error(request, "Investment amount must be greater than 0.")
+                return redirect('investor:find_startups')
+            
+            # Create the offer
+            offer = Offer.objects.create(
+                investor=investor_profile,
+                startup=startup,
+                equity_percentage=equity_percentage,
+                royalty_percentage=royalty_percentage,
+                investment_amount=investment_amount,
+                details=message
+            )
+            
+            messages.success(request, f"Your offer to {startup.name} has been sent successfully!")
+            return redirect('investor:investor_dashboard')
+            
+        except InvestorProfile.DoesNotExist:
+            messages.error(request, "You must complete your investor profile before making offers.")
+            return redirect('investor:investor_profile')
+        
+        except Startup.DoesNotExist:
+            messages.error(request, "The startup you're trying to make an offer to doesn't exist.")
+            return redirect('investor:find_startups')
+        
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect('investor:find_startups')
+    
+    # GET requests should be redirected to the find_startups page
+    return redirect('investor:find_startups')
+
+@login_required
 def portfolio_tracker(request):
     # You might want to pass portfolio data here later
     return render(request, 'investor/portfolio_tracker.html')
