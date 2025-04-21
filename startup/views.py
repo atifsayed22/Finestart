@@ -7,6 +7,7 @@ from accounts.models import InvestorProfile, CustomUser, StartupProfile, Monthly
 import json
 from django.views.decorators.http import require_POST
 from datetime import datetime
+from django.utils import timezone
 
 @login_required
 def startup_registration(request):
@@ -997,11 +998,17 @@ def respond_to_offer(request, offer_id, response):
         messages.warning(request, "This offer has already been responded to.")
         return redirect('startup:manage_offers')
 
+    # Mark the offer as viewed if it hasn't been already
+    if not offer.viewed_by_startup:
+        offer.viewed_by_startup = True
+    
     if response == 'accept':
         offer.status = 'accepted'
+        offer.response_date = timezone.now()
         messages.success(request, f'Offer from {offer.investor.user.get_full_name()} accepted!')
     elif response == 'reject':
         offer.status = 'rejected'
+        offer.response_date = timezone.now()
         messages.info(request, f'Offer from {offer.investor.user.get_full_name()} rejected.')
     else:
         messages.error(request, "Invalid response.")
@@ -1035,6 +1042,17 @@ def manage_offers(request):
         
         # Get all offers for this startup with related investor data
         offers = Offer.objects.filter(startup=startup).select_related('investor', 'investor__user').order_by('-created_at')
+        
+        # Mark all unviewed offers as viewed by the startup
+        unviewed_offers = offers.filter(viewed_by_startup=False)
+        if unviewed_offers.exists():
+            # Update viewed_by_startup flag for all unviewed offers
+            unviewed_offers.update(viewed_by_startup=True)
+            
+            # Check if there are any new or recently updated offers
+            recently_updated = unviewed_offers.filter(status='pending')
+            if recently_updated.exists():
+                messages.info(request, f"You have {recently_updated.count()} new or updated offers to review.")
         
         # Enhanced context with detailed information
         context = {
@@ -1132,3 +1150,34 @@ def delete_profit_entry(request):
     
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+def view_offer(request, offer_id):
+    # Check if user is a startup
+    if request.user.user_type.lower() != 'startup':
+        messages.warning(request, "This page is only for startup users.")
+        return redirect('home')
+    
+    try:
+        # Get the startup associated with the user
+        startup = get_object_or_404(Startup, user=request.user)
+        
+        # Get the offer, ensuring it belongs to the current startup
+        offer = get_object_or_404(Offer, id=offer_id, startup=startup)
+        
+        # Mark the offer as viewed if it hasn't been already
+        if not offer.viewed_by_startup:
+            offer.viewed_by_startup = True
+            offer.save()
+        
+        context = {
+            'offer': offer,
+            'investor': offer.investor,
+            'startup': startup
+        }
+        
+        return render(request, 'startup/view_offer.html', context)
+        
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('startup:manage_offers')

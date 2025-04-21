@@ -70,9 +70,14 @@
                         {% endif %}
                     </div>
                     <p class="mb-1">
-                        <strong>Equity Offered:</strong> {{ offer.equity_percentage }}% <br>
-                        <strong>Royalty Offered:</strong> {{ offer.royalty_percentage }}%
+                        <strong>Investment Amount:</strong> ${{ offer.investment_amount|floatformat:2 }} <br>
+                        <strong>Equity Offered:</strong> {{ offer.equity_percentage }}%
                     </p>
+                    {% if offer.details %}
+                    <p class="mb-1">
+                        <strong>Offer Details:</strong> {{ offer.details }}
+                    </p>
+                    {% endif %}
                     {% if offer.investor.investment_focus %}
                     <p class="mb-1">
                         <strong>Investment Focus:</strong> {{ offer.investor.investment_focus }}
@@ -90,6 +95,9 @@
                             {% endif %}
                         </div>
                         <div>
+                            <a href="{% url 'startup:view_offer' offer.id %}" class="btn btn-sm me-2" style="background-color: #6c757d; color: white;">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
                             <button type="button" class="btn btn-sm me-2" style="background-color: #4A90E2; color: white;" data-bs-toggle="modal" data-bs-target="#investorModal{{ offer.id }}">
                                 <i class="fas fa-user"></i> View Investor
                             </button>
@@ -156,12 +164,12 @@
                                     <h5>Current Offer</h5>
                                     <table class="table">
                                         <tr>
-                                            <th>Equity Percentage</th>
-                                            <td>{{ offer.equity_percentage }}%</td>
+                                            <th>Investment Amount</th>
+                                            <td>${{ offer.investment_amount|floatformat:2 }}</td>
                                         </tr>
                                         <tr>
-                                            <th>Royalty Percentage</th>
-                                            <td>{{ offer.royalty_percentage }}%</td>
+                                            <th>Equity Percentage</th>
+                                            <td>{{ offer.equity_percentage }}%</td>
                                         </tr>
                                         <tr>
                                             <th>Offer Status</th>
@@ -179,6 +187,12 @@
                                             <th>Offer Date</th>
                                             <td>{{ offer.created_at|date:"F j, Y" }}</td>
                                         </tr>
+                                        {% if offer.details %}
+                                        <tr>
+                                            <th>Additional Details</th>
+                                            <td>{{ offer.details }}</td>
+                                        </tr>
+                                        {% endif %}
                                     </table>
                                 </div>
                             </div>

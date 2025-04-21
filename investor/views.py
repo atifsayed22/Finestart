@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from startup.models import Startup, Offer  # Import the Startup and Offer models
 from accounts.models import InvestorProfile
 from django.contrib import messages
+from django.utils import timezone
 
 # Create your views here.
 
@@ -313,9 +314,16 @@ def edit_offer(request, offer_id):
                 offer.investment_amount = investment_amount
                 offer.equity_percentage = equity_percentage
                 offer.details = request.POST.get('details', '')
+                
+                # Update the timestamp to show it's been modified
+                offer.updated_at = timezone.now()
+                
+                # This ensures the startup will see the offer has been updated
+                offer.viewed_by_startup = False
+                
                 offer.save()
                 
-                messages.success(request, "Offer updated successfully.")
+                messages.success(request, "Offer updated successfully. The startup will be notified of the changes.")
                 return redirect('investor:view_offer', offer_id=offer.id)
                 
             except ValueError as ve:

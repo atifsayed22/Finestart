@@ -16,6 +16,10 @@
         margin-bottom: 20px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         overflow: hidden;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     .startup-card:hover {
@@ -23,25 +27,130 @@
         box-shadow: 0 8px 15px rgba(0,0,0,0.1);
     }
     
-    .startup-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 15px 20px;
-        font-weight: 600;
+    .startup-logo-container {
+        padding: 1.5rem 0;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
+        background-color: #f8f9fa;
+        position: relative;
+    }
+    
+    .startup-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: white;
+        border: 3px solid var(--primary);
+    }
+    
+    .startup-logo-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        border: 3px solid var(--primary);
+        font-size: 2rem;
+        color: #aaa;
+    }
+    
+    .growth-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border-radius: 20px;
+        padding: 4px 10px;
+    }
+    
+    .growth-rapid {
+        background-color: rgba(76, 175, 80, 0.15);
+        color: #2E7D32;
+    }
+    
+    .growth-steady {
+        background-color: rgba(33, 150, 243, 0.15);
+        color: #0277BD;
+    }
+    
+    .growth-slow {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #F57F17;
+    }
+    
+    .startup-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0.5rem 0;
+        color: #333;
+        text-align: center;
+    }
+    
+    .startup-description {
+        margin: 1rem 0;
+        color: #555;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 0 1rem;
+    }
+    
+    .startup-meta {
+        padding: 1rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
     }
     
     .startup-body {
-        padding: 20px;
-        background-color: white;
+        padding: 0.5rem 1.5rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
     }
     
     .startup-footer {
-        padding: 15px 20px;
+        padding: 1rem 1.5rem;
         background-color: #f8f9fa;
         border-top: 1px solid #e0e0e0;
+        margin-top: auto;
+    }
+    
+    .startup-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .stat-item {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: var(--primary-dark);
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
     }
     
     .tag {
@@ -50,8 +159,35 @@
         border-radius: 30px;
         font-size: 0.8rem;
         font-weight: 500;
-        margin-right: 5px;
-        margin-bottom: 5px;
+    }
+    
+    .score-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    
+    .score-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+    
+    .risk-indicator {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
     }
     
     .tag-industry {
@@ -81,11 +217,6 @@
         margin: 10px 0;
     }
     
-    .startup-description {
-        margin: 15px 0;
-        color: #555;
-    }
-    
     .filter-section {
         background-color: white;
         border-radius: 10px;
@@ -99,19 +230,6 @@
         color: var(--primary-dark);
     }
     
-    .score-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        color: white;
-        font-weight: bold;
-        font-size: 1rem;
-        margin-right: 10px;
-    }
-    
     .score-high {
         background-color: #4CAF50;
     }
@@ -122,14 +240,6 @@
     
     .score-low {
         background-color: #F44336;
-    }
-    
-    .risk-indicator {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        font-weight: 500;
     }
     
     .risk-low {
@@ -239,44 +349,59 @@
             {% for startup in startups %}
                 <div class="col-lg-6 mb-4">
                     <div class="startup-card">
-                        <div class="startup-header">
-                            <h5 class="mb-0">{{ startup.name }}</h5>
-                            <span class="tag tag-growth">{{ startup.growth_trend }}</span>
+                        <div class="startup-logo-container">
+                            {% if startup.logo %}
+                                <img src="{{ startup.logo.url }}" alt="{{ startup.name }} Logo" class="startup-logo">
+                            {% else %}
+                                <div class="startup-logo-placeholder">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            {% endif %}
+                            <span class="growth-indicator growth-{{ startup.growth_trend|lower }}">{{ startup.growth_trend }}</span>
                         </div>
-                        <div class="startup-body">
-                            <!-- Add Score and Risk Section -->
-                            <div class="score-section">
+                        
+                        <div class="startup-meta">
+                            <h3 class="startup-name">{{ startup.name }}</h3>
+                            
+                            <div class="score-container">
                                 <div class="score-badge {% if startup.score >= 70 %}score-high{% elif startup.score >= 40 %}score-medium{% else %}score-low{% endif %}">
                                     {{ startup.score }}
                                 </div>
-                                <div class="score-details">
-                                    <span class="score-title">Startup Score</span>
-                                    <span class="score-value">{{ startup.score }}/100</span>
-                                </div>
-                                <div class="ms-auto">
-                                    <span class="risk-indicator risk-{{ startup.risk_assessment|lower }}">
-                                        {{ startup.risk_assessment }} Risk
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="tags mb-3">
-                                <span class="tag tag-industry">{{ startup.industry }}</span>
-                                <span class="tag tag-years">{{ startup.years_in_business }} years</span>
-                                <span class="tag tag-market">{{ startup.target_market }}</span>
-                            </div>
-                            
-                            <div class="investment-required">
-                                Investment: ${{ startup.investment_required }}
+                                <span>{{ startup.score }}/100</span>
+                                <span class="risk-indicator risk-{{ startup.risk_assessment|lower }}">
+                                    {{ startup.risk_assessment }} Risk
+                                </span>
                             </div>
                             
                             <div class="startup-description">
-                                {{ startup.description|truncatechars:150 }}
+                                {{ startup.description|truncatechars:100 }}
+                            </div>
+                            
+                            <div class="startup-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${{ startup.investment_required }}</div>
+                                    <div class="stat-label">Investment Req.</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ startup.years_in_business }}</div>
+                                    <div class="stat-label">Years Active</div>
+                                </div>
+                            </div>
+                            
+                            <div class="tags">
+                                <span class="tag tag-industry">{{ startup.industry }}</span>
+                                <span class="tag tag-market">{{ startup.target_market }}</span>
+                                {% if startup.years_in_business <= 2 %}
+                                    <span class="tag tag-years">Early Stage</span>
+                                {% else %}
+                                    <span class="tag tag-years">Established</span>
+                                {% endif %}
                             </div>
                         </div>
+                        
                         <div class="startup-footer">
                             <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ startup.id }}">
-                                Contact Startup
+                                Make Offer
                             </a>
                             <a href="{% url 'startup:startup_insights' %}?startup_id={{ startup.id }}" class="btn btn-sm btn-outline-primary ms-2">View Insights</a>
                         </div>

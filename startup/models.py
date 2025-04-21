@@ -111,10 +111,13 @@ class Offer(models.Model):
     investor = models.ForeignKey(InvestorProfile, on_delete=models.CASCADE, related_name='offers')
     startup = models.ForeignKey(Startup, on_delete=models.CASCADE, related_name='offers')
     equity_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of equity offered")
-    royalty_percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="Percentage of royalty offered")
+    investment_amount = models.DecimalField(max_digits=12, decimal_places=2, help_text="Amount of investment offered", default=0)
+    details = models.TextField(blank=True, null=True, help_text="Additional details of the offer")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    viewed_by_startup = models.BooleanField(default=False, help_text="Whether the startup has viewed this offer since the last update")
+    response_date = models.DateTimeField(null=True, blank=True, help_text="When the startup responded to the offer")
 
     def __str__(self):
         return f"Offer from {self.investor.user.get_full_name()} to {self.startup.name}"
